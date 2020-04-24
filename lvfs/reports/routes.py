@@ -137,7 +137,7 @@ def route_report():
     crt = None
     if signature:
         try:
-            info = _pkcs7_signature_info(signature, check_rc=False)
+            info = _pkcs7_signature_info(signature)
         except IOError as e:
             return _json_error('Signature invalid: %s' % str(e))
         if 'serial' not in info:
