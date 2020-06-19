@@ -92,28 +92,30 @@ def _repair_csum():
                        .filter(Firmware.firmware_id == firmware_id)\
                        .one()
         try:
-            print('checking {}'.format(fw.filename_absolute))
-            with open(fw.filename_absolute, 'rb') as f:
-                checksum_signed_sha1 = hashlib.sha1(f.read()).hexdigest()
+            print('checking {}…'.format(fw.filename_absolute))
+            fn = _get_absolute_path(fw)
+            with open(fn, 'rb') as f:
+                buf = f.read()
+                checksum_signed_sha1 = hashlib.sha1(buf).hexdigest()
                 if checksum_signed_sha1 != fw.checksum_signed_sha1:
                     print('repairing checksum from {} to {}'.format(fw.checksum_signed_sha1,
                                                                     checksum_signed_sha1))
                     fw.checksum_signed_sha1 = checksum_signed_sha1
                     fw.mark_dirty()
-                checksum_signed_sha256 = hashlib.sha256(f.read()).hexdigest()
+                checksum_signed_sha256 = hashlib.sha256(buf).hexdigest()
                 if checksum_signed_sha256 != fw.checksum_signed_sha256:
                     print('repairing checksum from {} to {}'.format(fw.checksum_signed_sha256,
                                                                     checksum_signed_sha256))
                     fw.checksum_signed_sha256 = checksum_signed_sha256
                     fw.mark_dirty()
+            sz = os.path.getsize(fn)
             for md in fw.mds:
-                sz = os.path.getsize(fw.filename_absolute)
                 if sz != md.release_download_size:
                     print('repairing size from {} to {}'.format(md.release_download_size, sz))
                     md.release_download_size = sz
                     md.fw.mark_dirty()
         except FileNotFoundError as _:
-            pass
+            print('skipping {}'.format(fw.filename_absolute))
 
     # all done
     db.session.commit()
