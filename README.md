@@ -39,9 +39,9 @@ method for localhost.
 
 Then create the schema using:
 
-    FLASK_APP=lvfs/__init__.py flask-3 initdb
-    FLASK_APP=lvfs/__init__.py flask-3 db stamp
-    FLASK_APP=lvfs/__init__.py flask-3 db upgrade
+    FLASK_APP=lvfs/__init__.py ./env/bin/flask initdb
+    FLASK_APP=lvfs/__init__.py ./env/bin/flask db stamp
+    FLASK_APP=lvfs/__init__.py ./env/bin/flask db upgrade
 
 The admin user is set as `sign-test@fwupd.org` with password `Pa$$w0rd`.
 
