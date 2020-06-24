@@ -92,7 +92,7 @@ class Pulp:
         # parse into lines
         for line in rv.content.decode().split("\n"):
             try:
-                fn, csum, sz = line.rsplit(',', maxsplit=2)
+                fn, csum, sz = line.rsplit(",", 2)
             except ValueError as e:
                 continue
             self._sync_file(os.path.join(path, fn), csum, int(sz))
