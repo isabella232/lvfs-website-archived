@@ -6,6 +6,9 @@
 # SPDX-License-Identifier: GPL-2.0+
 #
 # pylint: disable=too-few-public-methods,bad-continuation
+#
+# The machine that runs this script must have the 'requests' module installed,
+# for example `yum install -y python-requests`
 
 import os
 import hashlib
@@ -13,6 +16,12 @@ import sys
 import posixpath
 
 import requests
+
+# Python 2.x compat
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError # pylint: disable=redefined-builtin
 
 
 class Pulp:
