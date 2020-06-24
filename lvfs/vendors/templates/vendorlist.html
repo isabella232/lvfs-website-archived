@@ -4,6 +4,16 @@
 
 {% block content %}
 
+{% if not vendors %}
+<div class="card">
+  <div class="card-body">
+    <p class="card-text text-muted">
+      There are no public vendors.
+    </p>
+  </div>
+</div>
+{% endif %}
+
 {% for v in vendors %}
 <div class="card mb-3" id="{{v.group_id}}">
   <div class="card-body">
