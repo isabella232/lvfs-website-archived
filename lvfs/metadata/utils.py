@@ -423,7 +423,9 @@ def _metadata_update_pulp(download_dir):
     with open(os.path.join(download_dir, 'PULP_MANIFEST'), 'w') as manifest:
 
         # add metadata
-        for basename in ['firmware.xml.gz', 'firmware.xml.gz.asc']:
+        for basename in ['firmware.xml.gz',
+                         'firmware.xml.gz.asc',
+                         'firmware.xml.gz.jcat']:
             fn = os.path.join(download_dir, basename)
             if os.path.exists(fn):
                 with open(fn, 'rb') as f:
