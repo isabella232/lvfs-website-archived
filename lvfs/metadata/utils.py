@@ -572,7 +572,9 @@ def _regenerate_and_sign_metadata():
 def _async_regenerate_remote(remote_id):
     r = db.session.query(Remote)\
                   .filter(Remote.remote_id == remote_id)\
-                  .one()
+                  .first()
+    if not r:
+        return
     _regenerate_and_sign_metadata_remote(r)
 
 @celery.task(max_retries=3, default_retry_delay=10, task_time_limit=60)

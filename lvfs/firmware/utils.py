@@ -145,7 +145,9 @@ def _show_diff(blob_old, blob_new):
 def _async_sign_fw(firmware_id):
     fw = db.session.query(Firmware)\
                    .filter(Firmware.firmware_id == firmware_id)\
-                   .one()
+                   .first()
+    if not fw:
+        return
     _sign_fw(fw)
 
     # just do it now
