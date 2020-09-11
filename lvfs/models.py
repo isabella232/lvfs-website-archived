@@ -1768,6 +1768,12 @@ class Component(db.Model):
                 problems.append(Claim(kind='invalid-name',
                                       icon='warning',
                                       summary='The vendor should not be part of the name',
+                                      description='The vendor name {} should not be be included in {}.\n'
+                                                  'Please remove the vendor name from the '
+                                                  'firmware name as it will be prefixed '
+                                                  'automatically as required.'.\
+                                                    format(self.fw.vendor.display_name,
+                                                           self.name),
                                       url=url_for('components.route_show',
                                                   component_id=self.component_id)))
 
