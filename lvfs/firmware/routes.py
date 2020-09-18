@@ -292,12 +292,6 @@ def route_promote(firmware_id, target):
     # some tests only run when the firmware is in stable
     ploader.ensure_test_for_fw(fw)
 
-    # sync everything we added
-    db.session.commit()
-
-    # asynchronously run
-    _async_test_run_for_firmware.apply_async(args=(fw.firmware_id,))
-
     # also dirty any ODM remote if uploading on behalf of an OEM
     if target == 'embargo' and fw.vendor != fw.user.vendor:
         fw.user.vendor.remote.is_dirty = True
@@ -306,6 +300,9 @@ def route_promote(firmware_id, target):
     fw.remote_id = remote.remote_id
     fw.events.append(FirmwareEvent(remote_id=fw.remote_id, user_id=g.user.user_id))
     db.session.commit()
+
+    # asynchronously run
+    _async_test_run_for_firmware.apply_async(args=(fw.firmware_id,))
 
     # send email
     for u in fw.get_possible_users_to_email:
