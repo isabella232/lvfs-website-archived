@@ -24,7 +24,7 @@ from cabarchive import CabArchive, CabFile
 from lvfs import app, db, celery, ploader
 from lvfs.emails import send_email
 from lvfs.models import Remote, Firmware, FirmwareEvent, Component
-from lvfs.util import _event_log, _get_shard_path
+from lvfs.util import _event_log, _get_shard_path, _get_absolute_path
 from lvfs.metadata.utils import _generate_metadata_mds, _async_regenerate_remote
 from lvfs.metadata.utils import _regenerate_and_sign_metadata_remote
 
@@ -164,8 +164,7 @@ def _sign_fw(fw):
         return
 
     # load the .cab file
-    download_dir = app.config['DOWNLOAD_DIR']
-    fn = os.path.join(download_dir, fw.filename)
+    fn = _get_absolute_path(fw)
     try:
         with open(fn, 'rb') as f:
             cabarchive = CabArchive(f.read())
