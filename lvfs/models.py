@@ -17,6 +17,7 @@ import re
 import math
 import hashlib
 import collections
+from distutils.version import StrictVersion
 
 from enum import IntEnum
 
@@ -370,6 +371,22 @@ class Namespace(db.Model):
     def __repr__(self):
         return '<Namespace {}>'.format(self.value)
 
+class VendorBranch(db.Model):
+
+    __tablename__ = 'vendor_branches'
+
+    branch_id = Column(Integer, primary_key=True)
+    vendor_id = Column(Integer, ForeignKey('vendors.vendor_id'), nullable=False, index=True)
+    value = Column(Text, nullable=False)
+    ctime = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+
+    vendor = relationship("Vendor", back_populates='branches')
+    user = relationship('User', foreign_keys=[user_id])
+
+    def __repr__(self):
+        return '<VendorBranch {}>'.format(self.value)
+
 class AffiliationAction(db.Model):
 
     __tablename__ = 'affiliation_actions'
@@ -448,6 +465,9 @@ class Vendor(db.Model):
     namespaces = relationship("Namespace",
                               back_populates="vendor",
                               cascade='all,delete,delete-orphan')
+    branches = relationship("VendorBranch",
+                            back_populates="vendor",
+                            cascade='all,delete,delete-orphan')
     affiliations = relationship("Affiliation",
                                 foreign_keys=[Affiliation.vendor_id],
                                 back_populates="vendor",
@@ -1388,6 +1408,7 @@ class Component(db.Model):
     checksum_contents_sha1 = Column(String(40), nullable=False)
     checksum_contents_sha256 = Column(String(64), nullable=False)
     appstream_id = Column(Text, nullable=False)
+    branch = Column(Text, default=None)
     name = Column(Text, default=None)
     name_variant_suffix = Column(Text, default=None)
     summary = Column(Text, default=None)
@@ -1785,6 +1806,38 @@ class Component(db.Model):
                                                   'automatically as required.'.\
                                                     format(self.fw.vendor.display_name,
                                                            self.name),
+                                      url=url_for('components.route_show',
+                                                  component_id=self.component_id)))
+
+        # only very new fwupd versions support <branch>
+        if self.branch:
+            req = self.find_req('id', 'org.freedesktop.fwupd')
+            if not req or req.compare != 'ge' or StrictVersion(req.version) < StrictVersion('1.5.0'):
+                problems.append(Claim(kind='requirement-missing',
+                                      icon='warning',
+                                      summary='A requirement is missing for branch',
+                                      description='The requirement of org.freedesktop.fwupd '
+                                                  '>= 1.5.0 is missing to allow setting '
+                                                  'a branch name',
+                                      url=url_for('components.route_show',
+                                                  component_id=self.component_id)))
+
+        # the vendor has to have been permitted to use this branch
+        if self.branch:
+            branches = [br.value for br in self.fw.vendor.branches]
+            if not branches:
+                problems.append(Claim(kind='branch-invalid',
+                                      icon='warning',
+                                      summary='The specified component branch was invalid',
+                                      description='This vendor cannot ship firmware with branches',
+                                      url=url_for('components.route_show',
+                                                  component_id=self.component_id)))
+            elif self.branch not in branches:
+                problems.append(Claim(kind='branch-invalid',
+                                      icon='warning',
+                                      summary='The specified component branch was invalid',
+                                      description='This vendor is only allowed to use branches {}'\
+                                        .format('|'.join(branches)),
                                       url=url_for('components.route_show',
                                                   component_id=self.component_id)))
 

@@ -18,6 +18,8 @@
 {% if g.user.check_acl('@admin') %}
       <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_namespaces' else 'default'}}"
         href="{{url_for('vendors.route_namespaces', vendor_id=v.vendor_id)}}">Namespaces</a>
+      <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_branches' else 'default'}}"
+        href="{{url_for('vendors.route_branches', vendor_id=v.vendor_id)}}">Branches</a>
 {% endif %}
 {% if v.check_acl('@view-affiliations') %}
       <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_affiliations' else 'default'}}"

@@ -34,6 +34,7 @@ def _get_valid_metainfo(release_tag='N1NET43W',
   <id>com.hughski.ColorHug.firmware</id>
   <name>ColorHug</name>
   <name_variant_suffix>China</name_variant_suffix>
+  <branch>oss</branch>
   <summary>Firmware for the ColorHug</summary>
   <description><p>Updating the firmware improves performance.</p></description>
   <provides>

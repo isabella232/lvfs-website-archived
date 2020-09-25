@@ -701,6 +701,13 @@ Here are some of our suggestions:
 * Use a short string, as it will be appended to the visible name with brackets if required
 * Don't duplicate any part of the name
 
+``<branch>``
+-------------------------
+
+* Only use this optional tag if there are multiple vendors providing different
+  firmware streams for the same hardware.
+* Use a familiar lower case single word string, as it will be shown in the UI
+
 ``<summary>``
 -------------
 

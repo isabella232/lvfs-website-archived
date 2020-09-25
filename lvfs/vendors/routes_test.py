@@ -77,6 +77,25 @@ class LocalTestCase(LvfsTestCase):
         assert b'Deleted namespace' in rv.data, rv.data
         assert b'com.dell' not in rv.data, rv.data
 
+        # create a branch
+        rv = self.app.post('/lvfs/vendors/2/branch/create', data=dict(value='dave'),
+                           follow_redirects=True)
+        assert b'Added branch' in rv.data, rv.data
+
+        # create a branch
+        rv = self.app.post('/lvfs/vendors/2/branch/create', data=dict(value='dave'),
+                           follow_redirects=True)
+        assert b'Failed to add branch' in rv.data, rv.data
+
+        # show the branches page
+        rv = self.app.get('/lvfs/vendors/2/branches')
+        assert b'dave' in rv.data, rv.data.decode()
+
+        # delete a branch
+        rv = self.app.post('/lvfs/vendors/2/branch/1/delete', follow_redirects=True)
+        assert b'Deleted branch' in rv.data, rv.data
+        assert b'dave' not in rv.data, rv.data
+
         # change some properties
         rv = self.app.post('/lvfs/vendors/2/modify_by_admin', data=dict(
             display_name='VendorName',

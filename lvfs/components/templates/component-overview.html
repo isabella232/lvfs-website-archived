@@ -65,6 +65,24 @@
     <td class="col"><code>{{md.name_variant_suffix}}</code></td>
 {% endif %}
   </tr>
+{% if md.branch or md.fw.vendor.branches %}
+  <tr class="row">
+    <th class="col-3">Branch</th>
+{% if md.check_acl('@modify-keywords') %}
+    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+    <td class="col-7">
+      <textarea class="form-control fixed-width" name="branch" cols="100" rows="1">{{md.branch if md.branch}}</textarea>
+    </td>
+    <td class="col">
+      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
+    </td>
+    </form>
+{% else %}
+    <td class="col"><code>{{md.branch}}</code></td>
+{% endif %}
+  </tr>
+{% endif %}
   <tr class="row">
     <th class="col-3">Tag, e.g. <code>N1CET75W</code> (optional)</th>
 {% if md.check_acl('@modify-keywords') %}
