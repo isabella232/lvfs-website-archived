@@ -1,9 +1,5 @@
 stages:
-    - test
     - build
-
-test:
-    stage: test
 
 docker-build:
   # Official docker image.
