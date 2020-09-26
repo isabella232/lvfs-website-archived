@@ -1,5 +1,4 @@
 FROM centos:8
-ARG commit
 EXPOSE 5000
 
 RUN dnf -y upgrade
@@ -22,7 +21,7 @@ RUN dnf -y install \
 	python3-devel \
 	python3-pip \
 	python3-psutil \
-        s3cmd
+    s3cmd
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
