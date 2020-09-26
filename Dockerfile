@@ -42,8 +42,8 @@ RUN pip3 install uwsgi
 
 # copy the app; various configs and scripts
 COPY lvfs/ /app/www/
-COPY docker/files/uwsgi.ini /app/conf/uwsgi.ini
-COPY docker/files/flaskapp.cfg /app/www/lvfs/flaskapp.cfg
+COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
+COPY docker/files/application/flaskapp.cfg /app/www/lvfs/flaskapp.cfg
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
 
 # cleanup
