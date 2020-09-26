@@ -36,11 +36,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # install all the things
 COPY requirements.txt /app/conf
+RUN pip3 install --upgrade pip
 RUN pip3 install -r conf/requirements.txt
 RUN pip3 install uwsgi
 
 # copy the app; various configs and scripts
-COPY docker/scripts/*.sh /app/scripts/
 COPY lvfs/ /app/www/
 COPY docker/files/uwsgi.ini /app/conf/uwsgi.ini
 COPY docker/files/flaskapp.cfg /app/www/lvfs/flaskapp.cfg
