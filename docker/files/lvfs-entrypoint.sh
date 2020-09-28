@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
 
-if [ $DEPLOY == "application" ]
+if [ "$DEPLOY" = "application" ]
 then
-	exec uwsgi --ini /app/conf/uwsgi.ini
+	echo "app"
 fi
 
-if [ $DEPLOY == "worker" ]
-	exec celery -A lvfs.celery.worker --queues metadata,firmware,celery,yara
+if [ "$DEPLOY" = "worker" ]
+then
+	echo "worker"
 fi
