@@ -1,7 +1,6 @@
 FROM centos:8
 EXPOSE 5000
 
-RUN dnf -y upgrade
 RUN dnf install -y epel-release dnf-plugins-core
 RUN dnf config-manager --set-enabled PowerTools epel
 RUN dnf group install -y "Development Tools"
@@ -41,9 +40,14 @@ RUN pip3 install -r conf/requirements.txt
 RUN pip3 install uwsgi
 
 # copy the app; various configs and scripts
-COPY lvfs/ /app/www/
+COPY lvfs/ /app/lvfs/
+COPY cabarchive/ /app/cabarchive/
+COPY pkgversion/ /app/pkgversion/
+COPY jcat/ /app/jcat/
+COPY infparser/ /app/infparser/
+COPY plugins/ /app/plugins/
 COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
-COPY docker/files/application/flaskapp.cfg /app/www/lvfs/flaskapp.cfg
+COPY docker/files/application/flaskapp.cfg /app/lvfs/flaskapp.cfg
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
 
 # cleanup
