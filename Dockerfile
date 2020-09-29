@@ -23,6 +23,7 @@ RUN dnf -y install \
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
+RUN bash -c 'mkdir /data'
 #RUN bash -c 'mkdir -p /data/{downloads,shards,uploads,deleted,firmware}'
 #RUN bash -c 'mkdir /backups'
 WORKDIR /app
