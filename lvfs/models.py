@@ -1762,6 +1762,17 @@ class Component(db.Model):
                                           url=url_for('components.route_show',
                                                       component_id=self.component_id)))
 
+        # name contains a banned word
+        if self.name:
+            name = self.name.lower()
+            for word in ['bios', 'firmware', 'update']:
+                if name.find(word) != -1:
+                    problems.append(Claim(kind='invalid-name',
+                                          icon='warning',
+                                          summary='{} is is banned as part of <name>'.format(word),
+                                          url=url_for('components.route_show',
+                                                      component_id=self.component_id)))
+
         # name contains the vendor
         if self.name and self.fw.vendor.display_name:
             if self.name.upper().find(self.fw.vendor.display_name.upper()) != -1:
