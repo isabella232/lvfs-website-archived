@@ -35,7 +35,7 @@
   </tr>
   <tr class="row">
     <th class="col-3">Name</th>
-{% if g.user.check_acl('@admin') %}
+{% if md.check_acl('@modify-keywords') %}
     <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
     <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
     <td class="col-7">
