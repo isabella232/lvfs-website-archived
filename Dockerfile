@@ -23,7 +23,7 @@ RUN dnf -y install \
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
-RUN bash -c 'mkdir /data'
+RUN mkdir /data /backups
 #RUN bash -c 'mkdir -p /data/{downloads,shards,uploads,deleted,firmware}'
 #RUN bash -c 'mkdir /backups'
 WORKDIR /app
@@ -50,7 +50,6 @@ COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
 COPY docker/files/application/flaskapp.cfg /app/lvfs/flaskapp.cfg
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
 
-# cleanup (/data /backups)
-RUN chown -R nobody:nobody /app
+RUN chown -R nobody:nobody /app /data /backups
 
 ENTRYPOINT [ "./lvfs-entrypoint.sh" ]
