@@ -1851,7 +1851,11 @@ class Component(db.Model):
             return True
 
         # depends on the action requested
-        if action in ('@modify-keywords', '@modify-requirements', '@modify-checksums', '@modify-updateinfo'):
+        if action in ('@modify-keywords',
+                      '@modify-requirements',
+                      '@modify-checksums',
+                      '@modify-appstream-id',
+                      '@modify-updateinfo'):
             if not self.fw.remote.is_public:
                 if user.check_acl('@qa') and self.fw._is_permitted_action(action, user):
                     return True
