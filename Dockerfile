@@ -3,7 +3,6 @@ EXPOSE 5000
 
 RUN dnf install -y epel-release dnf-plugins-core
 RUN dnf config-manager --set-enabled PowerTools epel
-RUN dnf group install -y "Development Tools"
 RUN dnf -y install \
 	GeoIP-devel \
 	bsdtar \
@@ -24,8 +23,8 @@ RUN dnf -y install \
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
-RUN bash -c 'mkdir -p /data/{downloads,shards,uploads,deleted,firmware}'
-RUN bash -c 'mkdir /backups'
+#RUN bash -c 'mkdir -p /data/{downloads,shards,uploads,deleted,firmware}'
+#RUN bash -c 'mkdir /backups'
 WORKDIR /app
 
 # create and activate a venv
@@ -50,8 +49,7 @@ COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
 COPY docker/files/application/flaskapp.cfg /app/lvfs/flaskapp.cfg
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
 
-# cleanup
-RUN chown -R nobody:nobody /app /data /backups
-RUN dnf group remove -y "Development Tools"
+# cleanup (/data /backups)
+RUN chown -R nobody:nobody /app
 
 ENTRYPOINT [ "./lvfs-entrypoint.sh" ]
