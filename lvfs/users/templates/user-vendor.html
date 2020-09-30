@@ -35,7 +35,7 @@
     <select class="form-control" name="vendor_id">
 {% for v in possible_vendors %}
       <option value="{{v.vendor_id}}" {{ 'selected' if v.vendor_id == u.vendor_id }}>
-        {{v.display_name}}
+        {{v.display_name_with_team}}
       </option>
 {% endfor %}
     </select>
