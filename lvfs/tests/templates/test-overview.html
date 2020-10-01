@@ -58,9 +58,13 @@
 {% endfor %}
 
 {% else %}
-<p class="text-secondary">
-  No tests exist.
-</p>
+<div class="card mt-3">
+  <div class="card-body">
+    <p class="card-text text-secondary">
+      No tests exist.
+    </p>
+  </div>
+</div>
 {% endif %}
 
 {% endblock %}

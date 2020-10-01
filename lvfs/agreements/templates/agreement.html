@@ -6,7 +6,7 @@
   <div class="card-body">
     <h2 class="card-title">Legal Agreement</h2>
 {{agreement.text|safe}}
-    <p class="text-muted">Version {{agreement.version}}</p>
+    <p class="text-muted mt-3">Version {{agreement.version}}</p>
     <div class="text-center">
       <form action="{{url_for('agreements.route_confirm', agreement_id=agreement.agreement_id)}}" method="POST">
         <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
@@ -14,7 +14,7 @@
       </form>
       <form action="{{url_for('agreements.route_decline', agreement_id=agreement.agreement_id)}}" method="POST">
         <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-        <button class="btn btn-danger btn-lg">Decline</button>
+        <button class="btn btn-danger btn-lg mt-3">Decline</button>
       </form>
     </div>
   </div>
