@@ -107,7 +107,6 @@ def anonymize_db(db):
         v.comments = 'We pass no judgement'
         v.icon = 'vendor-1.png'
         v.keywords = generic_words[idx_generic_words]
-        v.plugins = 'generichid >= 0.9.9'
         v.oauth_unknown_user = None
         v.oauth_domain_glob = None
         v.username_glob = '*@' + v.group_id.replace('_', '') + '.com'

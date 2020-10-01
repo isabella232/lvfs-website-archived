@@ -567,7 +567,6 @@ def route_modify_by_admin(vendor_id):
                 'legal_name',
                 'internal_team',
                 'group_id',
-                'plugins',
                 'quote_text',
                 'quote_author',
                 'consulting_text',

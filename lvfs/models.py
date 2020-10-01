@@ -434,7 +434,6 @@ class Vendor(db.Model):
     display_name = Column(Text, default=None)
     legal_name = Column(Text, default=None)
     internal_team = Column(Text, default=None)
-    plugins = Column(Text, default=None)
     description = Column(Text, default=None)
     quote_text = Column(Text, default=None)
     quote_author = Column(Text, default=None)
