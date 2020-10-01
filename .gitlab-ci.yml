@@ -20,6 +20,6 @@ deploy production:
   image: python:latest
   script:
     - pip install awscli
-    - aws ecs update-service --cluster "$FARGATE_CLUSTER_PROD" --service "$FARGATE_SERVICE_PROD" --force-new-deployment
+    - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_SERVICE" --force-new-deployment
   only:
     - master
