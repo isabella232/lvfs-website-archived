@@ -16,6 +16,7 @@ docker-build:
 
 deploy production:
   environment: production
+  stage: deploy
   when: manual
   image: python:latest
   script:
