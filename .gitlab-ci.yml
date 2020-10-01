@@ -13,3 +13,13 @@ docker-build:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+
+deploy production:
+  environment: production
+  when: manual
+  image: python:latest
+  script:
+    - pip install awscli
+    - aws ecs update-service --cluster "$FARGATE_CLUSTER_PROD" --service "$FARGATE_SERVICE_PROD" --force-new-deployment
+  only:
+    - master
