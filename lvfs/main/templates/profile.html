@@ -32,7 +32,7 @@
             </div>
 {% endif %}
           </div>
-          <button class="btn btn-primary" type="submit">Update</button>
+          <button class="btn btn-primary" type="submit">Save</button>
         </form>
       </div>
     </div>
@@ -106,7 +106,7 @@
           </div>
         </div>
 {% endif %}
-        <button class="btn btn-primary mt-3" type="submit">Update</button>
+        <button class="btn btn-primary mt-3" type="submit">Save</button>
       </div>
     </div>
     </form>
@@ -182,7 +182,9 @@
             <button type="button" class="btn btn-secondary btn-block mt-3" data-toggle="modal" data-target="#otpSetupModal">
               {{ 'Show QR Code' if g.user.is_otp_working else 'Set up using QR code' }}
             </button>
-            <button class="btn btn-primary btn-block" type="submit">Update</button>
+{% if g.user.is_otp_working %}
+            <button class="btn btn-primary btn-block" type="submit">Save</button>
+{% endif %}
           </form>
         </div>
       </div>
