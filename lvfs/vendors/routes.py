@@ -24,7 +24,8 @@ from lvfs.hash import _otp_hash
 from lvfs.util import admin_login_required
 from lvfs.util import _error_internal, _email_check
 from lvfs.metadata.utils import _async_regenerate_remote
-from lvfs.models import Vendor, Restriction, Namespace, User, Remote, Affiliation, AffiliationAction, Verfmt, Firmware
+from lvfs.models import Vendor, Restriction, Namespace, User, Remote, \
+                        Affiliation, AffiliationAction, Verfmt, Firmware, VendorBranch
 from lvfs.util import _generate_password
 
 from .utils import _vendor_hash
@@ -346,6 +347,19 @@ def route_namespaces(vendor_id):
                            category='vendors',
                            v=vendor)
 
+@bp_vendors.route('/<int:vendor_id>/branches')
+@login_required
+@admin_login_required
+def route_branches(vendor_id):
+    """ Allows changing a vendor [ADMIN ONLY] """
+    vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+    return render_template('vendor-branches.html',
+                           category='vendors',
+                           v=vendor)
+
 @bp_vendors.route('/<int:vendor_id>/event')
 @login_required
 def route_event(vendor_id):
@@ -491,6 +505,48 @@ def route_namespace_delete(vendor_id, namespace_id):
             break
     flash('Deleted namespace', 'info')
     return redirect(url_for('vendors.route_namespaces', vendor_id=vendor_id), 302)
+
+@bp_vendors.route('/<int:vendor_id>/branch/create', methods=['POST', 'GET'])
+@login_required
+@admin_login_required
+def route_branch_create(vendor_id):
+    """ Allows changing a vendor [ADMIN ONLY] """
+
+    # check exists
+    vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+
+    # check does not already exist
+    vb = db.session.query(VendorBranch).filter(VendorBranch.value == request.form['value']).first()
+    if vb:
+        flash('Failed to add branch: ID already exists', 'warning')
+        return redirect(url_for('vendors.route_branches', vendor_id=vendor_id), 302)
+    vb = VendorBranch(value=request.form['value'], user=g.user)
+    vendor.branches.append(vb)
+    db.session.commit()
+    flash('Added branch ID', 'info')
+    return redirect(url_for('vendors.route_branches', vendor_id=vendor_id), 302)
+
+@bp_vendors.route('/<int:vendor_id>/branch/<int:branch_id>/delete', methods=['POST'])
+@login_required
+@admin_login_required
+def route_branch_delete(vendor_id, branch_id):
+    """ Allows changing a vendor [ADMIN ONLY] """
+
+    # check exists
+    vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+    for vb in vendor.branches:
+        if vb.branch_id == branch_id:
+            db.session.delete(vb)
+            db.session.commit()
+            break
+    flash('Deleted branch ID', 'info')
+    return redirect(url_for('vendors.route_branches', vendor_id=vendor_id), 302)
 
 @bp_vendors.route('/<int:vendor_id>/modify_by_admin', methods=['GET', 'POST'])
 @login_required

@@ -66,6 +66,49 @@ class LocalTestCase(LvfsTestCase):
         rv = self.app.get('/lvfs/firmware/1/problems')
         assert b'ColorHug2 is already part' not in rv.data, rv.data.decode()
 
+    def test_branch(self):
+
+        # get the default update info from the firmware archive
+        self.login()
+        self.add_namespace()
+        self.upload()
+
+        # edit the branch to something the vendor can't have
+        rv = self.app.post('/lvfs/components/1/modify', data=dict(
+            branch='dave',
+            name_variant_suffix='Pre-Release ColorHug2',
+        ), follow_redirects=True)
+        assert b'Component updated' in rv.data, rv.data
+
+        # edit the branch to something the vendor can't have
+        rv = self.app.get('/lvfs/components/1')
+        assert b'dave' in rv.data, rv.data.decode()
+
+        # verify the new problems
+        rv = self.app.get('/lvfs/firmware/1/problems')
+        assert b'cannot ship firmware with branches' in rv.data, rv.data.decode()
+        assert b'requirement of org.freedesktop.fwupd' in rv.data, rv.data.decode()
+
+        # allow vendor a branch, but the "wrong one"
+        rv = self.app.post('/lvfs/vendors/1/branch/create', data=dict(value='oss-firmware'),
+                           follow_redirects=True)
+        assert b'Added branch' in rv.data, rv.data
+
+        # verify the new problems
+        rv = self.app.get('/lvfs/firmware/1/problems')
+        assert b'only allowed to use branches' in rv.data, rv.data.decode()
+        assert b'requirement of org.freedesktop.fwupd' in rv.data, rv.data.decode()
+
+        # edit the branch
+        rv = self.app.post('/lvfs/components/1/modify', data=dict(
+            branch='oss-firmware',
+        ), follow_redirects=True)
+        assert b'Component updated' in rv.data, rv.data
+
+        # verify the new problems
+        rv = self.app.get('/lvfs/firmware/1/problems')
+        assert b'branches' not in rv.data, rv.data.decode()
+
     def test_vendor_in_name(self):
 
         # get the default update info from the firmware archive

@@ -65,6 +65,8 @@ def _generate_metadata_mds(mds,
     component = ET.Element('component')
     component.set('type', 'firmware')
     ET.SubElement(component, 'id').text = md.appstream_id
+    if md.branch:
+        ET.SubElement(component, 'branch').text = md.branch
 
     # until all front ends support <category> and <name_variant_suffix> append both */
     if metainfo:

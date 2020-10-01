@@ -380,6 +380,13 @@ class UploadedFile:
         except IndexError as _:
             pass
 
+        # get optional <branch>
+        try:
+            md.branch = _node_validate_text(component.xpath('branch')[0],
+                                            minlen=2, maxlen=500)
+        except IndexError as _:
+            pass
+
         # get optional <description}
         try:
             md.description = _node_validate_text(component.xpath('description')[0],

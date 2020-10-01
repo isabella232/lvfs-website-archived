@@ -1,0 +1,65 @@
+{% extends "default.html" %}
+{% block title %}Vendor Branches{% endblock %}
+
+{% block nav %}{% include 'vendor-nav.html' %}{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning mt-1" role="alert">
+  Most vendors do not need branches unless they are providing alternate
+  firmware compatible with the firmware supplied by the original OEM.
+</div>
+<div class="card mt-3">
+  <div class="card-body">
+{% if v.branches|length == 0 %}
+    <p class="text-muted card-text">
+      No branches have been defined.
+    </p>
+  </div>
+</div>
+
+{% else %}
+<table class="table">
+  <tr class="row table-borderless">
+    <th class="col">Branch ID</th>
+    <th class="col">Added on</th>
+    <th class="col">Added by</th>
+    <th class="col col-sm-2">&nbsp;</th>
+  </tr>
+{% for vb in v.branches %}
+  <tr class="row">
+    <td class="col"><code>{{vb.value}}</code></td>
+    <td class="col">{{vb.ctime.strftime('%F %T')}}</td>
+    <td class="col"><code>{{vb.user.username}}</code></td>
+    <td class="col col-sm-2">
+      <form action="{{url_for('vendors.route_branch_delete', vendor_id=v.vendor_id, branch_id=vb.branch_id)}}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+        <button class="btn-block btn btn-danger">Delete</button>
+      </form>
+    </td>
+  </tr>
+{% endfor %}
+</table>
+  </div>
+</div>
+{% endif %}
+
+<form method="post" action="{{url_for('vendors.route_branch_create', vendor_id=v.vendor_id)}}">
+<input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">Add a new branch ID for this vendor</h2>
+    <table class="table">
+      <tr class="row">
+        <td class="col">
+          <input type="text" class="form-control" name="value" value="" placeholder="oss-firmware" required>
+        </td>
+        <td class="col-2">
+          <input type="submit" class="btn btn-primary btn-block" value="Add">
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+</form>
+
+{% endblock %}
