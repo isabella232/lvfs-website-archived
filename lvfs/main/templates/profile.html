@@ -32,7 +32,7 @@
             </div>
 {% endif %}
           </div>
-          <button class="btn btn-primary" type="submit">Update</button>
+          <button class="btn btn-primary" type="submit">Save</button>
         </form>
       </div>
     </div>
@@ -106,7 +106,7 @@
           </div>
         </div>
 {% endif %}
-        <button class="btn btn-primary mt-3" type="submit">Update</button>
+        <button class="btn btn-primary mt-3" type="submit">Save</button>
       </div>
     </div>
     </form>
@@ -182,7 +182,9 @@
             <button type="button" class="btn btn-secondary btn-block mt-3" data-toggle="modal" data-target="#otpSetupModal">
               {{ 'Show QR Code' if g.user.is_otp_working else 'Set up using QR code' }}
             </button>
-            <button class="btn btn-primary btn-block" type="submit">Update</button>
+{% if g.user.is_otp_working %}
+            <button class="btn btn-primary btn-block" type="submit">Save</button>
+{% endif %}
           </form>
         </div>
       </div>
@@ -213,8 +215,7 @@
       <!-- deactivate -->
       <div class="card">
         <div class="card-body bg-light">
-          <h2 class="card-title">Danger Zone</h2>
-          <h5 class="fs-0">Delete this account</h5>
+          <h2 class="card-title">Delete this account</h2>
           <p class="fs--1">Once you delete the account there is no going back.</p>
           <button type="button" class="btn btn-block btn-falcon-danger" data-toggle="modal" data-target="#deactivateModal">
             Deactivate Account

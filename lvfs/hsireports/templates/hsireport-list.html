@@ -8,6 +8,18 @@
 {% endblock %}
 
 {% block content %}
+
+{% if rpts|length == 0 %}
+<div class="card">
+  <div class="card-body">
+    <p class="card-text text-secondary">
+      No reports found.
+    </p>
+  </div>
+</div>
+
+{% else %}
+
 <div class="card">
   <div class="card-body">
   <h2 class="card-title">
@@ -48,4 +60,6 @@
 </table>
   </div>
 </div>
+{% endif %}
+
 {% endblock %}

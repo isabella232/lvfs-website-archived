@@ -2,10 +2,10 @@
 {% block title %}Agreement List{% endblock %}
 
 {% block content %}
+{% if agreements|length > 0 %}
 <div class="card">
   <div class="card-body">
     <h2 class="card-title">Agreement List</h2>
-{% if agreements|length > 0 %}
 <table class="table">
   <tr class="row table-borderless">
     <th class="col col-sm-2">Created</th>
@@ -35,12 +35,16 @@
     </td>
   </tr>
 </table>
-{% else %}
-<p class="text-secondary">
-  No agreements defined.
-</p>
-{% endif %}
   </div>
 </div>
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <p class="card-text text-secondary">
+      No agreements defined.
+    </p>
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}
