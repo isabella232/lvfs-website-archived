@@ -1469,6 +1469,9 @@ class Component(db.Model):
     protocol = relationship('Protocol', foreign_keys=[protocol_id])
     category = relationship('Category', foreign_keys=[category_id])
     verfmt = relationship('Verfmt', foreign_keys=[verfmt_id])
+    yara_query_results = relationship('YaraQueryResult',
+                                      lazy='joined',
+                                      cascade='all,delete,delete-orphan')
 
     def __lt__(self, other):
         return vercmp(self.version_display, other.version_display) < 0
