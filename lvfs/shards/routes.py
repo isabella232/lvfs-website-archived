@@ -62,12 +62,12 @@ def route_create():
         return redirect(url_for('shards.route_list'))
 
     # add ComponentShardInfo
-    shard = ComponentShardInfo(guid=guid)
-    db.session.add(shard)
+    info = ComponentShardInfo(guid=guid)
+    db.session.add(info)
     db.session.commit()
     flash('Added shard', 'info')
     return redirect(url_for('shards.route_show',
-                            component_shard_info_id=shard.component_shard_info_id))
+                            component_shard_info_id=info.component_shard_info_id))
 
 @bp_shards.route('/<int:component_shard_info_id>/modify', methods=['POST'])
 @login_required

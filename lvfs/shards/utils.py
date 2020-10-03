@@ -35,7 +35,9 @@ def _regenerate_shard_infos():
             print('fixing shard {} with {}'.format(component_shard_id, shard.guid))
         else:
             print('creating ComponentShardInfo for {}'.format(shard.guid))
-            shard.info = ComponentShardInfo(guid=shard.guid)
+            info = ComponentShardInfo(guid=shard.guid)
+            db.session.add(info)
+            shard.info = info
             infos[shard.guid] = shard.info
         db.session.commit()
 
