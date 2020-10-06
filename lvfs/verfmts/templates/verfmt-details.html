@@ -8,24 +8,24 @@
 <form method="post" action="{{url_for('verfmts.route_modify', verfmt_id=verfmt.verfmt_id)}}">
   <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <div class="form-group">
-    <label for="group_id">Value:</label>
-    <input type="text" class="form-control" name="value" value="{{verfmt.value}}" required />
+    <label for="value">Value:</label>
+    <input type="text" class="form-control" id="value" name="value" value="{{verfmt.value}}" required />
   </div>
   <div class="form-group">
-    <label for="display_name">Name:</label>
-    <input type="text" class="form-control" name="name" value="{{verfmt.name if verfmt.name}}" required />
+    <label for="name">Name:</label>
+    <input type="text" class="form-control" id="name" name="name" value="{{verfmt.name if verfmt.name}}" required />
   </div>
   <div class="form-group">
     <label for="example">Example (e.g. <code>12.34</code>):</label>
-    <input type="text" class="form-control" name="example" value="{{verfmt.example if verfmt.example}}" />
+    <input type="text" class="form-control" id="example" name="example" value="{{verfmt.example if verfmt.example}}" />
   </div>
   <div class="form-group">
     <label for="fwupd_version">Lowest fwupd version (e.g. <code>1.3.3</code>):</label>
-    <input type="text" class="form-control" name="fwupd_version" value="{{verfmt.fwupd_version}}" />
+    <input type="text" class="form-control" id="fwupd_version" name="fwupd_version" value="{{verfmt.fwupd_version}}" />
   </div>
   <div class="form-group">
     <label for="fallbacks">Legacy fallback (e.g. <code>quad,intelme</code>):</label>
-    <input type="text" class="form-control" name="fallbacks" value="{{verfmt.fallbacks if verfmt.fallbacks}}" />
+    <input type="text" class="form-control" id="fallbacks" name="fallbacks" value="{{verfmt.fallbacks if verfmt.fallbacks}}" />
   </div>
   <input type="submit" class="card-link btn btn-primary" value="Save">
   <button type="button" class="card-link btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>

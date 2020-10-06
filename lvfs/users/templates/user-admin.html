@@ -19,23 +19,23 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="display_name">Display Name</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" name="display_name" value="{{u.display_name}}" required>
+      <input type="text" class="form-control" id="display_name" name="display_name" value="{{u.display_name}}" required>
     </div>
   </div>
 {% endif %}
 {% if g.user.check_acl('@admin') %}
   <div class="form-group row">
-    <label class="col col-sm-2 col-form-label" for="display_name">Username</label>
+    <label class="col col-sm-2 col-form-label" for="username">Username</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" name="username" value="{{u.username}}">
+      <input type="text" class="form-control" id="username" name="username" value="{{u.username}}">
     </div>
   </div>
 {% endif %}
 {% if g.user.check_acl('@admin') and u.auth_type in ['local', 'local+locked'] %}
   <div class="form-group row">
-    <label class="col col-sm-2 col-form-label" for="display_name">Password</label>
+    <label class="col col-sm-2 col-form-label" for="password">Password</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" name="password" value="" placeholder="{{'Exists' if u.password else 'Does not exist'}}">
+      <input type="text" class="form-control" id="password" name="password" value="" placeholder="{{'Exists' if u.password else 'Does not exist'}}">
     </div>
   </div>
 {% endif %}
@@ -43,13 +43,13 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="auth_warning">Account Warning</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" name="auth_warning" value="{{u.auth_warning if u.auth_warning else ''}}">
+      <input type="text" class="form-control" id="auth_warning" name="auth_warning" value="{{u.auth_warning if u.auth_warning else ''}}">
     </div>
   </div>
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="human_user">Contact Email</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" name="human_user" value="{{u.human_user.username if u.human_user else ''}}" placeholder="As username...">
+      <input type="text" class="form-control" id="human_user" name="human_user" value="{{u.human_user.username if u.human_user else ''}}" placeholder="As username...">
     </div>
   </div>
 {% endif %}
@@ -57,7 +57,7 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="auth_type">Account Type</label>
     <div class="col col-sm-10">
-    <select class="form-control" name="auth_type">
+    <select class="form-control" id="auth_type" name="auth_type">
       <option value="disabled" {{ 'selected' if u.auth_type == 'disabled' }}>
         Disabled
       </option>
@@ -75,11 +75,11 @@
   </div>
   <fieldset class="form-group">
     <div class="row">
-      <legend class="col col-form-label col-sm-2 pt-0">Attributes</legend>
+      <label class="col col-form-label col-sm-2 pt-0">Attributes</label>
       <div class="col col-sm-10">
 {% if g.user.check_acl('@add-action-admin') %}
         <span class="switch mt-3">
-          <input class="switch" type="checkbox" name="admin" id="id-admin" value="1" {{'checked' if u.check_acl('@admin')}}>
+          <input class="switch" type="checkbox" id="admin" name="admin" id="id-admin" value="1" {{'checked' if u.check_acl('@admin')}}>
           <label for="id-admin">
             Full access to all vendors and users on the server
           </label>
@@ -88,7 +88,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-robot') %}
         <span class="switch mt-3">
-          <input class="switch" type="checkbox" name="robot" id="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
+          <input class="switch" type="checkbox" id="robot" name="robot" id="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
           <label for="robot">
             Account is a robot used for automated firmware uploading only
           </label>
@@ -97,7 +97,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-analyst') %}
         <span class="switch">
-          <input class="switch" type="checkbox" name="analyst" id="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
+          <input class="switch" type="checkbox" id="analyst" name="analyst" id="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
           <label for="analyst">
             Read-only access to all firmware and associated reports in the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -106,7 +106,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-qa') %}
         <span class="switch mt-3">
-          <input class="switch" type="checkbox" name="qa" id="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
+          <input class="switch" type="checkbox" id="qa" name="qa" id="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
           <label for="qa">
             Allowed to modify all the firmware uploaded to the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -115,7 +115,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-vendor-manager') %}
         <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" name="vendor-manager" id="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
+          <input class="switch mt-3" type="checkbox" id="vendor-manager" name="vendor-manager" id="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
           <label for="vendor-manager">
             Allowed to add, remove and modify users in the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -124,7 +124,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-researcher') %}
         <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" name="researcher" id="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
+          <input class="switch mt-3" type="checkbox" id="researcher" name="researcher" id="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
           <label for="researcher">
             Allowed to create YARA rules that can be run on <strong>public</strong> firmware
           </label>
@@ -133,7 +133,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-partner') %}
         <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" name="partner" id="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
+          <input class="switch mt-3" type="checkbox" id="partner" name="partner" id="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
           <label for="partner">
             Allowed to import and export <strong>public</strong> lists of firmware, e.g. from Microsoft Update
           </label>
@@ -142,7 +142,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-approved-public') %}
         <span class="switch mt-3">
-          <input class="switch" type="checkbox" name="approved-public" id="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
+          <input class="switch" type="checkbox" id="approved-public" name="approved-public" id="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
           <label for="approved-public">
             Allowed to move firmware to the public <code>testing</code> and <code>stable</code> remotes
           </label>
@@ -152,7 +152,7 @@
 {% if g.user.check_acl('@add-action-vendor-manager') %}
 {% if u.auth_type != 'oauth' %}
         <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" name="is_otp_enabled" id="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
+          <input class="switch mt-3" type="checkbox" id="is_otp_enabled" name="is_otp_enabled" id="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
           <label for="is_otp_enabled">
             Two factor authentication is required
           </label>
@@ -167,7 +167,7 @@
 {% if g.user.check_acl('@admin') %}
     <div class="form-group">
     <label for="send_email">
-      <input class="checkbox" type="checkbox" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
+      <input class="checkbox" type="checkbox" id="send_email" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
       Notify the user about the account change
     </label>
   </div>

@@ -10,24 +10,24 @@
 <form method="post" action="{{url_for('issues.route_modify', issue_id=issue.issue_id)}}">
   <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <div class="form-group">
-    <label for="group_id">URL:</label>
-    <input type="text" class="form-control" name="url" value="{{issue.url}}" required {{'disabled' if not issue.check_acl('@modify')}}>
+    <label for="url">URL:</label>
+    <input type="text" class="form-control" id="url" name="url" value="{{issue.url}}" required {{'disabled' if not issue.check_acl('@modify')}}>
   </div>
   <div class="form-group">
     <label for="group_id">Group:</label>
-    <input type="text" class="form-control" name="group_id" value="{{issue.vendor.group_id}}" disabled>
+    <input type="text" class="form-control" id="group_id" name="group_id" value="{{issue.vendor.group_id}}" disabled>
   </div>
   <div class="form-group">
-    <label for="group_id">Name:</label>
-    <input type="text" class="form-control" name="name" value="{{issue.name}}" required {{'disabled' if not issue.check_acl('@modify')}}>
+    <label for="name">Name:</label>
+    <input type="text" class="form-control" id="name" name="name" value="{{issue.name}}" required {{'disabled' if not issue.check_acl('@modify')}}>
   </div>
   <div class="form-group">
-    <label for="display_name">Description:</label>
-    <input type="text" class="form-control" name="description" value="{{issue.description}}" required {{'disabled' if not issue.check_acl('@modify')}}>
+    <label for="description">Description:</label>
+    <input type="text" class="form-control" id="description" name="description" value="{{issue.description}}" required {{'disabled' if not issue.check_acl('@modify')}}>
   </div>
   <div class="form-group">
     <label for="enabled">
-      <input class="checkbox" type="checkbox" name="enabled" value="1" {{'checked' if issue.enabled}} {{'disabled' if not issue.check_acl('@modify')}}/>
+      <input class="checkbox" type="checkbox" id="enabled" name="enabled" value="1" {{'checked' if issue.enabled}} {{'disabled' if not issue.check_acl('@modify')}}/>
       Enabled
     </label>
   </div>

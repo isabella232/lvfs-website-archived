@@ -17,14 +17,14 @@
             <div class="col-lg-12">
               <div class="form-group">
                 <label for="display_name">Display Name</label>
-                <input class="form-control" id="display_name" type="text" name="display_name" value="{{g.user.display_name}}" required>
+                <input class="form-control" id="display_name" type="text" id="display_name" name="display_name" value="{{g.user.display_name}}" required>
               </div>
             </div>
 {% if g.user.check_acl('@robot') %}
             <div class="col-12">
               <div class="form-group">
                 <label for="human_user">Contact Email</label>
-                <input class="form-control" id="human_user" type="text" name="human_user" value="{{u.human_user.username}}">
+                <input class="form-control" id="human_user" type="text" id="human_user" name="human_user" value="{{u.human_user.username}}">
                 <p class="text-secondary">
                   This has to match the exact username of an existing LVFS user.
                 </p>
@@ -173,7 +173,7 @@
 {% if g.user.is_otp_working %}
             <div class="custom-control custom-switch">
               <input class="custom-control-input" type="checkbox" id="is_otp_enabled"
-                name="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}/>
+                id="is_otp_enabled" name="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}/>
               <label class="custom-control-label" for="is_otp_enabled">
                 Require OTP to login
               </label>
@@ -197,15 +197,15 @@
             <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
             <div class="form-group">
               <label for="password_old">Old Password</label>
-              <input class="form-control" id="password_old" type="password" name="password_old" required>
+              <input class="form-control" id="password_old" type="password" id="password_old" name="password_old" required>
             </div>
             <div class="form-group">
               <label for="password_new">New Password</label>
-              <input class="form-control" id="password_new" type="password" name="password_new" required>
+              <input class="form-control" id="password_new" type="password" id="password_new" name="password_new" required>
             </div>
             <div class="form-group">
               <label for="password_confirm">Confirm Password</label>
-              <input class="form-control" id="password_confirm" type="password" name="password_confirm" required>
+              <input class="form-control" id="password_confirm" type="password" id="password_confirm" name="password_confirm" required>
             </div>
             <button class="btn btn-primary btn-block" type="submit">Update Password</button>
           </form>
@@ -252,13 +252,13 @@ document.getElementById("file").onchange = function() {
           or any other suitable OTP application to scan this QR code:
         </p>
         <p class="text-center">
-          <img id="qrcode" src="{{ url_for('users.route_qrcode') }}">
+          <img id="qrcode" src="{{ url_for('users.route_qrcode') }}" alt="QR code">
         </p>
         <form method="post" action="{{url_for('users.route_otp_test')}}">
           <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
           <div class="form-group">
             <label for="otp">Test your OTP code:</label>
-            <input id="otp" class="form-control" type="password" name="otp" placeholder="123456" aria-label="OTP">
+            <input id="otp" class="form-control" type="password" id="otp" name="otp" placeholder="123456" aria-label="OTP">
           </div>
           <button class="btn btn-primary btn-block" type="submit">
             <b>Test OTP</b>

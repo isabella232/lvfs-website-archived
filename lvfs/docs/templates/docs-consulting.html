@@ -52,9 +52,9 @@
     <h2 class="card-title">
       {{v.display_name_with_team}}
 {% if v.icon %}
-      <img class="img-thumbnail float-right" src="/uploads/{{v.icon}}" width="96"/>
+      <img class="img-thumbnail float-right" src="/uploads/{{v.icon}}" width="96" alt="{{v.display_name}} logo"/>
 {% else %}
-      <img class="img-thumbnail float-right" src="/uploads/vendor-unknown.png" width="96"/>
+      <img class="img-thumbnail float-right" src="/uploads/vendor-unknown.png" width="96" alt="generic vendor logo"/>
 {% endif %}
     </h2>
     <p class="card-text">

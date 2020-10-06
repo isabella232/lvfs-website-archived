@@ -106,4 +106,5 @@ def route_show(claim_id):
 
     # show details
     return render_template('claim-details.html',
+                           category='admin',
                            claim=claim)

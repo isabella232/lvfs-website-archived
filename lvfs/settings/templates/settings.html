@@ -15,21 +15,21 @@
 {% if s.__class__.__name__ == 'PluginSettingBool' %}
       <div class="custom-control custom-switch">
         <input class="custom-control-input" type="checkbox" id="{{s.key}}"
-          name="{{s.key}}" value="enabled" {{'checked' if settings[s.key] == 'enabled'}}/>
+          id="{{s.key}}" name="{{s.key}}" value="enabled" {{'checked' if settings[s.key] == 'enabled'}}/>
         <label class="custom-control-label" for="{{s.key}}">
           {{s.name}}
         </label>
       </div>
       <input type="hidden" name="{{s.key}}" value="disabled"/>
 {% elif s.__class__.__name__ == 'PluginSettingTextList' %}
-      <label>{{s.name}}</label>
-      <textarea type="text" class="form-control" name="{{s.key}}" rows="10">{{settings[s.key].replace(',', '\n')}}</textarea>
+      <label for="{{s.key}}">{{s.name}}</label>
+      <textarea type="text" class="form-control" id="{{s.key}}" name="{{s.key}}" rows="10">{{settings[s.key].replace(',', '\n')}}</textarea>
 {% elif s.__class__.__name__ == 'PluginSettingInteger' %}
-      <label>{{s.name}}</label>
-      <input type="number" class="form-control" name="{{s.key}}" value="{{settings[s.key]}}">
+      <label for="{{s.key}}">{{s.name}}</label>
+      <input type="number" class="form-control" id="{{s.key}}" name="{{s.key}}" value="{{settings[s.key]}}">
 {% else %}
-      <label>{{s.name}}</label>
-      <input type="text" class="form-control" name="{{s.key}}" value="{{settings[s.key]}}">
+      <label for="{{s.key}}">{{s.name}}</label>
+      <input type="text" class="form-control" id="{{s.key}}" name="{{s.key}}" value="{{settings[s.key]}}">
 {% endif %}
     </div>
 {% endfor %}
