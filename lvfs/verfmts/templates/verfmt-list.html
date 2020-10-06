@@ -37,8 +37,8 @@
     <form method="post" action="{{url_for('verfmts.route_create')}}" class="form">
       <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
       <div class="form-group card-text">
-        <label>Value name, e.g. <code>intel-me2</code></label>
-        <input class="form-control" type="text" name="value" placeholder="Value" required />
+        <label for="value">Value name, e.g. <code>intel-me2</code></label>
+        <input class="form-control" type="text" id="value" name="value" placeholder="Value" required />
       </div>
       <input class="card-link btn btn-primary" type="submit" value="Add"/>
     </form>

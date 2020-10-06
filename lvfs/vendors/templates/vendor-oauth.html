@@ -13,8 +13,8 @@
 <form method="post" action="{{url_for('vendors.route_modify_by_admin', vendor_id=v.vendor_id)}}">
   <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <div class="form-group">
-    <label for="auth_type">Action when user with no account logs in using OAuth:</label>
-    <select class="form-control" name="oauth_unknown_user">
+    <label for="oauth_unknown_user">Action when user with no account logs in using OAuth:</label>
+    <select class="form-control" id="oauth_unknown_user" name="oauth_unknown_user">
       <option value="" {{ 'selected' if not v.oauth_unknown_user }}>
         Error message
       </option>
@@ -27,8 +27,8 @@
     </select>
   </div>
   <div class="form-group">
-    <label for="email">Domains to match for authentication:</label>
-    <input type="text" class="form-control" name="oauth_domain_glob"
+    <label for="oauth_domain_glob">Domains to match for authentication:</label>
+    <input type="text" class="form-control" id="oauth_domain_glob" name="oauth_domain_glob"
           value="{{ v.oauth_domain_glob if v.oauth_domain_glob }}"
           placeholder="*.domain.com,*.domain2.com" required>
   </div>

@@ -8,7 +8,7 @@
     <form method="GET" class="form-inline" action="{{url_for('search.route_search')}}">
       <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
       <div class="input-group">
-        <input type="text" class="form-control" aria-label="search" name="value" required>
+        <input type="text" class="form-control" aria-label="search" id="value" name="value" required>
         <div class="input-group-append">
           <button class="input-group-text" type="submit">Search</button>
         </div>

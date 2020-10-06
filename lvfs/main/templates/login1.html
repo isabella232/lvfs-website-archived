@@ -28,7 +28,7 @@
           <form method="post" action="{{url_for('main.route_login1_response')}}">
             <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
             <div class="form-group">
-              <input class="form-control" type="email" name="username" placeholder="Email address" />
+              <input class="form-control" type="email" id="username" name="username" placeholder="Email address" />
             </div>
             <div class="form-group">
               <button class="btn btn-primary btn-block mt-3" type="submit" name="submit">Next</button>

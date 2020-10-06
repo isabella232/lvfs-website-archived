@@ -21,12 +21,12 @@
       apply.
     </p>
     <div class="form-group">
-      <label>Failures Required</label>
-      <input type="number" min="1" max="100" class="form-control" name="failure_minimum" value="{{fw.failure_minimum}}">
+      <label for="failure_minimum">Failures Required</label>
+      <input type="number" min="1" max="100" class="form-control" id="failure_minimum" name="failure_minimum" value="{{fw.failure_minimum}}">
     </div>
     <div class="form-group">
-      <label>Threshold Percentage</label>
-      <input type="number" min="1" max="100" class="form-control" name="failure_percentage" value="{{fw.failure_percentage}}">
+      <label for="failure_percentage">Threshold Percentage</label>
+      <input type="number" min="1" max="100" class="form-control" id="failure_percentage" name="failure_percentage" value="{{fw.failure_percentage}}">
     </div>
     <input type="submit" class="btn btn-primary card-link" value="Change"/>
   </div>
@@ -93,13 +93,13 @@
   <input type="hidden" name="firmware_id" value="{{fw.firmware_id}}">
   <tr class="row table-borderless">
     <td class="col col-3">
-      <input type="number" class="form-control" name="value" min="1" max="10000" value="1000" required>
+      <input type="number" class="form-control" id="value" name="value" min="1" max="10000" value="1000" required>
     </td>
     <td class="col col-3">
-      <input type="text" class="form-control fixed-width h-100" name="user_agent_glob" placeholder="*">
+      <input type="text" class="form-control fixed-width h-100" id="user_agent_glob" name="user_agent_glob" placeholder="*">
     </td>
     <td class="col col-4">
-      <input type="text" class="form-control" name="response" placeholder="Too Many Requests">
+      <input type="text" class="form-control" id="response" name="response" placeholder="Too Many Requests">
     </td>
     <td class="col">
       <input class="btn btn-block btn-primary" type="submit" value="Add">

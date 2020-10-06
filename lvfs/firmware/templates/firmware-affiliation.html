@@ -23,7 +23,7 @@
       <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
       <div class="form-group">
         <label for="vendor_id">Controlling vendor</label>
-        <select class="form-control" name="vendor_id" required>
+        <select class="form-control" id="vendor_id" name="vendor_id" required>
 {% for v in vendors %}
           <option value="{{v.vendor_id}}" {{ 'selected' if v.vendor_id == fw.vendor_id }}>{{v.display_name_with_team}}</option>
 {% endfor %}
