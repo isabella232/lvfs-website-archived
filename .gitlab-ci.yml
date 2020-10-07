@@ -31,6 +31,7 @@ testing:
     - dnf -y install
         bsdtar
         geolite2-country
+        libcurl-devel
         libgcab1
         GeoIP-devel
         cairo-gobject-devel
