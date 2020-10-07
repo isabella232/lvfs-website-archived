@@ -13,6 +13,7 @@ RUN dnf -y install \
 	git \
 	gnutls-utils \
 	gobject-introspection-devel \
+	libcurl-devel \
 	libgcab1 \
 	logrotate \
 	python3-celery \
@@ -24,8 +25,6 @@ RUN dnf -y install \
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
 RUN mkdir /data /backups
-#RUN bash -c 'mkdir -p /data/{downloads,shards,uploads,deleted,firmware}'
-#RUN bash -c 'mkdir /backups'
 WORKDIR /app
 
 # create and activate a venv
