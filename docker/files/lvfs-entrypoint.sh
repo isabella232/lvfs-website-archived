@@ -6,7 +6,12 @@ then
 	exec uwsgi --ini /app/conf/uwsgi.ini
 fi
 
-if [ "$DEPLOY" = "worker" ]
+if [ "$DEPLOY" = "metadata" ]
 then
-    exec celery -A lvfs.celery.worker --queues metadata,firmware,celery,yara
+    exec celery -A lvfs.celery.worker --queues metadata,firmware,celery
+fi
+
+if [ "$DEPLOY" = "yara" ]
+then
+    exec celery -A lvfs.celery.worker --queues yara
 fi
