@@ -8,7 +8,6 @@
 # pylint: disable=wrong-import-position,wrong-import-order
 
 import os
-import sys
 import sqlalchemy
 import logging
 
@@ -36,11 +35,6 @@ else:
     app.config.from_pyfile('flaskapp.cfg')
 if 'LVFS_CUSTOM_SETTINGS' in os.environ:
     app.config.from_envvar('LVFS_CUSTOM_SETTINGS')
-
-# sanity check
-for dirname in ['DOWNLOAD_DIR', 'SHARD_DIR', 'UPLOAD_DIR', 'RESTORE_DIR']:
-    if not os.path.isdir(app.config[dirname]):
-        sys.exit('{} does not exist'.format(app.config[dirname]))
 
 oauth = OAuth(app)
 

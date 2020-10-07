@@ -5,12 +5,14 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+import os
+
 from collections import defaultdict
 
 from flask import Blueprint, render_template, request, url_for, redirect, flash
 from flask_login import login_required
 
-from lvfs import db, ploader
+from lvfs import app, db, ploader
 
 from lvfs.models import Setting, Test, Firmware
 from lvfs.util import _event_log, _get_settings
@@ -79,6 +81,11 @@ def route_tests(plugin_id, kind):
 @login_required
 @admin_login_required
 def route_create():
+
+    # sanity check
+    for dirname in ['DOWNLOAD_DIR', 'SHARD_DIR', 'UPLOAD_DIR', 'RESTORE_DIR']:
+        if not os.path.isdir(app.config[dirname]):
+            flash('Directory {} does not exist'.format(app.config[dirname]), 'warning')
 
     # create all the plugin default keys
     settings = _get_settings()
