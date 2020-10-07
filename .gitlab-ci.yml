@@ -1,5 +1,6 @@
 stages:
     - build
+    - test
     - deploy
 
 docker-build:
@@ -13,6 +14,53 @@ docker-build:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+
+testing:
+  image: centos8:latest
+  stage: test
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    paths:
+      - .cache/pip
+      - env/
+  before_script:
+    - dnf -y install dnf-plugins-core
+    - dnf config-manager --set-enabled PowerTools
+    - dnf -y install epel-release
+    - dnf -y install
+        bsdtar
+        geolite2-country
+        libgcab1
+        GeoIP-devel
+        cairo-gobject-devel
+        gobject-introspection-devel
+        gnutls-utils
+        gcc
+        python3-devel
+        python3-pip
+        python3-virtualenv
+        python3-psutil
+        redis
+        words
+    - virtualenv env
+    - source env/bin/activate
+    - pip install pip -U
+    - pip install -r requirements.txt --use-feature=2020-resolver
+    # required for tests
+    - redis-server &
+  script:
+    #- source env/bin/activate
+    - pytest --cov=lvfs --cov=plugins --cov=pkgversion --cov=infparser --cov=cabarchive --cov-fail-under=60
+    - env/bin/python ./pylint_test.py
+
+pages:
+  environment: production
+  stage: deploy
+  script:
+    - curl -X POST -H "Authorization: Token $RTD_TOKEN" -H "Content-Length: 0" https://readthedocs.org/api/v3/projects/lvfs/versions/latest/builds/
+  only:
+    - master
 
 deploy production:
   environment: production
