@@ -98,7 +98,7 @@ new Chart(ctx, {
 <div class="card-deck mt-3">
 {% if g.user.vendor.do_not_track %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-1.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Do Not Track in use</h2>
       <p class="card-text">
@@ -110,7 +110,7 @@ new Chart(ctx, {
   </div>
 {% elif not g.user.vendor.do_not_track and g.user.vendor.fws|length %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-1.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Downloads</h2>
       <p class="card-text">
@@ -126,7 +126,7 @@ new Chart(ctx, {
   </div>
 {% else %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-1.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Lets upload firmware!</h2>
       <p class="card-text">
@@ -144,7 +144,7 @@ new Chart(ctx, {
 {% endif %}
 {% if devices_cnt > 0 %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-2.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-2.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Devices</h2>
       <p class="card-text">You have {{devices_cnt}} different devices supported on the LVFS.</p>
@@ -156,7 +156,7 @@ new Chart(ctx, {
 {% endif %}
 {% if g.user.check_acl('@partner') %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-2.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-2.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Howdy partner!</h2>
       <p class="card-text">You can help us by uploading and downloading metadata from the LVFS.</p>
@@ -168,7 +168,7 @@ new Chart(ctx, {
   </div>
 {% endif %}
   <div class="card overflow-hidden" style="min-width: 12rem">
-    <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-3.png')}});"></div>
+    <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-3.png')}});"></div>
     <div class="card-body position-relative">
       <h2 class="card-title">Users</h2>
       <p class="card-text">
@@ -204,17 +204,17 @@ new Chart(ctx, {
       </p>
     </div>
     <div class="col pt-1">
-      <img src="{{url_for('static', filename='img/symbolic-' + fw.remote.icon_name + '.svg')}}" width="24"
+      <img src="{{url_for('cdn', filename='img/symbolic-' + fw.remote.icon_name + '.svg')}}" width="24"
         alt="{{fw.remote.name}}"
         title="{{fw.remote.description}}"/>
 {% if fw.problems|length %}
-      <img src="{{url_for('static', filename='img/symbolic-problem.svg')}}" width="24"
+      <img src="{{url_for('cdn', filename='img/symbolic-problem.svg')}}" width="24"
         title="{{fw.problems|length}} problems"/>
 {% endif %}
     </div>
     <div class="col pt-1">
       <span class="text-muted">
-        <img src="{{url_for('static', filename='img/symbolic-download.svg')}}" width="24" alt="download icon"/>
+        <img src="{{url_for('cdn', filename='img/symbolic-download.svg')}}" width="24" alt="download icon"/>
         <span>{{format_humanize_intchar(fw.download_cnt)}}</span>
       </span>
     </div>

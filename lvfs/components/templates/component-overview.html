@@ -14,7 +14,7 @@
 
 <fieldset {{ 'disabled="disabled"' if md.fw.remote.is_public }} >
 <div class="card">
-  <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-1.png')}});"></div>
+  <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
   <div class="card-body">
 <table class="table">
   <tr class="row table-borderless">
@@ -233,7 +233,7 @@
 </div>
 
 <div class="card mt-3">
-  <div class="bg-holder bg-card" style="background-image:url({{url_for('static', filename='img/corner-2.png')}});"></div>
+  <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-2.png')}});"></div>
   <div class="card-body">
     <h2 class="card-title">
       Security
