@@ -21,6 +21,7 @@ from flask_oauthlib.client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.local import LocalProxy
+import posixpath
 
 from lvfs.pluginloader import Pluginloader
 from lvfs.celery import FlaskCelery
@@ -35,6 +36,13 @@ else:
     app.config.from_pyfile('flaskapp.cfg')
 if 'LVFS_CUSTOM_SETTINGS' in os.environ:
     app.config.from_envvar('LVFS_CUSTOM_SETTINGS')
+
+def cdn_url_builder(_error, endpoint, values):
+    if endpoint != 'cdn':
+        return None
+    return posixpath.join(app.config['CDN_DOMAIN'], 'static', values['filename'])
+
+app.url_build_error_handlers.append(cdn_url_builder)
 
 oauth = OAuth(app)
 

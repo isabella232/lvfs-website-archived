@@ -5,10 +5,10 @@
   <head>
     <title>LVFS: {% block title %}{% endblock %}</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <link rel="stylesheet" href="{{url_for('static', filename='theme.css')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <link rel="stylesheet" href="{{url_for('cdn', filename='theme.css')}}">
+    <link rel="stylesheet" href="{{url_for('cdn', filename='style.css')}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}"/>
+    <link rel="shortcut icon" href="{{url_for('cdn', filename='favicon.ico')}}"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700%7cPoppins:100,200,300,400,500,600,700,800,900">
     <link rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
@@ -23,10 +23,10 @@
 {% endblock %}
     </main>
 
-<script src="{{url_for('static', filename='jquery-3.5.1.slim.min.js')}}"></script><!-- https://code.jquery.com/jquery-3.5.1.slim.min.js -->
-<script src="{{url_for('static', filename='popper.min.js')}}"></script><!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js -->
-<script src="{{url_for('static', filename='bootstrap.min.js')}}"></script><!-- https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js -->
-<script src="{{url_for('static', filename='theme.js')}}"></script>
+<script src="{{url_for('cdn', filename='jquery-3.5.1.slim.min.js')}}"></script><!-- https://code.jquery.com/jquery-3.5.1.slim.min.js -->
+<script src="{{url_for('cdn', filename='popper.min.js')}}"></script><!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js -->
+<script src="{{url_for('cdn', filename='bootstrap.min.js')}}"></script><!-- https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js -->
+<script src="{{url_for('cdn', filename='theme.js')}}"></script>
 {% block script %}
 {% endblock %}
   </body>

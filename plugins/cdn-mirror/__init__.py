@@ -70,8 +70,7 @@ class Plugin(PluginBase):
             im.save(fn, "PNG")
 
         # set the safe URL
-        settings = _get_settings('firmware')
-        return os.path.join(settings['firmware_baseuri_cdn'], basename)
+        return os.path.join(app.config['CDN_DOMAIN'], 'downloads', basename)
 
     def run_test_on_md(self, test, md):
 
