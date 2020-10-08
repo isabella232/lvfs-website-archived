@@ -16,6 +16,7 @@ RUN dnf -y install \
 	python3-devel \
 	python3-pip \
 	python3-psutil \
+	libcurl-devel \
 	redis \
 	words
 COPY requirements.txt /tmp/requirements.txt
