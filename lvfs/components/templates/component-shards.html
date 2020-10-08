@@ -11,13 +11,11 @@
     <h2 class="card-title">
       {{shard.name}}
     </h2>
-    <p class="card-text">
 {% if shard.description %}
+    <p class="card-text">
       {{shard.description}}
-{% else %}
-      We don't know what this module does! Can you tell us?
-{% endif %}
     </p>
+{% endif %}
     <p class="card-text">
       <table class="table">
 {% if shard.plugin_id %}
