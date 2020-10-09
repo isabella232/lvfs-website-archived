@@ -483,6 +483,10 @@ class UploadedFile:
                                      compare=req.get('compare'),
                                      version=req.get('version'))
                     md.requirements.append(rq)
+            elif req.tag == 'client':
+                text = _node_validate_text(req, minlen=3, maxlen=1000)
+                for req_value in text.split('|'):
+                    md.requirements.append(Requirement(kind=req.tag, value=req_value))
             else:
                 raise MetadataInvalid('<{}> requirement was invalid'.format(req.tag))
 

@@ -126,6 +126,7 @@ def _get_generated_metainfo():
   <firmware compare="eq" version="0.0.1">
    bootloader
   </firmware>
+  <client>switch-branch</client>
  </requires>
  <keywords>
   <keyword>
