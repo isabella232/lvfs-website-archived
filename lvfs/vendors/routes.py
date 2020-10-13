@@ -9,9 +9,10 @@
 
 import os
 import secrets
+import fnmatch
 
 from collections import defaultdict
-from glob import fnmatch, glob
+from glob import glob
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
