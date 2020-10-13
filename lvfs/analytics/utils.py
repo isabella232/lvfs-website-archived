@@ -9,7 +9,7 @@
 
 import datetime
 
-from lvfs import db, celery
+from lvfs import db, tq
 
 from lvfs.dbutils import _execute_count_star
 
@@ -158,7 +158,7 @@ def _generate_stats_for_datestr(datestr):
     # for the log
     print('generated for %s' % datestr)
 
-@celery.task(max_retries=3, default_retry_delay=600, task_time_limit=600)
+@tq.task(max_retries=3, default_retry_delay=600, task_time_limit=600)
 def _async_generate_stats():
     datestr = _get_datestr_from_datetime(datetime.date.today() - datetime.timedelta(days=1))
     _generate_stats_for_datestr(datestr)

@@ -26,7 +26,7 @@ import GeoIP
 
 from pkgversion import vercmp
 
-from lvfs import app, db, lm, ploader, csrf, celery
+from lvfs import app, db, lm, ploader, csrf, tq
 
 from lvfs.dbutils import _execute_count_star
 from lvfs.pluginloader import PluginError
@@ -41,7 +41,7 @@ from .utils import _async_regenerate_metrics
 
 bp_main = Blueprint('main', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(
         crontab(hour=4, minute=0),

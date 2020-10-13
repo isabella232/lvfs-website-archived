@@ -12,7 +12,7 @@ from flask_login import login_required
 
 from celery.schedules import crontab
 
-from lvfs import app, db, csrf, celery
+from lvfs import app, db, csrf, tq
 
 from lvfs.models import Firmware, Report, ReportAttribute, Issue, Certificate, Checksum
 from lvfs.util import _event_log
@@ -23,7 +23,7 @@ from .utils import _async_regenerate_reports
 
 bp_reports = Blueprint('reports', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(
         crontab(hour=5, minute=0),

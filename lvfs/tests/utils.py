@@ -9,7 +9,7 @@
 
 import datetime
 
-from lvfs import db, ploader, celery
+from lvfs import db, ploader, tq
 
 from lvfs.models import Test
 from lvfs.util import _event_log
@@ -65,7 +65,7 @@ def _test_run_all(tests=None):
     # all done
     db.session.commit()
 
-@celery.task(max_retries=3, default_retry_delay=600, task_time_limit=3600)
+@tq.task(max_retries=3, default_retry_delay=600, task_time_limit=3600)
 def _async_test_run_all():
     tests = db.session.query(Test)\
                       .filter(Test.started_ts == None)\
@@ -74,7 +74,7 @@ def _async_test_run_all():
         return
     _test_run_all(tests)
 
-@celery.task(max_retries=3, default_retry_delay=5, task_time_limit=600)
+@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=600)
 def _async_test_run(test_id):
     tests = db.session.query(Test)\
                       .filter(Test.started_ts == None)\
@@ -84,7 +84,7 @@ def _async_test_run(test_id):
         return
     _test_run_all(tests)
 
-@celery.task(max_retries=3, default_retry_delay=60, task_time_limit=600)
+@tq.task(max_retries=3, default_retry_delay=60, task_time_limit=600)
 def _async_test_run_for_firmware(firmware_id):
     tests = db.session.query(Test)\
                       .filter(Test.started_ts == None)\

@@ -16,7 +16,7 @@ from flask_login import login_required
 
 from celery.schedules import crontab
 
-from lvfs import db, celery
+from lvfs import db, tq
 
 from lvfs.models import Analytic, Client, Report, Useragent, UseragentKind, SearchEvent, AnalyticVendor, ReportAttribute
 from lvfs.models import _get_datestr_from_datetime, _split_search_string
@@ -27,7 +27,7 @@ from .utils import _async_generate_stats
 
 bp_analytics = Blueprint('analytics', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(
         crontab(hour=0, minute=0),

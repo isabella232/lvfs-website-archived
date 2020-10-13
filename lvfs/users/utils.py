@@ -11,7 +11,7 @@ import datetime
 
 from flask import render_template
 
-from lvfs import db, celery
+from lvfs import db, tq
 
 from lvfs.emails import send_email
 from lvfs.models import User
@@ -76,11 +76,11 @@ def _user_email_report():
                                        fws_embargo=fws_embargo,
                                        fws_testing=fws_testing))
 
-@celery.task(max_retries=3, default_retry_delay=60, task_time_limit=120)
+@tq.task(max_retries=3, default_retry_delay=60, task_time_limit=120)
 def _async_user_disable():
     _user_disable_notify()
     _user_disable_actual()
 
-@celery.task(max_retries=3, default_retry_delay=60, task_time_limit=120)
+@tq.task(max_retries=3, default_retry_delay=60, task_time_limit=120)
 def _async_user_email_report():
     _user_email_report()

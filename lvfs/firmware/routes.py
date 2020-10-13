@@ -16,7 +16,7 @@ from sqlalchemy.orm import joinedload
 
 from celery.schedules import crontab
 
-from lvfs import app, db, ploader, celery
+from lvfs import app, db, ploader, tq
 
 from lvfs.emails import send_email
 from lvfs.metadata.utils import _async_regenerate_remote
@@ -31,7 +31,7 @@ from .utils import _firmware_delete, _async_sign_fw, _async_autodelete
 
 bp_firmware = Blueprint('firmware', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(
         crontab(hour=2, minute=0),

@@ -21,7 +21,7 @@ from flask import render_template, g
 from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 from cabarchive import CabArchive, CabFile
 
-from lvfs import app, db, celery, ploader
+from lvfs import app, db, tq, ploader
 from lvfs.emails import send_email
 from lvfs.models import Remote, Firmware, FirmwareEvent, Component
 from lvfs.util import _event_log, _get_shard_path, _get_absolute_path
@@ -131,7 +131,7 @@ def _purge_old_deleted_firmware():
             db.session.delete(fw)
             db.session.commit()
 
-@celery.task(max_retries=3, default_retry_delay=360, task_time_limit=60)
+@tq.task(max_retries=3, default_retry_delay=360, task_time_limit=60)
 def _async_autodelete():
     _delete_embargo_obsoleted_fw()
     _purge_old_deleted_firmware()
@@ -142,7 +142,7 @@ def _show_diff(blob_old, blob_new):
     diff = difflib.unified_diff(fromlines, tolines)
     print('\n'.join(list(diff)[3:]))
 
-@celery.task(max_retries=3, default_retry_delay=5, task_time_limit=60)
+@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=60)
 def _async_sign_fw(firmware_id):
     fw = db.session.query(Firmware)\
                    .filter(Firmware.firmware_id == firmware_id)\

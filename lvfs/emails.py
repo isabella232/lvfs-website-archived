@@ -7,11 +7,11 @@
 
 from flask_mail import Message
 
-from lvfs import app, mail, celery
+from lvfs import app, mail, tq
 
 from .util import _event_log
 
-@celery.task(max_retries=3, default_retry_delay=5, task_time_limit=10)
+@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=10)
 def _async_send_email(subject, recipient, text_body):
     msg = Message(subject, recipients=[recipient])
     msg.body = text_body

@@ -10,7 +10,7 @@ import humanize
 from flask import Blueprint, render_template, make_response, flash, redirect, url_for
 from flask_login import login_required
 
-from lvfs import db, celery
+from lvfs import db, tq
 
 from lvfs.models import Vendor, Remote
 from lvfs.util import admin_login_required
@@ -19,7 +19,7 @@ from .utils import _async_regenerate_remote_all, _async_regenerate_remote
 
 bp_metadata = Blueprint('metadata', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(14400.0, _async_regenerate_remote_all.s(), options={'queue': 'metadata'})
 

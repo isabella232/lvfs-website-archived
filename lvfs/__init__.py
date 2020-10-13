@@ -59,8 +59,8 @@ lm.login_view = 'login1'
 
 ploader = Pluginloader('plugins')
 
-celery = FlaskCelery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.init_app(app)
+tq = FlaskCelery(app.name, broker=app.config['CELERY_BROKER_URL'])
+tq.init_app(app)
 
 from lvfs.agreements.routes import bp_agreements
 from lvfs.analytics.routes import bp_analytics

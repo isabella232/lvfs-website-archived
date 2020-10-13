@@ -11,7 +11,7 @@ from flask import Blueprint, url_for, redirect, flash, render_template
 from flask_login import login_required
 from sqlalchemy.orm import joinedload
 
-from lvfs import db, ploader, celery
+from lvfs import db, ploader, tq
 
 from lvfs.models import Test
 from lvfs.util import admin_login_required
@@ -20,7 +20,7 @@ from .utils import _async_test_run, _async_test_run_all
 
 bp_tests = Blueprint('tests', __name__, template_folder='templates')
 
-@celery.on_after_finalize.connect
+@tq.on_after_finalize.connect
 def setup_periodic_tasks(sender, **_):
     sender.add_periodic_task(
         3600.0,

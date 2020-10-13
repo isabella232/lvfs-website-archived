@@ -19,7 +19,7 @@ from lxml import etree as ET
 
 from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 
-from lvfs import db, app, ploader, celery
+from lvfs import db, app, ploader, tq
 
 from lvfs.models import Firmware, Remote
 from lvfs.util import _get_settings, _xml_from_markdown, _event_log
@@ -591,7 +591,7 @@ def _regenerate_and_sign_metadata():
     for r in db.session.query(Remote):
         _regenerate_and_sign_metadata_remote(r)
 
-@celery.task(max_retries=3, default_retry_delay=5, task_time_limit=60)
+@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=60)
 def _async_regenerate_remote(remote_id):
     r = db.session.query(Remote)\
                   .filter(Remote.remote_id == remote_id)\
@@ -601,6 +601,6 @@ def _async_regenerate_remote(remote_id):
         return
     _regenerate_and_sign_metadata_remote(r)
 
-@celery.task(max_retries=3, default_retry_delay=10, task_time_limit=60)
+@tq.task(max_retries=3, default_retry_delay=10, task_time_limit=60)
 def _async_regenerate_remote_all():
     _regenerate_and_sign_metadata()
