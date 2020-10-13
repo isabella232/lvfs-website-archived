@@ -6,8 +6,9 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 from itertools import zip_longest
+from typing import Tuple
 
-def _vercmp_char(chr1, chr2):
+def _vercmp_char(chr1: str, chr2: str) -> int:
     if chr1 == chr2:
         return 0
     if chr1 == '~':
@@ -22,7 +23,7 @@ def _vercmp_char(chr1, chr2):
         return -1
     return 1
 
-def _strtoll(val):
+def _strtoll(val: str) -> Tuple[int, str]:
     """ Parses a value, returning the numeric part and any string suffix """
     num_part = ''
     str_part = ''
@@ -35,7 +36,7 @@ def _strtoll(val):
         return 0, str_part
     return int(num_part), str_part
 
-def vercmp(version_a, version_b):
+def vercmp(version_a: str, version_b: str) -> int:
 
     # sanity check
     if not version_a or not version_b:
