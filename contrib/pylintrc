@@ -63,3 +63,17 @@ max-locals=30
 
 # Maximum number of lines in a module
 max-module-lines=1100
+
+[SIMILARITIES]
+
+# Minimum lines number of a similarity.
+min-similarity-lines=50
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=no

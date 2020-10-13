@@ -18,6 +18,8 @@ def main():
     rc = 0
     argv = []
     for fn in sorted(filenames):
+        if fn == 'setup.py':
+            continue
         if fn.find('migrations/') != -1:
             continue
         if fn.startswith('./env'):
