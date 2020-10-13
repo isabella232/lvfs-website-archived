@@ -25,7 +25,7 @@ class NotSupportedError(NotImplementedError):
 class CabArchive(dict):
     """An object representing a Microsoft Cab archive """
 
-    def __init__(self, buf=None, flattern=True):
+    def __init__(self, buf: bytes = None, flattern: bool = True):
         """ Parses a MS Cabinet archive """
         dict.__init__(self)
 
@@ -46,13 +46,13 @@ class CabArchive(dict):
                         fn = os.path.basename(fn)
                     self[fn] = CabFile(cffile.get_bytes().get_data())
 
-    def __setitem__(self, key, val):
+    def __setitem__(self, key: str, val: CabFile):
         assert isinstance(key, str)
         assert isinstance(val, CabFile)
         val.filename = key
         dict.__setitem__(self, key, val)
 
-    def save(self, compress=False):
+    def save(self, compress: bool = False) -> GLib.Bytes:
         """ Output a MS Cabinet archive to bytes """
         cfarchive = GCab.Cabinet.new()
 

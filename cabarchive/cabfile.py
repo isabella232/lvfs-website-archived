@@ -6,12 +6,12 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 class CabFile():
-    def __init__(self, buf=None, filename=None):
+    def __init__(self, buf: bytes = None, filename: str = None):
         """ Set defaults """
         self.filename = filename
         self.buf = buf
 
-    def __len__(self):
+    def __len__(self) -> int:
         if not self.buf:
             return 0
         return len(self.buf)
