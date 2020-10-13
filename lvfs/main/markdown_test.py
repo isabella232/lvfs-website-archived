@@ -16,7 +16,8 @@ from lxml import etree as ET
 # allows us to run this from the project root
 sys.path.append(os.path.realpath('.'))
 
-from lvfs.util import _markdown_from_root, _xml_from_markdown, _get_update_description_problems
+from lvfs.claims.utils import _get_update_description_problems
+from lvfs.util import _markdown_from_root, _xml_from_markdown
 
 class MarkdownTest(unittest.TestCase):
 

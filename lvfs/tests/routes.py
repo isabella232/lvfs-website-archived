@@ -13,7 +13,7 @@ from sqlalchemy.orm import joinedload
 
 from lvfs import db, ploader, tq
 
-from lvfs.models import Test
+from lvfs.tests.models import Test
 from lvfs.util import admin_login_required
 
 from .utils import _async_test_run, _async_test_run_all

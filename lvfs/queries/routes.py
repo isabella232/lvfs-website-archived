@@ -10,7 +10,7 @@ from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import YaraQuery
+from .models import YaraQuery
 from .utils import _async_query_run
 
 bp_queries = Blueprint('queries', __name__, template_folder='templates')

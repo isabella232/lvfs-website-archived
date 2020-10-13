@@ -18,11 +18,17 @@ from celery.schedules import crontab
 
 from lvfs import db, tq
 
-from lvfs.models import Analytic, Client, Report, Useragent, UseragentKind, SearchEvent, AnalyticVendor, ReportAttribute
-from lvfs.models import _get_datestr_from_datetime, _split_search_string
+from lvfs.analytics.models import Analytic
+from lvfs.main.models import Client
+from lvfs.reports.models import Report
+from lvfs.search.models import SearchEvent
+from lvfs.reports.models import ReportAttribute
+
+from lvfs.util import _get_datestr_from_datetime, _split_search_string
 from lvfs.util import admin_login_required
 from lvfs.util import _get_chart_labels_months, _get_chart_labels_days
 
+from .models import AnalyticUseragent, AnalyticUseragentKind, AnalyticVendor
 from .utils import _async_generate_stats
 
 bp_analytics = Blueprint('analytics', __name__, template_folder='templates')
@@ -138,9 +144,9 @@ def _user_agent_wildcard(user_agent):
 def route_user_agents(kind='APP', timespan_days=30):
     """ A analytics screen to show information about users """
 
-    # map back to UseragentKind
+    # map back to AnalyticUseragentKind
     try:
-        kind_enum = UseragentKind[kind]
+        kind_enum = AnalyticUseragentKind[kind]
     except KeyError as e:
         flash('Unable to view analytic type: {}'.format(str(e)), 'danger')
         return redirect(url_for('analytics.route_user_agents'))
@@ -151,10 +157,10 @@ def route_user_agents(kind='APP', timespan_days=30):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     datestr_start = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=timespan_days))
     datestr_end = _get_datestr_from_datetime(yesterday)
-    for ug in db.session.query(Useragent).\
-                    filter(Useragent.kind == kind_enum.value).\
-                    filter(and_(Useragent.datestr > datestr_start,
-                                Useragent.datestr <= datestr_end)):
+    for ug in db.session.query(AnalyticUseragent).\
+                    filter(AnalyticUseragent.kind == kind_enum.value).\
+                    filter(and_(AnalyticUseragent.datestr > datestr_start,
+                                AnalyticUseragent.datestr <= datestr_end)):
         user_agent_safe = _user_agent_wildcard(ug.value)
         if kind == 'FWUPD':
             splt = user_agent_safe.split('.', 3)

@@ -15,7 +15,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import Component, Category
+from lvfs.components.models import Component
+from lvfs.categories.models import Category
 from lvfs.util import _fix_component_name
 
 def upgrade():

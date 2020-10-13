@@ -23,12 +23,10 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.local import LocalProxy
 import posixpath
 
-from lvfs.pluginloader import Pluginloader
 from lvfs.celery import FlaskCelery
-from lvfs.util import _error_internal, _event_log
 from lvfs.dbutils import drop_db, init_db, anonymize_db
 
-app = Flask(__name__)
+app: Flask = Flask(__name__)
 app_config_fn = os.environ.get('LVFS_APP_SETTINGS', 'custom.cfg')
 if os.path.exists(os.path.join('lvfs', app_config_fn)):
     app.config.from_pyfile(app_config_fn)
@@ -44,22 +42,23 @@ def cdn_url_builder(_error, endpoint, values):
 
 app.url_build_error_handlers.append(cdn_url_builder)
 
-oauth = OAuth(app)
+oauth: OAuth = OAuth(app)
 
-db = SQLAlchemy(app)
+db: SQLAlchemy = SQLAlchemy(app)
 
-mail = Mail(app)
+mail: Mail = Mail(app)
 
-csrf = CSRFProtect(app)
+csrf: CSRFProtect = CSRFProtect(app)
 
-migrate = Migrate(app, db)
+migrate: Migrate = Migrate(app, db)
 
-lm = LoginManager(app)
+lm: LoginManager = LoginManager(app)
 lm.login_view = 'login1'
 
+from lvfs.pluginloader import Pluginloader
 ploader = Pluginloader('plugins')
 
-tq = FlaskCelery(app.name, broker=app.config['CELERY_BROKER_URL'])
+tq: FlaskCelery = FlaskCelery(app.name, broker=app.config['CELERY_BROKER_URL'])
 tq.init_app(app)
 
 from lvfs.agreements.routes import bp_agreements
@@ -127,6 +126,7 @@ def anonymizedb_command():
     anonymize_db(db)
 
 def flash_save_eventlog(unused_sender, message, category, **unused_extra):
+    from lvfs.util import _event_log
     is_important = False
     if category in ['danger', 'warning']:
         is_important = True
@@ -136,7 +136,7 @@ message_flashed.connect(flash_save_eventlog, app)
 
 @lm.user_loader
 def load_user(user_id):
-    from lvfs.models import User
+    from lvfs.users.models import User
     g.user = db.session.query(User).filter(User.username == user_id).first()
     return g.user
 

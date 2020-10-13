@@ -18,12 +18,16 @@ from celery.schedules import crontab
 from lvfs import db, tq
 
 from lvfs.emails import send_email
+from lvfs.firmware.models import Firmware, FirmwareEvent
 from lvfs.hash import _otp_hash
+from lvfs.main.models import Event
+from lvfs.metadata.models import Remote
 from lvfs.util import admin_login_required
 from lvfs.util import _error_internal, _email_check, _generate_password
 from lvfs.util import _pkcs7_certificate_info
-from lvfs.models import User, UserAction, Vendor, Remote, Firmware, Event, FirmwareEvent, Certificate
+from lvfs.vendors.models import Vendor
 
+from .models import User, UserAction, UserCertificate
 from .utils import _async_user_disable, _async_user_email_report
 
 bp_users = Blueprint('users', __name__, template_folder='templates')
@@ -39,7 +43,7 @@ def setup_periodic_tasks(sender, **_):
         _async_user_email_report.s(),
     )
 
-def _password_check(value):
+def _password_check(value: str) -> bool:
     """ Check the password for suitability """
     success = True
     if len(value) < 8:
@@ -526,7 +530,7 @@ def route_recover():
 def route_certificate_remove(certificate_id):
 
     # check cert exists
-    crt = db.session.query(Certificate).filter(Certificate.certificate_id == certificate_id).first()
+    crt = db.session.query(UserCertificate).filter(UserCertificate.certificate_id == certificate_id).first()
     if not crt:
         flash('No certificate matched!', 'danger')
         return redirect(url_for('main.route_dashboard'), 422)
@@ -565,27 +569,27 @@ def route_certificate_create():
         flash('No data recieved', 'warning')
         return redirect(url_for('main.route_profile'), code=302)
     if text.find('BEGIN CERTIFICATE') == -1:
-        flash('Certificate invalid, expected BEGIN CERTIFICATE', 'warning')
+        flash('UserCertificate invalid, expected BEGIN CERTIFICATE', 'warning')
         return redirect(url_for('main.route_profile'), code=302)
 
     # get serial for blob
     try:
         info = _pkcs7_certificate_info(text)
     except IOError as e:
-        flash('Certificate invalid, cannot parse: %s' % str(e), 'warning')
+        flash('UserCertificate invalid, cannot parse: %s' % str(e), 'warning')
         return redirect(url_for('main.route_profile'), code=302)
     if 'serial' not in info:
-        flash('Certificate invalid, cannot parse serial', 'warning')
+        flash('UserCertificate invalid, cannot parse serial', 'warning')
         return redirect(url_for('main.route_profile'), code=302)
 
     # check cert exists
-    crt = db.session.query(Certificate).filter(Certificate.serial == info['serial']).first()
+    crt = db.session.query(UserCertificate).filter(UserCertificate.serial == info['serial']).first()
     if crt:
-        flash('Certificate already in use', 'warning')
+        flash('UserCertificate already in use', 'warning')
         return redirect(url_for('main.route_profile'), code=302)
 
     # success
-    crt = Certificate(user_id=g.user.user_id, serial=info['serial'], text=text)
+    crt = UserCertificate(user_id=g.user.user_id, serial=info['serial'], text=text)
     db.session.add(crt)
     db.session.commit()
     flash('Added client certificate with serial %s' % info['serial'], 'success')

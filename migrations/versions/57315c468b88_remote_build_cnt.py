@@ -11,6 +11,7 @@ revision = '57315c468b88'
 down_revision = 'f1d919f4797b'
 
 from collections import defaultdict
+from typing import Dict
 
 from alembic import op
 import sqlalchemy as sa
@@ -25,10 +26,11 @@ def downgrade():
 # run with PYTHONPATH=.
 if __name__ == '__main__':
     from lvfs import db
-    from lvfs.models import Event, Remote
+    from lvfs.main.models import Event
+    from lvfs.metadata.models import Remote
 
     # get hash table of every time we signed a remote
-    remote_build_cnts = defaultdict(int)
+    remote_build_cnts: Dict[str, int] = defaultdict(int)
     for evt in db.session.query(Event)\
                          .filter(Event.vendor_id == 1)\
                          .filter(Event.user_id == 2)\

@@ -154,7 +154,7 @@ class LvfsTestCase(unittest.TestCase):
     def _ensure_checksums_from_upload(self):
         # peek into the database to get the checksums
         from lvfs import db
-        from lvfs.models import Firmware
+        from lvfs.firmware.models import Firmware
         fw = db.session.query(Firmware).first()
         self.checksum_signed_sha1 = fw.checksum_signed_sha1
         self.checksum_signed_sha256 = fw.checksum_signed_sha256
@@ -197,7 +197,7 @@ class LvfsTestCase(unittest.TestCase):
         from lvfs.reports.utils import _regenerate_reports
         from lvfs.analytics.utils import _generate_stats_for_datestr
         from lvfs.shards.utils import _regenerate_shard_infos
-        from lvfs.models import _get_datestr_from_datetime
+        from lvfs.util import _get_datestr_from_datetime
         with app.test_request_context():
             with io.StringIO() as buf, redirect_stdout(buf):
                 _generate_stats_for_datestr(_get_datestr_from_datetime(datetime.date.today()))

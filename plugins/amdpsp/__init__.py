@@ -10,6 +10,7 @@
 import os
 import struct
 import uuid
+from typing import Optional
 
 from psptool import PSPTool
 from psptool.entry import PubkeyEntry, HeaderEntry
@@ -17,9 +18,10 @@ from psptool.blob import Blob
 
 from lvfs import db
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool
-from lvfs.models import Test, ComponentShard
+from lvfs.tests.models import Test
+from lvfs.components.models import ComponentShard
 
-def _mkguid(value):
+def _mkguid(value: str) -> Optional[str]:
     if not value:
         return None
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, value))
@@ -67,8 +69,8 @@ def _run_psptool_on_blob(self, test, md):
         pass
 
 class Plugin(PluginBase):
-    def __init__(self, plugin_id=None):
-        PluginBase.__init__(self, plugin_id)
+    def __init__(self):
+        PluginBase.__init__(self)
         self.name = 'AMD PSP'
         self.summary = 'Analyse modules in AMD PSP firmware'
 
@@ -105,3 +107,30 @@ class Plugin(PluginBase):
         # run psptool on the capsule data
         _run_psptool_on_blob(self, test, md)
         db.session.commit()
+
+# run with PYTHONPATH=. ./env/bin/python3 plugins/amdpsp/__init__.py
+if __name__ == '__main__':
+    import sys
+
+    from lvfs.categories.models import Category
+    from lvfs.components.models import Component
+    from lvfs.firmware.models import Firmware
+    from lvfs.protocols.models import Protocol
+
+    for _argv in sys.argv[1:]:
+        print('Processing', _argv)
+        plugin = Plugin()
+        _test = Test(plugin_id=plugin.id)
+        _fw = Firmware()
+        _md = Component()
+        _md.component_id = 999999
+        _md.category = Category(value='X-PlatformSecurityProcessor')
+        _md.filename_contents = 'filename.bin'
+        _md.protocol = Protocol(value='org.uefi.capsule')
+        with open(_argv, 'rb') as _f:
+            _md.blob = _f.read()
+        plugin.run_test_on_md(_test, _md)
+        for attribute in _test.attributes:
+            print(attribute)
+        for _shard in _md.shards:
+            print(_shard.guid, _shard.name, _shard.checksum, len(_shard.blob))

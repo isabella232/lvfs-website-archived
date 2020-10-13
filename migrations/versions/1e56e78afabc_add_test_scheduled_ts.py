@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import Test
+from lvfs.tests.models import Test
 
 def upgrade():
     op.add_column('tests', sa.Column('scheduled_ts', sa.DateTime(), nullable=False))

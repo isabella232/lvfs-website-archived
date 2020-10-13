@@ -6,17 +6,18 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 import datetime
+from typing import List
 
 from flask import Blueprint, render_template, g, flash, redirect, url_for
 from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import Firmware
+from lvfs.firmware.models import Firmware
 
 bp_telemetry = Blueprint('telemetry', __name__, template_folder='templates')
 
-def _get_split_names_for_firmware(fw):
+def _get_split_names_for_firmware(fw: Firmware) -> List[str]:
     names = []
     for md in fw.mds:
         name_split = md.name.split('/')

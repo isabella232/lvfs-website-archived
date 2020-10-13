@@ -11,7 +11,7 @@ import requests
 
 from lvfs.pluginloader import PluginBase, PluginError
 from lvfs.pluginloader import PluginSettingBool, PluginSettingText, PluginSettingTextList
-from lvfs.models import Test
+from lvfs.tests.models import Test
 
 class Plugin(PluginBase):
     def __init__(self):

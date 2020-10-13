@@ -12,9 +12,10 @@ from flask_login import login_required
 
 from lvfs import db, tq
 
-from lvfs.models import Vendor, Remote
 from lvfs.util import admin_login_required
+from lvfs.vendors.models import Vendor
 
+from .models import Remote
 from .utils import _async_regenerate_remote_all, _async_regenerate_remote
 
 bp_metadata = Blueprint('metadata', __name__, template_folder='templates')
@@ -97,7 +98,7 @@ def route_rebuild():
         flash('Metadata will be rebuilt %s' % humanize.naturaltime(scheduled_signing), 'info')
     return redirect(url_for('metadata.route_view'))
 
-@bp_metadata.route('/rebuild/<remote_id>', methods=['POST'])
+@bp_metadata.route('/rebuild/<int:remote_id>', methods=['POST'])
 @login_required
 @admin_login_required
 def route_rebuild_remote(remote_id):

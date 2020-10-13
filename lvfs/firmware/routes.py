@@ -18,15 +18,19 @@ from celery.schedules import crontab
 
 from lvfs import app, db, ploader, tq
 
+from lvfs.analytics.models import AnalyticFirmware
+from lvfs.components.models import Component, ComponentShard, ComponentShardChecksum
 from lvfs.emails import send_email
+from lvfs.main.models import Client
+from lvfs.metadata.models import Remote
 from lvfs.metadata.utils import _async_regenerate_remote
-from lvfs.models import Firmware, Report, Client, FirmwareEvent, FirmwareLimit
-from lvfs.models import Remote, Vendor, AnalyticFirmware, Component
-from lvfs.models import ComponentShard, ComponentShardChecksum
-from lvfs.models import _get_datestr_from_datetime
+from lvfs.reports.models import Report
 from lvfs.tests.utils import _async_test_run_for_firmware
-from lvfs.util import _error_internal, admin_login_required
-from lvfs.util import _get_chart_labels_months, _get_chart_labels_days, _get_shard_path
+from lvfs.util import _error_internal, admin_login_required, _get_datestr_from_datetime
+from lvfs.util import _get_chart_labels_months, _get_chart_labels_days
+from lvfs.vendors.models import Vendor
+
+from .models import Firmware, FirmwareEvent, FirmwareLimit
 from .utils import _firmware_delete, _async_sign_fw, _async_autodelete
 
 bp_firmware = Blueprint('firmware', __name__, template_folder='templates')
@@ -188,9 +192,9 @@ def route_nuke(firmware_id):
     # delete shard cache if they exist
     for md in fw.mds:
         for shard in md.shards:
-            path = _get_shard_path(shard)
-            if os.path.exists(path):
-                os.remove(path)
+            fn = shard.absolute_path
+            if os.path.exists(fn):
+                os.remove(fn)
 
     # generate next cron run
     fw.remote.is_dirty = True

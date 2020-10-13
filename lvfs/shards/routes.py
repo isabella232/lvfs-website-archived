@@ -16,7 +16,8 @@ from flask_login import login_required
 
 from lvfs import db, tq
 
-from lvfs.models import ComponentShard, ComponentShardInfo, Component, ComponentShardClaim, Claim
+from lvfs.components.models import ComponentShard, ComponentShardInfo, Component, ComponentShardClaim
+from lvfs.claims.models import Claim
 from lvfs.util import admin_login_required
 
 from .utils import _async_regenerate_shard_infos

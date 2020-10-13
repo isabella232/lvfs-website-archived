@@ -13,6 +13,7 @@ import fnmatch
 
 from collections import defaultdict
 from glob import glob
+from typing import Dict, List, Tuple, Iterable, Callable
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
@@ -21,33 +22,34 @@ from sqlalchemy.orm import joinedload
 from lvfs import app, db
 
 from lvfs.emails import send_email
+from lvfs.firmware.models import Firmware
 from lvfs.hash import _otp_hash
-from lvfs.util import admin_login_required
-from lvfs.util import _error_internal, _email_check
+from lvfs.metadata.models import Remote
 from lvfs.metadata.utils import _async_regenerate_remote
-from lvfs.models import Vendor, Restriction, Namespace, User, Remote, \
-                        Affiliation, AffiliationAction, Verfmt, Firmware, VendorBranch
-from lvfs.util import _generate_password
+from lvfs.users.models import User
+from lvfs.util import admin_login_required, _error_internal, _email_check, _generate_password
+from lvfs.verfmts.models import Verfmt
 
+from .models import Vendor, VendorAffiliation, VendorAffiliationAction, VendorBranch, VendorRestriction, VendorNamespace
 from .utils import _vendor_hash
 
 bp_vendors = Blueprint('vendors', __name__, template_folder='templates')
 
-def _count_vendor_fws_public(vendor, remote_name):
+def _count_vendor_fws_public(vendor: Vendor, remote_name: str) -> int:
     dedupe_csum = {}
     for fw in vendor.fws:
         if fw.remote.name == remote_name:
             dedupe_csum[fw.checksum_upload_sha256] = True
     return len(dedupe_csum)
 
-def _count_vendor_fws_downloads(vendor, remote_name):
+def _count_vendor_fws_downloads(vendor: Vendor, remote_name: str) -> int:
     cnt = 0
     for fw in vendor.fws:
         if fw.remote.name == remote_name:
             cnt += fw.download_cnt
     return cnt
 
-def _count_vendor_fws_devices(vendor, remote_name):
+def _count_vendor_fws_devices(vendor: Vendor, remote_name: str) -> int:
     guids = {}
     for fw in vendor.fws:
         if fw.remote.name == remote_name:
@@ -61,10 +63,12 @@ class VendorStat:
         self.stable = stable
         self.testing = testing
 
-def _get_vendorlist_stats(vendors, fn):
+def _get_vendorlist_stats(vendors: List[Vendor],
+                          fn: Callable[[Vendor, str], int]) \
+                          -> Tuple[List[str], List[float], List[float]]:
 
     # get stats
-    display_names = {}
+    display_names: Dict[str, VendorStat] = {}
     for v in vendors:
         if not v.visible:
             continue
@@ -84,7 +88,8 @@ def _get_vendorlist_stats(vendors, fn):
     labels = []
     data_stable = []
     data_testing = []
-    vendors = sorted(list(display_names.items()),
+    keys: Iterable = display_names.items()
+    vendors = sorted(list(keys),
                      key=lambda k: k[1].stable + k[1].testing,
                      reverse=True)
     for display_name, stat in vendors[:10]:
@@ -93,8 +98,8 @@ def _get_vendorlist_stats(vendors, fn):
         data_testing.append(float(stat.testing))
     return labels, data_stable, data_testing
 
-def _abs_to_pc(data, data_other):
-    total = 0
+def _abs_to_pc(data: List[float], data_other: List[float]) -> List[float]:
+    total: float = 0
     for num in data:
         total += num
     for num in data_other:
@@ -429,7 +434,7 @@ def route_restriction_create(vendor_id):
         return redirect(url_for('vendors.route_list_admin'), 302)
     if not 'value' in request.form:
         return _error_internal('No value')
-    vendor.restrictions.append(Restriction(value=request.form['value']))
+    vendor.restrictions.append(VendorRestriction(value=request.form['value']))
     vendor.remote.is_dirty = True
     db.session.commit()
     flash('Added restriction', 'info')
@@ -475,9 +480,9 @@ def route_namespace_create(vendor_id):
         flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
         return redirect(url_for('vendors.route_list_admin'), 302)
     if 'value' in request.form:
-        ns = Namespace(value=request.form['value'], user=g.user)
+        ns = VendorNamespace(value=request.form['value'], user=g.user)
     elif 'value' in request.args:
-        ns = Namespace(value=request.args['value'], user=g.user)
+        ns = VendorNamespace(value=request.args['value'], user=g.user)
     else:
         return _error_internal('No value')
     if not ns.is_valid:
@@ -773,7 +778,7 @@ def route_affiliation_action_create(vendor_id, affiliation_id, action):
         return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
 
     # already exists?
-    aff = db.session.query(Affiliation).filter(Affiliation.affiliation_id == affiliation_id).first()
+    aff = db.session.query(VendorAffiliation).filter(VendorAffiliation.affiliation_id == affiliation_id).first()
     if not aff:
         flash('Failed to add action: No affiliation with that ID', 'warning')
         return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
@@ -785,7 +790,7 @@ def route_affiliation_action_create(vendor_id, affiliation_id, action):
         return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
 
     # add
-    aff.actions.append(AffiliationAction(action=action, user=g.user))
+    aff.actions.append(VendorAffiliationAction(action=action, user=g.user))
     db.session.commit()
     flash('Added action', 'info')
     return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
@@ -805,7 +810,7 @@ def route_affiliation_action_remove(vendor_id, affiliation_id, action):
         return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
 
     # already exists?
-    aff = db.session.query(Affiliation).filter(Affiliation.affiliation_id == affiliation_id).first()
+    aff = db.session.query(VendorAffiliation).filter(VendorAffiliation.affiliation_id == affiliation_id).first()
     if not aff:
         flash('Failed to remove action: No affiliation with that ID', 'warning')
         return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id))
@@ -847,7 +852,7 @@ def route_affiliation_create(vendor_id):
             return redirect(url_for('vendors.route_affiliations', vendor_id=vendor_id), 302)
 
     # add a new ODM -> OEM affiliation
-    aff = Affiliation(vendor_id=vendor_id, vendor_id_odm=vendor_id_odm)
+    aff = VendorAffiliation(vendor_id=vendor_id, vendor_id_odm=vendor_id_odm)
     for action in ['@delete',
                    '@modify',
                    '@undelete',
@@ -855,7 +860,7 @@ def route_affiliation_create(vendor_id):
                    '@view',
                    '@retry',
                    '@waive']:
-        aff.actions.append(AffiliationAction(action=action, user=g.user))
+        aff.actions.append(VendorAffiliationAction(action=action, user=g.user))
     vendor.affiliations.append(aff)
     db.session.commit()
     flash('Added affiliation {}'.format(aff.affiliation_id), 'info')

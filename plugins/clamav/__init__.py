@@ -11,8 +11,7 @@ import os
 import subprocess
 
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool
-from lvfs.util import _get_absolute_path
-from lvfs.models import Test
+from lvfs.tests.models import Test
 
 class Plugin(PluginBase):
     def __init__(self):
@@ -54,12 +53,11 @@ class Plugin(PluginBase):
         test.add_pass('Version', stdout)
 
         # scan cabinet archive
-        fn = _get_absolute_path(fw)
         if self.get_setting_bool('clamav_use_daemon'):
             argv = ['clamdscan',
                     '--fdpass',
                     '--no-summary',
-                    fn]
+                    fw.absolute_path]
         else:
             argv = ['clamscan',
                     '--infected',
@@ -69,7 +67,7 @@ class Plugin(PluginBase):
                     '--scan-swf=no',
                     '--nocerts',
                     '--no-summary',
-                    fn]
+                    fw.absolute_path]
             if self.get_setting_bool('clamav_detect_pua'):
                 argv.append('--detect-pua=yes')
         try:
@@ -87,7 +85,7 @@ class Plugin(PluginBase):
         if rc != 0:
             for ln in stdout.split('\n'):
                 try:
-                    fn, status = ln.split(': ', 2)
+                    _, status = ln.split(': ', 2)
                 except ValueError as e:
                     continue
                 test.add_fail('Failed to scan', status)

@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 import json
+from typing import Optional
 
 from flask import Blueprint, request, url_for, redirect, flash, Response, render_template
 from flask_login import login_required
@@ -14,11 +15,15 @@ from celery.schedules import crontab
 
 from lvfs import app, db, csrf, tq
 
-from lvfs.models import Firmware, Report, ReportAttribute, Issue, Certificate, Checksum
+from lvfs.components.models import ComponentChecksum
+from lvfs.firmware.models import Firmware
+from lvfs.issues.models import Issue
+from lvfs.users.models import UserCertificate
 from lvfs.util import _event_log
 from lvfs.util import _json_success, _json_error, _pkcs7_signature_info, _pkcs7_signature_verify
 from lvfs.hash import _is_sha1, _is_sha256
 
+from .models import Report, ReportAttribute
 from .utils import _async_regenerate_reports
 
 bp_reports = Blueprint('reports', __name__, template_folder='templates')
@@ -30,7 +35,7 @@ def setup_periodic_tasks(sender, **_):
         _async_regenerate_reports.s(),
     )
 
-def _report_to_dict(report):
+def _report_to_dict(report: Report) -> dict:
     data = {}
     if report.state == 1:
         data['UpdateState'] = 'pending'
@@ -95,7 +100,7 @@ def route_delete(report_id):
     flash('Deleted report', 'info')
     return redirect(url_for('analytics.route_reports'))
 
-def _find_issue_for_report_data(data, fw):
+def _find_issue_for_report_data(data: dict, fw: Firmware) -> Optional[Issue]:
     for issue in db.session.query(Issue).order_by(Issue.priority.desc()):
         if not issue.enabled:
             continue
@@ -137,10 +142,10 @@ def route_report():
             return _json_error('Signature invalid: %s' % str(e))
         if 'serial' not in info:
             return _json_error('Signature invalid, no signature')
-        crt = db.session.query(Certificate).filter(Certificate.serial == info['serial']).first()
+        crt = db.session.query(UserCertificate).filter(UserCertificate.serial == info['serial']).first()
         if crt:
             try:
-                _pkcs7_signature_verify(crt, payload, signature)
+                _pkcs7_signature_verify(crt.text, payload, signature)
             except IOError as _:
                 return _json_error('Signature did not validate')
 
@@ -230,9 +235,9 @@ def route_report():
                     continue
                 _event_log('added device checksum %s to firmware %s' % (checksum, md.fw.checksum_upload_sha1))
                 if _is_sha1(checksum):
-                    md.device_checksums.append(Checksum(value=checksum, kind='SHA1'))
+                    md.device_checksums.append(ComponentChecksum(value=checksum, kind='SHA1'))
                 elif _is_sha256(checksum):
-                    md.device_checksums.append(Checksum(value=checksum, kind='SHA256'))
+                    md.device_checksums.append(ComponentChecksum(value=checksum, kind='SHA256'))
 
         # find any matching report
         issue_id = 0
@@ -250,8 +255,8 @@ def route_report():
         if r:
             msgs.append('%s replaces old report' % report['Checksum'])
             r.state = report['UpdateState']
-            for e in r.attributes:
-                db.session.delete(e)
+            for attr in r.attributes:
+                db.session.delete(attr)
         else:
             # save a new report in the database
             r = Report(machine_id=machine_id,

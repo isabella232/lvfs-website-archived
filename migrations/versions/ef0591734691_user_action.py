@@ -14,7 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import User, UserAction
+from lvfs.users.models import User, UserAction
 
 def upgrade():
     op.create_table('user_actions',

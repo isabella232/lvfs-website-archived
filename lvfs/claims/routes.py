@@ -10,9 +10,10 @@ from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import Claim
 from lvfs.util import _error_internal
 from lvfs.util import admin_login_required
+
+from .models import Claim
 
 bp_claims = Blueprint('claims', __name__, template_folder='templates')
 

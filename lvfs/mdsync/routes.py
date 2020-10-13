@@ -7,6 +7,7 @@
 
 import json
 import gzip
+from typing import List
 
 from collections import defaultdict
 import dateutil.parser
@@ -16,12 +17,16 @@ from flask_login import login_required
 
 from lvfs import db, csrf
 
-from lvfs.models import Firmware, Component, Remote, ComponentRef, Protocol, Vendor
+from lvfs.components.models import Component, ComponentRef
+from lvfs.firmware.models import Firmware
+from lvfs.metadata.models import Remote
+from lvfs.protocols.models import Protocol
 from lvfs.util import _json_success, _json_error
+from lvfs.vendors.models import Vendor
 
 bp_mdsync = Blueprint('mdsync', __name__, template_folder='templates')
 
-def _md_to_mdsync_dict(md):
+def _md_to_mdsync_dict(md: Component) -> dict:
     obj = {}
     obj['component_id'] = md.component_id
     obj['status'] = md.fw.remote.icon_name
@@ -39,7 +44,7 @@ def _md_to_mdsync_dict(md):
             obj['filename'] = md.fw.filename
     return obj
 
-def _mds_to_mdsync_dict(mds):
+def _mds_to_mdsync_dict(mds: List[Component]) -> dict:
     obj = {}
     for md in sorted(mds):
         if not md.fw.vendor.visible:
@@ -101,7 +106,7 @@ def route_export():
                     status=400, \
                     mimetype="application/json")
 
-def _get_plausible_versions_for_md(md):
+def _get_plausible_versions_for_md(md: Component) -> List[str]:
     versions = [md.version_display]
     if md.version not in versions:
         versions.append(md.version)

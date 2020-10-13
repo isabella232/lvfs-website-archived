@@ -13,9 +13,10 @@ from flask_login import login_required
 from lvfs import db, csrf
 
 from lvfs.hash import _is_sha256
-from lvfs.models import HsiReport, HsiReportAttr
 from lvfs.util import admin_login_required, _pkcs7_signature_info
 from lvfs.util import _json_success, _json_error
+
+from .models import HsiReport, HsiReportAttr
 
 bp_hsireports = Blueprint('hsireports', __name__, template_folder='templates')
 

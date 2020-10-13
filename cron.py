@@ -15,16 +15,22 @@ from flask import g
 
 from lvfs import app, db, ploader
 
-from lvfs.models import Component, Category, Protocol, Firmware, User, Vendor, Remote
+from lvfs.categories.models import Category
+from lvfs.components.models import Component
+from lvfs.firmware.models import Firmware
+from lvfs.metadata.models import Remote
+from lvfs.protocols.models import Protocol
 from lvfs.upload.uploadedfile import UploadedFile, MetadataInvalid
-from lvfs.util import _get_absolute_path, _get_sanitized_basename
+from lvfs.users.models import User
+from lvfs.util import _get_sanitized_basename
+from lvfs.vendors.models import Vendor
 from lvfs.vendors.utils import _vendor_hash
 
 def _repair_ts():
 
     # fix any timestamps that are incorrect
     for md in db.session.query(Component).filter(Component.release_timestamp < 1980):
-        fn = _get_absolute_path(md.fw)
+        fn = md.fw.absolute_path
         if not os.path.exists(fn):
             continue
         print(fn, md.release_timestamp)
@@ -59,7 +65,7 @@ def _repair_fn():
         if filename != fw.filename:
 
             print('moving {} to {}'.format(fw.filename, filename))
-            fn_old = _get_absolute_path(fw)
+            fn_old = fw.absolute_path
             fn_new = os.path.join(os.path.dirname(fn_old), filename)
             try:
                 os.rename(fn_old, fn_new)
@@ -77,7 +83,7 @@ def _fsck():
         fw = db.session.query(Firmware)\
                        .filter(Firmware.firmware_id == firmware_id)\
                        .one()
-        fn = _get_absolute_path(fw)
+        fn = fw.absolute_path
         if not os.path.isfile(fn):
             print('firmware {} is missing, expected {}'.format(fw.firmware_id, fn))
 
@@ -163,7 +169,7 @@ def _repair_csum():
                        .one()
         try:
             print('checking {}…'.format(fw.filename_absolute))
-            fn = _get_absolute_path(fw)
+            fn = fw.absolute_path
             with open(fn, 'rb') as f:
                 buf = f.read()
                 checksum_signed_sha1 = hashlib.sha1(buf).hexdigest()

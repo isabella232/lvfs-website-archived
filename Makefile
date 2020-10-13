@@ -4,6 +4,7 @@
 VENV=./env
 PYTHON=$(VENV)/bin/python
 PYTEST=$(VENV)/bin/pytest
+MYPY=$(VENV)/bin/mypy
 SPHINX_BUILD=$(VENV)/bin/sphinx-build
 FLASK=$(VENV)/bin/flask
 
@@ -38,4 +39,5 @@ check: $(PYTEST) contrib/blocklist.cab contrib/chipsec.cab
 		--cov=cabarchive \
 		--cov=plugins \
 		--cov-report=html
+	$(MYPY) cabarchive jcat pkgversion lvfs plugins contrib migrations/versions
 	$(PYTHON) ./pylint_test.py

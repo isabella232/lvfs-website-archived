@@ -11,13 +11,13 @@ revision = '858f56a164c8'
 down_revision = '1822ddbf2a73'
 
 from lvfs import db
-from lvfs.models import Affiliation, AffiliationAction
+from lvfs.vendors.models import VendorAffiliation, VendorAffiliationAction
 
 def upgrade():
     # add these by default
-    for aff in db.session.query(Affiliation):
+    for aff in db.session.query(VendorAffiliation):
         for action in ['@retry', '@waive']:
-            aff.actions.append(AffiliationAction(action=action, user_id=1))
+            aff.actions.append(VendorAffiliationAction(action=action, user_id=1))
     db.session.commit()
 
 def downgrade():

@@ -15,7 +15,9 @@ from sqlalchemy import func
 from lvfs import db
 
 from lvfs.util import admin_login_required
-from lvfs.models import Firmware, Component, Remote, Guid
+from lvfs.firmware.models import Firmware
+from lvfs.components.models import Component, ComponentGuid
+from lvfs.metadata.models import Remote
 
 bp_devices = Blueprint('devices', __name__, template_folder='templates')
 
@@ -39,7 +41,7 @@ def route_list_admin():
 
     return render_template('devices.html', devices=devices)
 
-def _dt_from_quarter(year, quarter):
+def _dt_from_quarter(year: int, quarter: int):
     month = (quarter * 3) + 1
     if month > 12:
         month %= 12
@@ -52,7 +54,7 @@ def _get_fws_for_appstream_id(value):
     if len(value.split('-')) == 5:
         return db.session.query(Firmware).\
                     join(Remote).filter(Remote.is_public).\
-                    join(Component).join(Guid).filter(Guid.value == value).\
+                    join(Component).join(ComponentGuid).filter(ComponentGuid.value == value).\
                     order_by(Firmware.timestamp.desc()).all()
 
     # new, AppStream ID view

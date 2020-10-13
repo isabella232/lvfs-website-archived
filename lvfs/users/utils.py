@@ -14,8 +14,8 @@ from flask import render_template
 from lvfs import db, tq
 
 from lvfs.emails import send_email
-from lvfs.models import User
 from lvfs.util import _event_log
+from .models import User
 
 def _user_disable_notify():
 
