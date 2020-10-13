@@ -4,6 +4,7 @@ celerybeat*
 env
 deleted
 downloads
+shards
 gnupg
 lvfs/custom.cfg
 htmlcov
@@ -12,3 +13,5 @@ lvfs_*.sql
 report.csv
 .coverage
 .gnupg
+.pytest_cache
+.mypy_cache
