@@ -9,6 +9,7 @@
 
 import os
 import datetime
+from typing import List
 
 from pyasn1.codec.der import decoder as der_decoder
 from pyasn1_modules import rfc2315
@@ -18,9 +19,10 @@ import pefile
 
 from lvfs import db
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool, PluginSettingInteger
-from lvfs.models import Test, ComponentShardCertificate
+from lvfs.tests.models import Test
+from lvfs.components.models import ComponentShardCertificate
 
-def _build_rfc2459_description(value):
+def _build_rfc2459_description(value) -> str:
     descs = []
     for val in value:
         attr_type = val[0]['type']
@@ -47,7 +49,7 @@ def _build_rfc2459_description(value):
             descs.append('N=%s' % attr_value)
     return ', '.join(descs)
 
-def _extract_authenticode_tbscerts(tbscert):
+def _extract_authenticode_tbscerts(tbscert) -> ComponentShardCertificate:
 
     cert = ComponentShardCertificate(kind='Authenticode PKCS7')
     cert.serial_number = str(tbscert['serialNumber'])
@@ -61,7 +63,7 @@ def _extract_authenticode_tbscerts(tbscert):
         break
     return cert
 
-def _extract_certs_from_authenticode_blob(buf):
+def _extract_certs_from_authenticode_blob(buf: bytes) -> List[ComponentShardCertificate]:
 
     contentInfo, _ = der_decoder.decode(buf, asn1Spec=rfc2315.ContentInfo())
     contentType = contentInfo.getComponentByName('contentType')
@@ -85,8 +87,8 @@ def _extract_certs_from_authenticode_blob(buf):
     return certs
 
 class Plugin(PluginBase):
-    def __init__(self, plugin_id=None):
-        PluginBase.__init__(self, plugin_id)
+    def __init__(self):
+        PluginBase.__init__(self)
         self.name = 'PE Check'
         self.summary = 'Check the portable executable file (.efi) for common problems'
         self.order_after = ['uefi-extract', 'intelme']
@@ -166,3 +168,32 @@ class Plugin(PluginBase):
         for shard in md.shards:
             if shard.blob:
                 self._run_test_on_shard(test, shard)
+
+# run with PYTHONPATH=. ./env/bin/python3 plugins/pecheck/__init__.py
+if __name__ == '__main__':
+    import sys
+
+    from lvfs.components.models import Component, ComponentShard
+    from lvfs.firmware.models import Firmware
+    from lvfs.protocols.models import Protocol
+
+    for _argv in sys.argv[1:]:
+        print('Processing', _argv)
+        plugin = Plugin()
+        _test = Test(plugin_id=plugin.id)
+        _fw = Firmware()
+        _fw.timestamp = datetime.datetime.utcnow()
+        _md = Component()
+        _md.protocol = Protocol(value='org.uefi.capsule')
+        _shard = ComponentShard(name=os.path.basename(_argv))
+        try:
+            with open(_argv, 'rb') as f:
+                _shard.set_blob(f.read())
+        except IsADirectoryError as _:
+            continue
+        _md.shards.append(_shard)
+        plugin.run_test_on_md(_test, _md)
+        for attribute in _test.attributes:
+            print(attribute)
+        for _cert in _shard.certificates:
+            print(_cert)

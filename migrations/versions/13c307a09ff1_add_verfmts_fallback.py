@@ -14,7 +14,8 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import Component, Verfmt
+from lvfs.components.models import Component
+from lvfs.verfmts.models import Verfmt
 
 def upgrade():
     op.add_column('verfmts', sa.Column('fallbacks', sa.Text(), nullable=True))

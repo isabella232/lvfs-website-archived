@@ -22,13 +22,17 @@ from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 from cabarchive import CabArchive, CabFile
 
 from lvfs import app, db, tq, ploader
+
+from lvfs.components.models import Component
 from lvfs.emails import send_email
-from lvfs.models import Remote, Firmware, FirmwareEvent, Component
-from lvfs.util import _event_log, _get_shard_path, _get_absolute_path
+from lvfs.metadata.models import Remote
 from lvfs.metadata.utils import _generate_metadata_mds, _async_regenerate_remote
 from lvfs.metadata.utils import _regenerate_and_sign_metadata_remote
+from lvfs.util import _event_log
 
-def _firmware_delete(fw):
+from .models import Firmware, FirmwareEvent
+
+def _firmware_delete(fw: Firmware):
 
     # find private remote
     remote = db.session.query(Remote).filter(Remote.name == 'deleted').first()
@@ -125,7 +129,7 @@ def _purge_old_deleted_firmware():
                 os.remove(path)
             for md in fw.mds:
                 for shard in md.shards:
-                    path = _get_shard_path(shard)
+                    path = shard.absolute_path
                     if os.path.exists(path):
                         os.remove(path)
             db.session.delete(fw)
@@ -136,7 +140,7 @@ def _async_autodelete():
     _delete_embargo_obsoleted_fw()
     _purge_old_deleted_firmware()
 
-def _show_diff(blob_old, blob_new):
+def _show_diff(blob_old: bytes, blob_new: bytes) -> None:
     fromlines = blob_old.decode().replace('\r', '').split('\n')
     tolines = blob_new.decode().split('\n')
     diff = difflib.unified_diff(fromlines, tolines)
@@ -164,7 +168,7 @@ def _sign_fw(fw):
         return
 
     # load the .cab file
-    fn = _get_absolute_path(fw)
+    fn = fw.absolute_path
     try:
         with open(fn, 'rb') as f:
             cabarchive = CabArchive(f.read())

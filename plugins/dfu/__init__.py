@@ -11,7 +11,7 @@ import struct
 import zlib
 
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool
-from lvfs.models import Test
+from lvfs.tests.models import Test
 
 class Plugin(PluginBase):
     def __init__(self):

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2015-2020 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
 #
@@ -31,12 +31,16 @@ from lvfs import app, db, lm, ploader, csrf, tq
 from lvfs.dbutils import _execute_count_star
 from lvfs.pluginloader import PluginError
 
-from lvfs.models import Firmware, Requirement, Vendor, Metric
-from lvfs.models import User, Client, Event, AnalyticVendor, Remote
-from lvfs.models import _get_datestr_from_datetime
+from lvfs.analytics.models import AnalyticVendor
+from lvfs.components.models import ComponentRequirement
+from lvfs.firmware.models import Firmware
+from lvfs.metadata.models import Remote
+from lvfs.users.models import User
+from lvfs.util import _event_log, _error_internal, _get_datestr_from_datetime
 from lvfs.util import _get_client_address, _get_settings, _xml_from_markdown, _get_chart_labels_days
-from lvfs.util import _event_log, _error_internal
+from lvfs.vendors.models import Vendor
 
+from .models import Client, ClientMetric, Event
 from .utils import _async_regenerate_metrics
 
 bp_main = Blueprint('main', __name__, template_folder='templates')
@@ -48,7 +52,7 @@ def setup_periodic_tasks(sender, **_):
         _async_regenerate_metrics.s(),
     )
 
-def _user_agent_safe_for_requirement(user_agent):
+def _user_agent_safe_for_requirement(user_agent: str) -> bool:
 
     # very early versions of fwupd used 'fwupdmgr' as the user agent
     if user_agent == 'fwupdmgr':
@@ -103,10 +107,10 @@ def serveStaticResource(resource):
 
         # check the user agent isn't in the blocklist for this firmware
         for md in fw.mds:
-            req = db.session.query(Requirement).\
-                            filter(Requirement.component_id == md.component_id).\
-                            filter(Requirement.kind == 'id').\
-                            filter(Requirement.value == 'org.freedesktop.fwupd').\
+            req = db.session.query(ComponentRequirement).\
+                            filter(ComponentRequirement.component_id == md.component_id).\
+                            filter(ComponentRequirement.kind == 'id').\
+                            filter(ComponentRequirement.value == 'org.freedesktop.fwupd').\
                             first()
             if req and user_agent and not _user_agent_safe_for_requirement(user_agent):
                 return Response(response='detected fwupd version too old',
@@ -149,7 +153,7 @@ def serveStaticResource(resource):
 
             # this is updated best-effort, but also set in the cron job
             fw.download_cnt += 1
-            metric = db.session.query(Metric).filter(Metric.key == 'ClientCnt').first()
+            metric = db.session.query(ClientMetric).filter(ClientMetric.key == 'ClientCnt').first()
             if metric:
                 metric.value += 1
             db.session.commit()
@@ -430,14 +434,14 @@ def route_login_oauth_authorized(plugin_id):
     p = ploader.get_by_id(plugin_id)
     if not p:
         _error_internal('no plugin {}'.format(plugin_id))
-    if not hasattr(p, 'oauth_get_data'):
-        return _error_internal('no oauth support in plugin {}'.format(plugin_id))
     try:
         data = p.oauth_get_data()
         if 'userPrincipalName' not in data:
             return _error_internal('No userPrincipalName in profile')
     except PluginError as e:
         return _error_internal(str(e))
+    except NotImplementedError as _:
+        return _error_internal('no oauth support in plugin {}'.format(plugin_id))
 
     # auth check
     created_account = False
@@ -540,7 +544,7 @@ def route_profile():
 def route_metrics():
 
     item = {}
-    for metric in db.session.query(Metric).order_by(Metric.key):
+    for metric in db.session.query(ClientMetric).order_by(ClientMetric.key):
         item[metric.key] = metric.value
     dat = json.dumps(item, indent=4, separators=(',', ': '))
     return Response(response=dat,

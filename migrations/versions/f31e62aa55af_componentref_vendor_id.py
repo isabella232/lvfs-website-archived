@@ -14,7 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import ComponentRef
+from lvfs.components.models import ComponentRef
 
 def upgrade():
     op.add_column('component_refs', sa.Column('vendor_id_partner', sa.Integer(), nullable=False))

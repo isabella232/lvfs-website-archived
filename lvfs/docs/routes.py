@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2015-2020 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
 #
@@ -11,7 +11,10 @@ from flask import Blueprint, redirect, render_template
 
 from lvfs import app, db
 
-from lvfs.models import Protocol, Agreement, Verfmt, Vendor
+from lvfs.agreements.models import Agreement
+from lvfs.protocols.models import Protocol
+from lvfs.vendors.models import Vendor
+from lvfs.verfmts.models import Verfmt
 
 bp_docs = Blueprint('docs', __name__, template_folder='templates')
 

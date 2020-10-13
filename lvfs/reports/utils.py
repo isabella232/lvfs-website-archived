@@ -14,11 +14,15 @@ from flask import render_template
 from lvfs import db, tq
 
 from lvfs.emails import send_email
-from lvfs.models import Report, User, Remote, FirmwareEvent, Firmware
-from lvfs.util import _event_log
+from lvfs.firmware.models import FirmwareEvent, Firmware
+from lvfs.metadata.models import Remote
 from lvfs.metadata.utils import _async_regenerate_remote
+from lvfs.users.models import User
+from lvfs.util import _event_log
 
-def _demote_back_to_testing(fw):
+from .models import Report
+
+def _demote_back_to_testing(fw: Firmware):
 
     # from the server admin
     user = db.session.query(User).filter(User.username == 'anon@fwupd.org').first()
@@ -47,7 +51,7 @@ def _demote_back_to_testing(fw):
     db.session.commit()
     _event_log('Demoted firmware {} as reported success {}%'.format(fw.firmware_id, fw.success))
 
-def _generate_stats_firmware_reports(fw):
+def _generate_stats_firmware_reports(fw: Firmware):
 
     # count how many times any of the firmware files were downloaded
     reports_success = 0

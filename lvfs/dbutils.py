@@ -15,11 +15,11 @@ import uuid
 
 from sqlalchemy import func
 
-def _execute_count_star(q):
+def _execute_count_star(q) -> int:
     count_query = q.statement.with_only_columns([func.count()]).order_by(None)
     return q.session.execute(count_query).scalar()
 
-def _make_boring(val):
+def _make_boring(val: str) -> str:
     out = ''
     for v in val.lower():
         if 'a' <= v <= 'z':
@@ -44,19 +44,20 @@ def _should_anonymize(v):
         return False
     return True
 
-def _make_fake_ip_address():
+def _make_fake_ip_address() -> str:
     return '%i.%i.%i.%i' % (random.randint(1, 254),
                             random.randint(1, 254),
                             random.randint(1, 254),
                             random.randint(1, 254))
 
-def _make_fake_version():
+def _make_fake_version() -> str:
     return '%i.%i.%i' % (random.randint(0, 1),
                          random.randint(1, 16),
                          random.randint(1, 254))
 
 def anonymize_db(db):
-    from .models import Vendor, Firmware
+    from .vendors.models import Vendor
+    from .firmware.models import Firmware
 
     # get vendor display names
     vendor_names = []
@@ -189,7 +190,12 @@ def init_db(db):
     db.metadata.create_all(bind=db.engine)
 
     # ensure admin user exists
-    from .models import User, UserAction, Vendor, Remote, Verfmt, Protocol, Category
+    from .vendors.models import Vendor
+    from .verfmts.models import Verfmt
+    from .protocols.models import Protocol
+    from .categories.models import Category
+    from .users.models import User, UserAction
+    from .metadata.models import Remote
     from .hash import _otp_hash
     if not db.session.query(Remote).filter(Remote.name == 'stable').first():
         db.session.add(Remote(name='stable', is_public=True))

@@ -14,7 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import Affiliation, AffiliationAction
+from lvfs.vendors.models import VendorAffiliation, VendorAffiliationAction
 
 def upgrade():
     op.create_table('affiliation_actions',
@@ -31,7 +31,7 @@ def upgrade():
     )
 
     # migrate affiliates to a sane set
-    for aff in db.session.query(Affiliation):
+    for aff in db.session.query(VendorAffiliation):
         if aff.actions:
             continue
         for action in ['@delete',
@@ -39,7 +39,7 @@ def upgrade():
                        '@undelete',
                        '@modify-updateinfo',
                        '@view']:
-            aff.actions.append(AffiliationAction(action=action, user_id=1))
+            aff.actions.append(VendorAffiliationAction(action=action, user_id=1))
     db.session.commit()
 
 def downgrade():

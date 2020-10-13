@@ -10,8 +10,10 @@ from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import Issue, Condition, Report, ReportAttribute
+from lvfs.reports.models import Report, ReportAttribute
 from lvfs.util import _error_internal
+
+from .models import Issue, IssueCondition
 
 bp_issues = Blueprint('issues', __name__, template_folder='templates')
 
@@ -80,14 +82,14 @@ def route_condition_create(issue_id):
         return redirect(url_for('issues.route_list'))
 
     # already exists
-    if db.session.query(Condition).\
-            filter(Condition.key == request.form['key']).\
-            filter(Condition.issue_id == issue_id).first():
+    if db.session.query(IssueCondition).\
+            filter(IssueCondition.key == request.form['key']).\
+            filter(IssueCondition.issue_id == issue_id).first():
         flash('Failed to add condition to issue: Key %s already exists' % request.form['key'], 'info')
         return redirect(url_for('issues.route_conditions', issue_id=issue_id))
 
     # add condition
-    db.session.add(Condition(issue_id=issue_id,
+    db.session.add(IssueCondition(issue_id=issue_id,
                              key=request.form['key'],
                              value=request.form['value'],
                              compare=request.form['compare']))
@@ -112,9 +114,9 @@ def route_condition_delete(issue_id, condition_id):
         return redirect(url_for('issues.route_list'))
 
     # get issue
-    condition = db.session.query(Condition).\
-            filter(Condition.issue_id == issue_id).\
-            filter(Condition.condition_id == condition_id).first()
+    condition = db.session.query(IssueCondition).\
+            filter(IssueCondition.issue_id == issue_id).\
+            filter(IssueCondition.condition_id == condition_id).first()
     if not condition:
         flash('No condition found', 'info')
         return redirect(url_for('issues.route_list'))
@@ -151,7 +153,7 @@ def route_delete(issue_id):
     return redirect(url_for('issues.route_list'))
 
 
-def _create_query_for_conditions(issue):
+def _create_query_for_conditions(issue: Issue):
 
     # use a set of subqueries for speed
     subqs = []
@@ -190,7 +192,7 @@ def _create_query_for_conditions(issue):
         stmt = stmt.join(subq, Report.report_id == subq.c.report_id)
     return stmt
 
-def _issue_fix_report_failures(issue):
+def _issue_fix_report_failures(issue: Issue):
 
     # process each report
     change_cnt = 0

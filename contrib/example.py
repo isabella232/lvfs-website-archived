@@ -14,7 +14,7 @@ import requests
 
 MAX_RETRIES = 5
 
-def _upload(session, filename):
+def _upload(session, filename: str):
 
     # open file
     try:
@@ -37,7 +37,7 @@ def _upload(session, filename):
     # no more retries
     sys.exit(1)
 
-def _vendor_user_add(session, vendor_id, username, display_name):
+def _vendor_user_add(session, vendor_id: str, username: str, display_name: str):
 
     # upload
     payload = {'username': username,
@@ -53,7 +53,7 @@ def _vendor_user_add(session, vendor_id, username, display_name):
     # no more retries
     sys.exit(1)
 
-def _mdsync_import(session, filename):
+def _mdsync_import(session, filename: str):
 
     # import
     try:
@@ -74,7 +74,7 @@ def _mdsync_import(session, filename):
     # no more retries
     sys.exit(1)
 
-def _mdsync_export(session, filename):
+def _mdsync_export(session, filename: str):
 
     # export
     for _ in range(MAX_RETRIES):

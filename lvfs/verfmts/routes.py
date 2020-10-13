@@ -10,9 +10,8 @@ from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import Verfmt
-from lvfs.util import admin_login_required
-from lvfs.util import _error_internal
+from lvfs.util import admin_login_required, _error_internal
+from lvfs.verfmts.models import Verfmt
 
 bp_verfmts = Blueprint('verfmts', __name__, template_folder='templates')
 

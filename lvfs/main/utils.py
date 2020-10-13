@@ -9,10 +9,17 @@
 
 from lvfs import db, tq
 
+from lvfs.components.models import ComponentShardInfo, ComponentShard, Component
 from lvfs.dbutils import _execute_count_star
-from lvfs.models import Metric, Client, Firmware, Remote, Test, Report
-from lvfs.models import Protocol, ComponentShardInfo, ComponentShard, Component
-from lvfs.models import Vendor, User
+from lvfs.firmware.models import Firmware
+from lvfs.metadata.models import Remote
+from lvfs.protocols.models import Protocol
+from lvfs.reports.models import Report
+from lvfs.tests.models import Test
+from lvfs.users.models import User
+from lvfs.vendors.models import Vendor
+
+from .models import Client, ClientMetric
 
 def _regenerate_metrics():
     values = {}
@@ -54,9 +61,9 @@ def _regenerate_metrics():
 
     #  save to database
     for key in values:
-        metric = db.session.query(Metric).filter(Metric.key == key).first()
+        metric = db.session.query(ClientMetric).filter(ClientMetric.key == key).first()
         if not metric:
-            metric = Metric(key=key)
+            metric = ClientMetric(key=key)
             db.session.add(metric)
         metric.value = values[key]
         print('{}={}'.format(metric.key, metric.value))

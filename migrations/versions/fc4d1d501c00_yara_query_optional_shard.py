@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import YaraQueryResult
+from lvfs.queries.models import YaraQueryResult
 
 def upgrade():
     op.add_column('yara_query_result', sa.Column('component_id', sa.Integer(), nullable=False))

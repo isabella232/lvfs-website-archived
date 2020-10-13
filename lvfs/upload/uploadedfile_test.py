@@ -18,7 +18,7 @@ sys.path.append(os.path.realpath('.'))
 
 from lvfs.upload.uploadedfile import UploadedFile, FileTooSmall, FileNotSupported, MetadataInvalid
 from lvfs.util import _validate_guid
-from lvfs.models import Verfmt
+from lvfs.verfmts.models import Verfmt
 
 from cabarchive import CabArchive, CabFile
 

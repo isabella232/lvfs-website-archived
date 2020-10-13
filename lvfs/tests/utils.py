@@ -8,10 +8,11 @@
 # pylint: disable=singleton-comparison,too-many-nested-blocks
 
 import datetime
+from typing import List, Optional
 
 from lvfs import db, ploader, tq
 
-from lvfs.models import Test
+from lvfs.tests.models import Test
 from lvfs.util import _event_log
 
 def _test_priority_sort_func(test):
@@ -20,7 +21,7 @@ def _test_priority_sort_func(test):
         return 0
     return plugin.priority
 
-def _test_run_all(tests=None):
+def _test_run_all(tests: Optional[List[Test]] = None) -> None:
 
     # make a list of the first few tests that need running
     if not tests:
@@ -28,6 +29,8 @@ def _test_run_all(tests=None):
                           .filter(Test.started_ts == None)\
                           .order_by(Test.scheduled_ts)\
                           .limit(50).all()
+        if not tests:
+            return
 
     # mark all the tests as started
     for test in tests:
@@ -44,17 +47,25 @@ def _test_run_all(tests=None):
             continue
         try:
             print('Running test {} for firmware {}'.format(test.plugin_id, test.fw.firmware_id))
-            if hasattr(plugin, 'run_test_on_fw'):
-                if hasattr(plugin, 'require_test_for_fw'):
-                    if not plugin.require_test_for_fw(test.fw):
-                        continue
+            try:
+                if not plugin.require_test_for_fw(test.fw):
+                    continue
+            except NotImplementedError as _:
+                pass
+            try:
                 plugin.run_test_on_fw(test, test.fw)
-            if hasattr(plugin, 'run_test_on_md'):
-                for md in test.fw.mds:
-                    if hasattr(plugin, 'require_test_for_md'):
-                        if not plugin.require_test_for_md(md):
-                            continue
+            except NotImplementedError as _:
+                pass
+            for md in test.fw.mds:
+                try:
+                    if not plugin.require_test_for_md(md):
+                        continue
+                except NotImplementedError as _:
+                    pass
+                try:
                     plugin.run_test_on_md(test, md)
+                except NotImplementedError as _:
+                    pass
             test.ended_ts = datetime.datetime.utcnow()
             # don't leave a failed task running
             db.session.commit()

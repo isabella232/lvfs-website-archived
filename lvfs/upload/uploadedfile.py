@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2015-2020 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
 #
-# pylint: disable=fixme,too-many-instance-attributes,too-few-public-methods,too-many-statements
+# pylint: disable=fixme,too-many-instance-attributes,too-few-public-methods,too-many-statements,protected-access
 
 import os
 import hashlib
@@ -15,15 +15,19 @@ import tempfile
 import configparser
 import datetime
 import fnmatch
+from typing import Optional, Dict
 
 from lxml import etree as ET
 
 from cabarchive import CabArchive, CabFile
 from infparser import InfParser
 
-from lvfs.models import Firmware, Component, ComponentIssue, Guid, Requirement, Checksum
-from lvfs.models import Verfmt, Protocol, Category
+from lvfs.categories.models import Category
+from lvfs.components.models import Component, ComponentIssue, ComponentGuid, ComponentRequirement, ComponentChecksum
+from lvfs.firmware.models import Firmware
+from lvfs.protocols.models import Protocol
 from lvfs.util import _validate_guid, _markdown_from_root, _get_sanitized_basename
+from lvfs.verfmts.models import Verfmt
 
 class FileTooLarge(Exception):
     pass
@@ -34,7 +38,10 @@ class FileNotSupported(Exception):
 class MetadataInvalid(Exception):
     pass
 
-def _repackage_archive(filename, buf, tmpdir=None, flattern=True):
+def _repackage_archive(filename: str,
+                       buf: bytes,
+                       tmpdir: str = None,
+                       flattern: bool = True) -> CabArchive:
     """ Unpacks an archive (typically a .zip) into a CabArchive object """
 
     # write to temp file
@@ -65,7 +72,9 @@ def _repackage_archive(filename, buf, tmpdir=None, flattern=True):
     # extract
     ps = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if ps.wait() != 0:
-        raise IOError('Failed to extract: %s' % ps.stderr.read())
+        if ps.stderr:
+            raise IOError('Failed to extract: %s' % ps.stderr.read().decode())
+        raise IOError('Failed to extract')
 
     # add all the fake CFFILE objects
     cabarchive = CabArchive()
@@ -77,7 +86,7 @@ def _repackage_archive(filename, buf, tmpdir=None, flattern=True):
             cabarchive[fn] = CabFile(f.read())
     return cabarchive
 
-def detect_encoding_from_bom(b):
+def detect_encoding_from_bom(b: bytes):
 
     # UTF-8 BOM
     if b[0:3] == b'\xef\xbb\xbf':
@@ -94,7 +103,10 @@ def detect_encoding_from_bom(b):
     # fallback
     return "cp1252"
 
-def _node_validate_text(node, minlen=0, maxlen=0, nourl=False, allow_none=False):
+def _node_validate_text_full(node: ET.SubElement,
+                             minlen: int = 0,
+                             maxlen: int = 0,
+                             nourl: bool = False) -> Optional[str]:
     """ Validates the style """
 
     # unwrap description
@@ -111,11 +123,9 @@ def _node_validate_text(node, minlen=0, maxlen=0, nourl=False, allow_none=False)
                 if text.find(tag) != -1:
                     raise MetadataInvalid('{} cannot specify markup tag {}'.format(node.tag, tag))
 
-    # invalid length
+    # no content
     if not text:
-        if allow_none:
-            return None
-        raise MetadataInvalid('{} has no value'.format(node.tag))
+        return None
 
     # some tags can be split for multiple models
     if node.tag in ['name']:
@@ -136,28 +146,39 @@ def _node_validate_text(node, minlen=0, maxlen=0, nourl=False, allow_none=False)
 
     return text
 
+def _node_validate_text(node: ET.SubElement,
+                        minlen: int = 0,
+                        maxlen: int = 0,
+                        nourl: bool = False) -> str:
+    """ Validates the style """
+    text = _node_validate_text_full(node=node, minlen=minlen,
+                                    maxlen=maxlen, nourl=nourl)
+    if not text:
+        raise MetadataInvalid('{} has no value'.format(node.tag))
+    return text
+
 class UploadedFile:
 
-    def __init__(self, is_strict=True):
+    def __init__(self, is_strict: bool = True):
         """ default public attributes """
 
         self.fw = Firmware()
         self.is_strict = is_strict
         self.enable_inf_parsing = True
         self.fwupd_min_version = '0.8.0'    # a guess, but everyone should have this
-        self.version_formats = {}
-        self.category_map = {}
-        self.protocol_map = {}
+        self.version_formats: Dict[str, Verfmt] = {}
+        self.category_map: Dict[str, Category] = {}
+        self.protocol_map: Dict[str, Protocol] = {}
 
         # strip out any unlisted files
         self.cabarchive_repacked = CabArchive()
 
         # private
         self._data_size = 0
-        self.cabarchive_upload = None
+        self.cabarchive_upload: Optional[CabArchive] = None
         self._version_inf = None
 
-    def _parse_inf(self, contents):
+    def _parse_inf(self, contents: str) -> None:
 
         # FIXME is banned...
         if contents.find('FIXME') != -1:
@@ -185,7 +206,7 @@ class UploadedFile:
             tmp = cfg.get('Version', 'DriverVer').split(',')
             if len(tmp) != 2:
                 raise MetadataInvalid('The inf file Version:DriverVer was invalid')
-            self.fw.version_display = tmp[1]
+            self.fw._version_display = tmp[1]
         except configparser.NoOptionError as _:
             pass
 
@@ -193,16 +214,17 @@ class UploadedFile:
         # -- also note this will not work with multi-component .cab files
         if len(self.fw.mds) == 1 and self.fw.mds[0].version.isdigit():
             try:
-                self._version_inf = cfg.get('Firmware_AddReg', 'HKR->FirmwareVersion')
-                if self._version_inf.startswith('0x'):
-                    self._version_inf = str(int(self._version_inf[2:], 16))
-                if self._version_inf == '0':
-                    self._version_inf = None
+                version_inf = cfg.get('Firmware_AddReg', 'HKR->FirmwareVersion')
+                if version_inf:
+                    if version_inf.startswith('0x'):
+                        version_inf = str(int(version_inf[2:], 16))
+                    if version_inf != '0':
+                        self._version_inf = version_inf
             except (configparser.NoOptionError, configparser.NoSectionError) as _:
                 pass
 
     @staticmethod
-    def _parse_release(md, release):
+    def _parse_release(md: Component, release: ET.SubElement) -> None:
 
         # get description
         try:
@@ -280,13 +302,13 @@ class UploadedFile:
         for csum in release.xpath('checksum[@target="device"]'):
             text = _node_validate_text(csum, minlen=32, maxlen=128)
             if csum.get('kind') == 'sha1':
-                md.device_checksums.append(Checksum(value=text, kind='SHA1'))
+                md.device_checksums.append(ComponentChecksum(value=text, kind='SHA1'))
             elif csum.get('kind') == 'sha256':
-                md.device_checksums.append(Checksum(value=text, kind='SHA256'))
+                md.device_checksums.append(ComponentChecksum(value=text, kind='SHA256'))
         if not md.filename_contents:
             md.filename_contents = 'firmware.bin'
 
-    def _parse_component(self, component):
+    def _parse_component(self, component: ET.SubElement):
 
         # get priority
         md = Component()
@@ -447,7 +469,7 @@ class UploadedFile:
                         'd6072785-6fc0-5f83-9d49-11376e7f48b1',     # MST-leaf
                         '49ec4eb4-c02b-58fc-8935-b1ee182405c7']:    # MST-tesla
                 raise MetadataInvalid('The GUID {} is too generic'.format(text))
-            md.guids.append(Guid(value=text))
+            md.guids.append(ComponentGuid(value=text))
         if not md.guids:
             raise MetadataInvalid('The metadata file did not provide any GUID.')
 
@@ -459,16 +481,16 @@ class UploadedFile:
         # check only recognised requirements are added
         for req in component.xpath('requires/*'):
             if req.tag == 'firmware':
-                text = _node_validate_text(req, minlen=3, maxlen=1000, allow_none=True)
-                rq = Requirement(kind=req.tag,
-                                 value=text,
+                req_value = _node_validate_text_full(req, minlen=3, maxlen=1000)
+                rq = ComponentRequirement(kind=req.tag,
+                                 value=req_value,
                                  compare=req.get('compare'),
                                  version=req.get('version'),
                                  depth=req.get('depth', None))
                 md.requirements.append(rq)
             elif req.tag == 'id':
                 text = _node_validate_text(req, minlen=3, maxlen=1000)
-                rq = Requirement(kind=req.tag,
+                rq = ComponentRequirement(kind=req.tag,
                                  value=text,
                                  compare=req.get('compare'),
                                  version=req.get('version'))
@@ -478,7 +500,7 @@ class UploadedFile:
             elif req.tag == 'hardware':
                 text = _node_validate_text(req, minlen=3, maxlen=1000)
                 for req_value in text.split('|'):
-                    rq = Requirement(kind=req.tag,
+                    rq = ComponentRequirement(kind=req.tag,
                                      value=req_value,
                                      compare=req.get('compare'),
                                      version=req.get('version'))
@@ -486,7 +508,7 @@ class UploadedFile:
             elif req.tag == 'client':
                 text = _node_validate_text(req, minlen=3, maxlen=1000)
                 for req_value in text.split('|'):
-                    md.requirements.append(Requirement(kind=req.tag, value=req_value))
+                    md.requirements.append(ComponentRequirement(kind=req.tag, value=req_value))
             else:
                 raise MetadataInvalid('<{}> requirement was invalid'.format(req.tag))
 
@@ -544,7 +566,7 @@ class UploadedFile:
         try:
             text = _node_validate_text(component.xpath('custom/value[@key="LVFS::BannedCountryCodes"]')[0],
                                        minlen=2, maxlen=1000, nourl=True)
-            self.fw.banned_country_codes = text
+            self.fw.banned_country_codes = text.split(',')
         except IndexError as _:
             pass
 
@@ -595,7 +617,7 @@ class UploadedFile:
         self._parse_release(md, default_release)
 
         # ensure the update description does not refer to a file in the archive
-        if md.release_description:
+        if md.release_description and self.cabarchive_upload:
             for word in md.release_description.split(' '):
                 if word.find('.') == -1: # any word without a dot is not a fn
                     continue
@@ -611,7 +633,15 @@ class UploadedFile:
         # success
         return md
 
-    def _parse_metainfo(self, cabfile):
+    def _parse_metainfo(self, cabfile: CabFile) -> None:
+
+        # sanity check
+        if not cabfile.buf:
+            raise MetadataInvalid('No metainfo data')
+        if not cabfile.filename:
+            raise MetadataInvalid('No metainfo filename')
+        if not self.cabarchive_upload:
+            raise MetadataInvalid('No upload archive')
 
         # check the file does not have any missing request.form
         if cabfile.buf.decode('utf-8', 'ignore').find('FIXME') != -1:
@@ -651,7 +681,10 @@ class UploadedFile:
         md.release_installed_size = len(cabfile_fw.buf)
         self.fw.mds.append(md)
 
-    def parse(self, filename, data, use_hashed_prefix=True):
+    def parse(self,
+              filename: str,
+              data: bytes,
+              use_hashed_prefix: bool = True) -> None:
 
         # check size
         self._data_size = len(data)

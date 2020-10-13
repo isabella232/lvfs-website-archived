@@ -17,7 +17,7 @@ def _async_send_email(subject, recipient, text_body):
     msg.body = text_body
     mail.send(msg)
 
-def send_email(subject, recipient, text_body):
+def send_email(subject: str, recipient: str, text_body: str):
     if 'MAIL_SUPPRESS_SEND' in app.config and app.config['MAIL_SUPPRESS_SEND']:
         if 'DEBUG' in app.config and app.config['DEBUG']:
             # also save the email *contents* -- which could be password...

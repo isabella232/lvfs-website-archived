@@ -13,7 +13,11 @@ import yara
 
 from lvfs import db, tq
 
-from lvfs.models import Remote, Firmware, Component, YaraQuery, YaraQueryResult
+from lvfs.components.models import Component, ComponentShard
+from lvfs.firmware.models import Firmware
+from lvfs.metadata.models import Remote
+
+from .models import YaraQuery, YaraQueryResult
 
 @tq.task(max_retries=3, default_retry_delay=60, task_time_limit=6000)
 def _async_query_run(yara_query_id):
@@ -24,7 +28,7 @@ def _async_query_run(yara_query_id):
         return
     _query_run(query)
 
-def _query_run_shard(query, md, shard):
+def _query_run_shard(query: YaraQuery, md: Component, shard: ComponentShard):
     if not shard.blob:
         return
     matches = query.rules.match(data=shard.blob)
@@ -41,7 +45,7 @@ def _query_run_shard(query, md, shard):
     # unallocate the cached blob as it's no longer needed
     shard.blob = None
 
-def _query_run_component(query, md):
+def _query_run_component(query: YaraQuery, md: Component):
     if not md.blob:
         return
     matches = query.rules.match(data=md.blob)
@@ -58,7 +62,7 @@ def _query_run_component(query, md):
     # unallocate the cached blob as it's no longer needed
     md.blob = None
 
-def _query_run(query):
+def _query_run(query: YaraQuery):
     print('processing query {}: {}...'.format(query.yara_query_id, query.title))
     try:
         query.rules = yara.compile(source=query.value)

@@ -10,9 +10,10 @@ from flask_login import login_required
 
 from lvfs import db
 
-from lvfs.models import Protocol, Verfmt
-from lvfs.util import _error_internal
+from lvfs.protocols.models import Protocol
 from lvfs.util import admin_login_required
+from lvfs.util import _error_internal
+from lvfs.verfmts.models import Verfmt
 
 bp_protocols = Blueprint('protocols', __name__, template_folder='templates')
 

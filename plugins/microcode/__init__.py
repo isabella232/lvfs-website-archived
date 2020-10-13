@@ -10,8 +10,9 @@
 import datetime
 
 from lvfs.pluginloader import PluginBase, PluginSettingBool
-from lvfs.models import Test, ComponentShard, ComponentShardAttribute
-from lvfs.models import _get_datestr_from_datetime
+from lvfs.tests.models import Test
+from lvfs.components.models import ComponentShard, ComponentShardAttribute
+from lvfs.util import _get_datestr_from_datetime
 from lvfs import db
 
 class Plugin(PluginBase):

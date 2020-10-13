@@ -14,7 +14,8 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import Claim, ComponentShardInfo, ComponentClaim
+from lvfs.claims.models import Claim
+from lvfs.components.models import ComponentClaim
 
 def upgrade():
 

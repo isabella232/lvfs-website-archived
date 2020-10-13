@@ -22,6 +22,7 @@ RUN dnf -y install \
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install pip -U
 RUN pip3 install -r /tmp/requirements.txt --use-feature=2020-resolver
+RUN pip3 install mypy
 RUN mkdir /build
 WORKDIR /build
 COPY . .

@@ -15,7 +15,9 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import Verfmt, Component, Vendor
+from lvfs.verfmts.models import Verfmt
+from lvfs.components.models import Component
+from lvfs.vendors.models import Vendor
 
 def upgrade():
     if 1:

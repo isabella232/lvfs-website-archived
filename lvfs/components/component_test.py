@@ -14,7 +14,7 @@ import unittest
 # allows us to run this from the project root
 sys.path.append(os.path.realpath('.'))
 
-from lvfs.models import Component
+from lvfs.components.models import Component
 
 class ComponentTestCase(unittest.TestCase):
 

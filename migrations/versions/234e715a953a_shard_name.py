@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import ComponentShard, ComponentShardInfo
+from lvfs.components.models import ComponentShard, ComponentShardInfo
 
 def upgrade():
     op.add_column('component_shards', sa.Column('guid', sa.String(length=36), nullable=True))

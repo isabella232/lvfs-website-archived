@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2015-2020 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
 #
@@ -10,6 +10,7 @@
 import os
 import datetime
 import hashlib
+from typing import List, Optional, Dict
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
@@ -17,18 +18,24 @@ from sqlalchemy import or_
 
 from lvfs import app, db, ploader, csrf
 
+from lvfs.agreements.models import Agreement
+from lvfs.categories.models import Category
+from lvfs.components.models import Component
 from lvfs.emails import send_email
-from lvfs.models import Firmware, FirmwareEvent, Vendor, Remote, Agreement
-from lvfs.models import Affiliation, Protocol, Category, Component, Verfmt
+from lvfs.firmware.models import Firmware, FirmwareEvent
+from lvfs.firmware.utils import _firmware_delete, _async_sign_fw
+from lvfs.metadata.models import Remote
+from lvfs.protocols.models import Protocol
 from lvfs.tests.utils import _async_test_run_for_firmware
 from lvfs.upload.uploadedfile import UploadedFile, FileTooLarge, FileTooSmall, FileNotSupported, MetadataInvalid
-from lvfs.util import _get_client_address, _get_settings, _fix_component_name
-from lvfs.util import _error_internal
-from lvfs.firmware.utils import _firmware_delete, _async_sign_fw
+from lvfs.users.models import User
+from lvfs.util import _get_client_address, _get_settings, _fix_component_name, _error_internal
+from lvfs.vendors.models import Vendor, VendorAffiliation
+from lvfs.verfmts.models import Verfmt
 
 bp_upload = Blueprint('upload', __name__, template_folder='templates')
 
-def _get_plugin_metadata_for_uploaded_file(ufile):
+def _get_plugin_metadata_for_uploaded_file(ufile: UploadedFile) -> Dict[str, str]:
     settings = _get_settings()
     metadata = {}
     metadata['$DATE$'] = datetime.datetime.now().replace(microsecond=0).isoformat()
@@ -37,7 +44,7 @@ def _get_plugin_metadata_for_uploaded_file(ufile):
     metadata['$FIRMWARE_BASEURI$'] = settings['firmware_baseuri']
     return metadata
 
-def _user_can_upload(user):
+def _user_can_upload(user: User) -> bool:
 
     # never signed anything
     if not user.agreement:
@@ -54,7 +61,10 @@ def _user_can_upload(user):
     # works for us
     return True
 
-def _filter_fw_by_id_guid_version(fws, component_id, provides_value, release_version):
+def _filter_fw_by_id_guid_version(fws: List[Firmware],
+                                  component_id: int,
+                                  provides_value: str,
+                                  release_version: str) -> Optional[Firmware]:
     for fw in fws:
         if fw.is_deleted:
             continue
@@ -324,8 +334,8 @@ def route_firmware():
         if not _user_can_upload(g.user):
             return redirect(url_for('agreements.route_show'))
         vendor_ids = [res.value for res in g.user.vendor.restrictions]
-        affiliations = db.session.query(Affiliation).\
-                        filter(Affiliation.vendor_id_odm == g.user.vendor_id).all()
+        affiliations = db.session.query(VendorAffiliation).\
+                        filter(VendorAffiliation.vendor_id_odm == g.user.vendor_id).all()
         return render_template('upload.html',
                                category='firmware',
                                vendor_ids=vendor_ids,

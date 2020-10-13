@@ -13,10 +13,14 @@ from lvfs import db, tq
 
 from lvfs.dbutils import _execute_count_star
 
-from lvfs.models import _get_datestr_from_datetime
+from lvfs.util import _get_datestr_from_datetime
 
-from lvfs.models import Client, AnalyticFirmware, Analytic, AnalyticVendor, Remote
-from lvfs.models import Useragent, UseragentKind, Vendor, Firmware
+from lvfs.firmware.models import Firmware
+from lvfs.main.models import Client
+from lvfs.metadata.models import Remote
+from lvfs.vendors.models import Vendor
+
+from .models import AnalyticFirmware, Analytic, AnalyticVendor, AnalyticUseragent, AnalyticUseragentKind
 
 def _generate_stats_for_vendor(v, datestr):
 
@@ -95,8 +99,8 @@ def _generate_stats_for_datestr(datestr):
         _generate_stats_for_firmware(fw, datestr)
     db.session.commit()
 
-    # update Useragent
-    for agnt in db.session.query(Useragent).filter(Useragent.datestr == datestr):
+    # update AnalyticUseragent
+    for agnt in db.session.query(AnalyticUseragent).filter(AnalyticUseragent.datestr == datestr):
         db.session.delete(agnt)
     db.session.commit()
     ua_apps = {}
@@ -138,13 +142,17 @@ def _generate_stats_for_datestr(datestr):
             else:
                 ua_distros[ua_distro] += 1
     for ua in ua_apps:
-        db.session.add(Useragent(kind=int(UseragentKind.APP), value=ua, datestr=datestr, cnt=ua_apps[ua]))
+        db.session.add(AnalyticUseragent(kind=int(AnalyticUseragentKind.APP),
+                                         value=ua, datestr=datestr, cnt=ua_apps[ua]))
     for ua in ua_fwupds:
-        db.session.add(Useragent(kind=int(UseragentKind.FWUPD), value=ua, datestr=datestr, cnt=ua_fwupds[ua]))
+        db.session.add(AnalyticUseragent(kind=int(AnalyticUseragentKind.FWUPD),
+                                         value=ua, datestr=datestr, cnt=ua_fwupds[ua]))
     for ua in ua_langs:
-        db.session.add(Useragent(kind=int(UseragentKind.LANG), value=ua, datestr=datestr, cnt=ua_langs[ua]))
+        db.session.add(AnalyticUseragent(kind=int(AnalyticUseragentKind.LANG),
+                                         value=ua, datestr=datestr, cnt=ua_langs[ua]))
     for ua in ua_distros:
-        db.session.add(Useragent(kind=int(UseragentKind.DISTRO), value=ua, datestr=datestr, cnt=ua_distros[ua]))
+        db.session.add(AnalyticUseragent(kind=int(AnalyticUseragentKind.DISTRO),
+                                         value=ua, datestr=datestr, cnt=ua_distros[ua]))
     db.session.commit()
 
     # update Analytic

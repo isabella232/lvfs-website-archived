@@ -12,16 +12,22 @@ from sqlalchemy import func
 
 from lvfs import db, ploader
 
-from lvfs.models import Requirement, Component, ComponentIssue, Keyword, Checksum, Category
-from lvfs.models import Protocol, Report, ReportAttribute, Firmware, Remote, Verfmt
+from lvfs.categories.models import Category
+from lvfs.firmware.models import Firmware
 from lvfs.firmware.utils import _async_sign_fw
+from lvfs.hash import _is_sha1, _is_sha256
+from lvfs.metadata.models import Remote
+from lvfs.protocols.models import Protocol
+from lvfs.reports.models import Report, ReportAttribute
 from lvfs.tests.utils import _async_test_run_for_firmware
 from lvfs.util import _error_internal, _validate_guid
-from lvfs.hash import _is_sha1, _is_sha256
+from lvfs.verfmts.models import Verfmt
+
+from .models import ComponentRequirement, Component, ComponentIssue, ComponentKeyword, ComponentChecksum
 
 bp_components = Blueprint('components', __name__, template_folder='templates')
 
-def _sanitize_markdown_text(txt):
+def _sanitize_markdown_text(txt: str) -> str:
     txt = txt.replace('\r', '')
     new_lines = [line.strip() for line in txt.split('\n')]
     return '\n'.join(new_lines)
@@ -291,7 +297,7 @@ def route_show(component_id, page='overview'):
 def route_requirement_delete(component_id, requirement_id):
 
     # get firmware component
-    rq = db.session.query(Requirement).filter(Requirement.requirement_id == requirement_id).first()
+    rq = db.session.query(ComponentRequirement).filter(ComponentRequirement.requirement_id == requirement_id).first()
     if not rq:
         flash('No requirement matched!', 'danger')
         return redirect(url_for('components.route_show', component_id=component_id))
@@ -369,7 +375,7 @@ def route_requirement_create(component_id):
         value = None
 
     # add requirement
-    rq = Requirement(kind=request.form['kind'],
+    rq = ComponentRequirement(kind=request.form['kind'],
                      value=value,
                      compare=compare,
                      version=version,
@@ -442,7 +448,7 @@ def route_requirement_modify(component_id):
             flash('Modified requirement firmware', 'info')
     else:
         # add requirement
-        rq = Requirement(kind=request.form['kind'],
+        rq = ComponentRequirement(kind=request.form['kind'],
                          value=value,
                          compare=request.form.get('compare', None),
                          version=request.form.get('version', None),
@@ -466,7 +472,7 @@ def route_requirement_modify(component_id):
 def route_keyword_delete(component_id, keyword_id):
 
     # get firmware component
-    kw = db.session.query(Keyword).filter(Keyword.keyword_id == keyword_id).first()
+    kw = db.session.query(ComponentKeyword).filter(ComponentKeyword.keyword_id == keyword_id).first()
     if not kw:
         flash('No keyword matched!', 'danger')
         return redirect(url_for('components.route_show', component_id=component_id))
@@ -561,7 +567,7 @@ def route_issue_delete(component_id, component_issue_id):
                             component_id=md.component_id,
                             page='issues'))
 
-def _autoimport_issues(md, prefix, kind):
+def _autoimport_issues(md, prefix: str, kind: str) -> int:
     issues = []
     start = 0
     tmp = md.release_description
@@ -704,7 +710,7 @@ def route_issue_create(component_id):
 def route_checksum_delete(component_id, checksum_id):
 
     # get firmware component
-    csum = db.session.query(Checksum).filter(Checksum.checksum_id == checksum_id).first()
+    csum = db.session.query(ComponentChecksum).filter(ComponentChecksum.checksum_id == checksum_id).first()
     if not csum:
         flash('No checksum matched!', 'danger')
         return redirect(url_for('components.route_show', component_id=component_id))
@@ -778,7 +784,7 @@ def route_checksum_create(component_id):
                                     page='checksums'))
 
     # add checksum
-    csum = Checksum(kind=hash_kind, value=hash_value)
+    csum = ComponentChecksum(kind=hash_kind, value=hash_value)
     md.device_checksums.append(csum)
     md.fw.mark_dirty()
     md.fw.signed_timestamp = None

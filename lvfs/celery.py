@@ -35,7 +35,7 @@ class FlaskCelery(Celery):
                 with _celery.app.app_context():
                     _celery.app.config['SERVER_NAME'] = _celery.app.config['HOST_NAME']
                     from lvfs import db
-                    from lvfs.models import User
+                    from lvfs.users.models import User
                     g.user = db.session.query(User).filter(User.username == 'anon@fwupd.org').first()
                     return TaskBase.__call__(self, *args, **kwargs)
 

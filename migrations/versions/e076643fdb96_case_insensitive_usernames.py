@@ -11,7 +11,7 @@ revision = 'e076643fdb96'
 down_revision = 'dbf9a3d31989'
 
 from lvfs import db
-from lvfs.models import User
+from lvfs.users.models import User
 
 def upgrade():
     for user in db.session.query(User):

@@ -7,7 +7,6 @@
 #
 # pylint: disable=wrong-import-position
 
-import os
 import json
 import calendar
 import datetime
@@ -16,12 +15,15 @@ import random
 import subprocess
 import tempfile
 
+from typing import Optional, Dict, List, Tuple, Any
+
 from functools import wraps
 
 from lxml import etree as ET
 from flask import request, flash, render_template, g, Response, redirect, url_for
 
-def _fix_component_name(name, developer_name=None):
+def _fix_component_name(name: Optional[str],
+                        developer_name: Optional[str] = None) -> Optional[str]:
     if not name:
         return None
 
@@ -41,14 +43,14 @@ def _fix_component_name(name, developer_name=None):
             words_new.append(word)
     return ' '.join(words_new)
 
-def _is_hex(chunk):
+def _is_hex(chunk: str) -> bool:
     try:
         _ = int(chunk, 16)
     except ValueError as _:
         return False
     return True
 
-def _validate_guid(guid):
+def _validate_guid(guid: str) ->bool:
     """ Validates if the string is a valid GUID """
     if not guid:
         return False
@@ -69,7 +71,7 @@ def _validate_guid(guid):
         return False
     return True
 
-def _unwrap_xml_text(txt):
+def _unwrap_xml_text(txt: str) -> str:
     txt = txt.replace('\r', '')
     new_lines = []
     for line in txt.split('\n'):
@@ -78,7 +80,7 @@ def _unwrap_xml_text(txt):
         new_lines.append(line.strip())
     return ' '.join(new_lines)
 
-def _markdown_from_root(root):
+def _markdown_from_root(root: ET.SubElement) -> str:
     """ return MarkDown for the XML input """
     tmp = ''
     for n in root:
@@ -102,7 +104,7 @@ def _markdown_from_root(root):
     tmp = tmp.strip(' \n')
     return tmp
 
-def _check_is_markdown_li(line):
+def _check_is_markdown_li(line: str) -> int:
     if line.startswith('- '):
         return 2
     if line.startswith(' - '):
@@ -117,7 +119,7 @@ def _check_is_markdown_li(line):
         return 3
     return 0
 
-def _xml_from_markdown(markdown):
+def _xml_from_markdown(markdown: str) -> Optional[ET.Element]:
     """ return a ElementTree for the markdown text """
     if not markdown:
         return None
@@ -137,101 +139,10 @@ def _xml_from_markdown(markdown):
             ET.SubElement(root, 'p').text = line
     return root
 
-def _add_problem(problems, description, line=None):
-    from lvfs.models import Claim
-    for problem in problems:
-        if problem.description.split('\n')[0] == description:
-            return
-    if line:
-        description += '\n{}'.format(line)
-    problems.append(Claim(kind='invalid-release-description',
-                          icon='warning',
-                          summary='Invalid release description',
-                          description=description))
-
-def _check_both(problems, txt):
-    if txt.isupper():
-        _add_problem(problems, 'Uppercase only sentences are not allowed', txt)
-    if txt.find('http://') != -1 or txt.find('https://') != -1:
-        _add_problem(problems, 'Links cannot be included in update descriptions', txt)
-    if txt.find('CVE-') != -1:
-        _add_problem(problems, 'CVEs in update description')
-    if txt.find('LEN-') != -1:
-        _add_problem(problems, 'Lenovo-specific security advisory tag in update description')
-    if txt.find('DSA-') != -1:
-        _add_problem(problems, 'Dell-specific security advisory tag in update description')
-    if txt.find('INTEL-SA-') != -1:
-        _add_problem(problems, 'Intel-specific security advisory tag in update description')
-    if txt.find('INTEL-TA-') != -1:
-        _add_problem(problems, 'Intel-specific technical advisory tag in update description')
-    if txt.find('REMOVE_ME') != -1:
-        _add_problem(problems, 'Update description should be checked after auto-importing issues')
-
-def _check_is_fake_li(txt):
-    for line in txt.split('\n'):
-        if _check_is_markdown_li(line):
-            return True
-    return False
-
-def _check_para(problems, txt):
-    _check_both(problems, txt)
-    if txt.startswith('[') and txt.endswith(']'):
-        _add_problem(problems, 'Paragraphs cannot start and end with "[]"', txt)
-    if txt.startswith('(') and txt.endswith(')'):
-        _add_problem(problems, 'Paragraphs cannot start and end with "()"', txt)
-    if _check_is_fake_li(txt):
-        _add_problem(problems, 'Paragraphs cannot start with list elements', txt)
-    if txt.find('.BLD') != -1 or txt.find('changes.new') != -1:
-        _add_problem(problems, 'Do not refer to BLD or changes.new release notes', txt)
-    if len(txt) > 300:
-        _add_problem(problems, 'Paragraph too long, limit is 300 chars and was %i' % len(txt), txt)
-    if len(txt) < 12:
-        _add_problem(problems, 'Paragraph too short, minimum is 12 chars and was %i' % len(txt), txt)
-
-def _check_li(problems, txt):
-    _check_both(problems, txt)
-    if txt in ('Nothing.', 'Not applicable.'):
-        _add_problem(problems, 'List element cannot be empty', txt)
-    if _check_is_fake_li(txt):
-        _add_problem(problems, 'List element cannot start with bullets', txt)
-    if txt.find('.BLD') != -1:
-        _add_problem(problems, 'Do not refer to BLD notes', txt)
-    if txt.find('Fix the return code from GetHardwareVersion') != -1:
-        _add_problem(problems, 'Do not use the example update notes!', txt)
-    if len(txt) > 300:
-        _add_problem(problems, 'List element too long, limit is 300 chars and was %i' % len(txt), txt)
-    if len(txt) < 5:
-        _add_problem(problems, 'List element too short, minimum is 5 chars and was %i' % len(txt), txt)
-
-def _get_update_description_problems(root):
-    problems = []
-    n_para = 0
-    n_li = 0
-    for n in root:
-        if n.tag == 'p':
-            _check_para(problems, n.text)
-            n_para += 1
-        elif n.tag == 'ul' or n.tag == 'ol':
-            for c in n:
-                if c.tag == 'li':
-                    _check_li(problems, c.text)
-                    n_li += 1
-                else:
-                    _add_problem(problems, 'Invalid XML tag', '<%s>' % c.tag)
-        else:
-            _add_problem(problems, 'Invalid XML tag', '<%s>' % n.tag)
-    if n_para > 5:
-        _add_problem(problems, 'Too many paragraphs, limit is 5 and was %i' % n_para)
-    if n_li > 20:
-        _add_problem(problems, 'Too many list elements, limit is 20 and was %i' % n_li)
-    if n_para < 1:
-        _add_problem(problems, 'Not enough paragraphs, minimum is 1')
-    return problems
-
-def _get_settings(prefix=None):
+def _get_settings(prefix: str = None) -> Dict[str, str]:
     """ return a dict of all the settings """
     from lvfs import db
-    from lvfs.models import Setting
+    from lvfs.settings.models import Setting
     settings = {}
     stmt = db.session.query(Setting)
     if prefix:
@@ -240,23 +151,13 @@ def _get_settings(prefix=None):
         settings[setting.key] = setting.value
     return settings
 
-def _get_absolute_path(fw):
-    from lvfs import app
-    if fw.is_deleted:
-        return os.path.join(app.config['RESTORE_DIR'], fw.filename)
-    return os.path.join(app.config['DOWNLOAD_DIR'], fw.filename)
-
-def _get_sanitized_basename(basename):
+def _get_sanitized_basename(basename: str) -> str:
     basename_sane = basename.encode('ascii', 'ignore').decode('utf-8')
     for key, value in [(',', '_')]:
         basename_sane = basename_sane.replace(key, value)
     return basename_sane
 
-def _get_shard_path(shard):
-    from lvfs import app
-    return os.path.join(app.config['SHARD_DIR'], str(shard.component_id), shard.name)
-
-def _get_client_address():
+def _get_client_address() -> str:
     """ Gets user IP address """
     try:
         if request.headers.getlist("X-Forwarded-For"):
@@ -267,7 +168,7 @@ def _get_client_address():
     except RuntimeError as _:
         return '127.0.0.1'
 
-def _event_log(msg, is_important=False):
+def _event_log(msg: str, is_important: bool = False) -> None:
     """ Adds an item to the event log """
     user_id = 2 	# Anonymous User
     vendor_id = 1	# admin
@@ -277,7 +178,7 @@ def _event_log(msg, is_important=False):
         vendor_id = g.user.vendor_id
     if request:
         request_path = request.path
-    from lvfs.models import Event
+    from lvfs.main.models import Event
     from lvfs import db
     event = Event(user_id=user_id,
                   message=msg,
@@ -288,14 +189,14 @@ def _event_log(msg, is_important=False):
     db.session.add(event)
     db.session.commit()
 
-def _error_internal(msg=None, errcode=402):
+def _error_internal(msg: str = None, errcode:int = 402) -> Tuple[str, int]:
     """ Error handler: Internal """
     flash("Internal error: %s" % msg, 'danger')
     return render_template('error.html'), errcode
 
-def _json_success(msg=None, uri=None, errcode=200):
+def _json_success(msg: str = None, uri: str = None, errcode:int = 200) -> Response:
     """ Success handler: JSON output """
-    item = {}
+    item: Dict[str, Any] = {}
     item['success'] = True
     if msg:
         item['msg'] = msg
@@ -306,9 +207,9 @@ def _json_success(msg=None, uri=None, errcode=200):
                     status=errcode, \
                     mimetype="application/json")
 
-def _json_error(msg=None, errcode=400):
+def _json_error(msg: str = None, errcode:int = 400) -> Response:
     """ Error handler: JSON output """
-    item = {}
+    item: Dict[str, Any] = {}
     item['success'] = False
     if msg:
         item['msg'] = str(msg)
@@ -317,7 +218,7 @@ def _json_error(msg=None, errcode=400):
                     status=errcode, \
                     mimetype="application/json")
 
-def _get_chart_labels_months(ts=1):
+def _get_chart_labels_months(ts: int = 1) -> List[str]:
     """ Gets the chart labels """
     now = datetime.date.today()
     labels = []
@@ -326,7 +227,7 @@ def _get_chart_labels_months(ts=1):
         labels.append('{} {}'.format(calendar.month_name[then.month], then.year))
     return labels
 
-def _get_chart_labels_days(limit=30):
+def _get_chart_labels_days(limit:int = 30) -> List[str]:
     """ Gets the chart labels """
     now = datetime.date.today()
     labels = []
@@ -335,27 +236,28 @@ def _get_chart_labels_days(limit=30):
         labels.append("%02i-%02i-%02i" % (then.year, then.month, then.day))
     return labels
 
-def _get_chart_labels_hours():
+def _get_chart_labels_hours() -> List[str]:
     """ Gets the chart labels """
     labels = []
     for i in range(0, 24):
         labels.append("%02i" % i)
     return labels
 
-def _email_check(value):
+def _email_check(value: str) -> bool:
     """ Do a quick and dirty check on the email address """
     if len(value) < 5 or value.find('@') == -1 or value.find('.') == -1:
         return False
     return True
 
-def _generate_password(size=10, chars=string.ascii_letters + string.digits):
+def _generate_password(size: int = 10,
+                       chars: str = string.ascii_letters + string.digits) -> str:
     return ''.join(random.choice(chars) for _ in range(size))
 
-def _get_certtool():
+def _get_certtool() -> List[str]:
     from lvfs import app
     return app.config['CERTTOOL'].split(' ')
 
-def _pkcs7_certificate_info(text):
+def _pkcs7_certificate_info(text: str) -> Dict[str, str]:
 
     # write certificate to temp file
     crt = tempfile.NamedTemporaryFile(mode='wb',
@@ -382,7 +284,7 @@ def _pkcs7_certificate_info(text):
             pass
     return info
 
-def _pkcs7_signature_info(text, check_rc=True):
+def _pkcs7_signature_info(text: str, check_rc: bool = True) -> Dict[str, str]:
 
     # write signature to temp file
     sig = tempfile.NamedTemporaryFile(mode='wb',
@@ -409,7 +311,9 @@ def _pkcs7_signature_info(text, check_rc=True):
             pass
     return info
 
-def _pkcs7_signature_verify(certificate, payload, signature):
+def _pkcs7_signature_verify(certificate: str,
+                            payload: str,
+                            signature: str) -> bool:
 
     # check the signature against the client cert
     crt = tempfile.NamedTemporaryFile(mode='wb',
@@ -417,7 +321,7 @@ def _pkcs7_signature_verify(certificate, payload, signature):
                                       suffix=".p7b",
                                       dir=None,
                                       delete=True)
-    crt.write(certificate.text.encode('utf8'))
+    crt.write(certificate.encode('utf8'))
     crt.flush()
 
     # write payload to temp file
@@ -466,3 +370,44 @@ def admin_login_required(f):
             return redirect(url_for('main.route_dashboard'))
         return f(*args, **kwargs)
     return decorated_function
+
+def _get_datestr_from_datetime(when):
+    return int("%04i%02i%02i" % (when.year, when.month, when.day))
+
+def _is_keyword_valid(value: str) -> bool:
+    if not len(value):
+        return False
+    if value.find('.') != -1:
+        return False
+    if value in ['a',
+                 'bios',
+                 'company',
+                 'corporation',
+                 'development',
+                 'device',
+                 'firmware',
+                 'for',
+                 'limited',
+                 'system',
+                 'the',
+                 'update']:
+        return False
+    return True
+
+def _sanitize_keyword(value: str) -> str:
+    for rpl in ['(', ')', '[', ']', '*', '?']:
+        value = value.replace(rpl, '')
+    return value.strip().lower()
+
+def _split_search_string(value: str) -> List[str]:
+    for delim in ['/', ',']:
+        value = value.replace(delim, ' ')
+    keywords: List[str] = []
+    for word in value.split(' '):
+        keyword = _sanitize_keyword(word)
+        if not _is_keyword_valid(keyword):
+            continue
+        if keyword in keywords:
+            continue
+        keywords.append(keyword)
+    return keywords

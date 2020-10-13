@@ -8,20 +8,24 @@
 import os
 
 from collections import defaultdict
+from typing import Dict, List
 
 from flask import Blueprint, render_template, request, url_for, redirect, flash
 from flask_login import login_required
 
 from lvfs import app, db, ploader
 
-from lvfs.models import Setting, Test, Firmware
-from lvfs.util import _event_log, _get_settings
-from lvfs.util import admin_login_required
+from lvfs.firmware.models import Firmware
+from lvfs.pluginloader import PluginBase
+from lvfs.tests.models import Test
+from lvfs.util import _event_log, _get_settings, admin_login_required
+
+from .models import Setting
 
 bp_settings = Blueprint('settings', __name__, template_folder='templates')
 
-def _convert_tests_for_plugin(plugin):
-    tests_by_type = defaultdict(list)
+def _convert_tests_for_plugin(plugin: PluginBase) -> Dict[str, List[Test]]:
+    tests_by_type: Dict[str, List[Test]] = defaultdict(list)
     for test in db.session.query(Test).join(Firmware).\
                          filter(Test.plugin_id == plugin.id). \
                          order_by(Test.scheduled_ts.desc()):
@@ -96,7 +100,7 @@ def route_create():
     db.session.commit()
     return redirect(url_for('settings.route_view'))
 
-def _textarea_string_to_text(value_unsafe):
+def _textarea_string_to_text(value_unsafe: str) -> str:
     values = []
     for value in value_unsafe.replace('\r', '').split('\n'):
         value = value.strip()

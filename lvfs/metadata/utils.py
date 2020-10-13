@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2018 Richard Hughes <richard@hughsie.com>
+# Copyright (C) 2015-2020 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
 #
@@ -14,6 +14,7 @@ import glob
 import datetime
 
 from collections import defaultdict
+from typing import List, Tuple, Optional, Dict
 from distutils.version import StrictVersion
 from lxml import etree as ET
 
@@ -21,10 +22,14 @@ from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 
 from lvfs import db, app, ploader, tq
 
-from lvfs.models import Firmware, Remote
+from lvfs.components.models import Component
+from lvfs.firmware.models import Firmware
 from lvfs.util import _get_settings, _xml_from_markdown, _event_log
+from lvfs.verfmts.models import Verfmt
 
-def _is_verfmt_supported_by_fwupd(md, verfmt):
+from .models import Remote
+
+def _is_verfmt_supported_by_fwupd(md: Component, verfmt: Verfmt) -> bool:
 
     # fwupd version no specified
     if not verfmt.fwupd_version:
@@ -47,18 +52,18 @@ def _is_verfmt_supported_by_fwupd(md, verfmt):
     # failed
     return False
 
-def _use_hex_release_version(md):
+def _use_hex_release_version(md: Component) -> bool:
     if not md.version.isdigit():
         return False
     if not md.verfmt or md.verfmt.value == 'plain':
         return False
     return True
 
-def _generate_metadata_mds(mds,
-                           firmware_baseuri='',
-                           local=False,
-                           metainfo=False,
-                           allow_unrestricted=True):
+def _generate_metadata_mds(mds: List[Component],
+                           firmware_baseuri: str = '',
+                           local: bool = False,
+                           metainfo: bool = False,
+                           allow_unrestricted: bool = True) -> ET.Element:
 
     # assume all the components have the same parent firmware information
     md = mds[0]
@@ -83,19 +88,19 @@ def _generate_metadata_mds(mds,
             component.set('priority', str(md.priority))
 
     # provides shared by all releases
-    elements = {}
+    provides: Dict[str, str] = {}
     for md in mds:
         for guid in md.guids:
-            if guid.value in elements:
+            if guid.value in provides:
                 continue
             child = ET.Element('firmware')
             child.set('type', 'flashed')
             child.text = guid.value
-            elements[guid.value] = child
-    if elements:
+            provides[guid.value] = child
+    if provides:
         parent = ET.SubElement(component, 'provides')
-        for key in sorted(elements):
-            parent.append(elements[key])
+        for key in sorted(provides):
+            parent.append(provides[key])
 
     # shared again
     if md.url_homepage:
@@ -108,7 +113,7 @@ def _generate_metadata_mds(mds,
     ET.SubElement(component, 'developer_name').text = md.developer_name
 
     # screenshot shared by all releases
-    elements = {}
+    screenshots: Dict[str, ET.Element] = {}
     for md in mds:
         if not md.screenshot_url and not md.screenshot_caption:
             continue
@@ -116,9 +121,9 @@ def _generate_metadata_mds(mds,
         key = md.screenshot_url
         if not key:
             key = md.screenshot_caption
-        if key not in elements:
+        if key not in screenshots:
             child = ET.Element('screenshot')
-            if not elements:
+            if not screenshots:
                 child.set('type', 'default')
             if md.screenshot_caption:
                 ET.SubElement(child, 'caption').text = md.screenshot_caption
@@ -127,14 +132,14 @@ def _generate_metadata_mds(mds,
                     ET.SubElement(child, 'image').text = md.screenshot_url
                 else:
                     ET.SubElement(child, 'image').text = md.screenshot_url_safe
-            elements[key] = child
-    if elements:
+            screenshots[key] = child
+    if screenshots:
         parent = ET.SubElement(component, 'screenshots')
-        for key in elements:
-            parent.append(elements[key])
+        for key in screenshots:
+            parent.append(screenshots[key])
 
     # add enumerated categories
-    cats = []
+    cats: List[str] = []
     for md in mds:
         if not md.category:
             continue
@@ -154,35 +159,35 @@ def _generate_metadata_mds(mds,
             ET.SubElement(categories, 'category').text = cat
 
     # metadata shared by all releases
-    elements = []
+    metadata: List[Tuple[str, Optional[str]]] = []
     for md in mds:
         if md.inhibit_download:
-            elements.append(('LVFS::InhibitDownload', None))
+            metadata.append(('LVFS::InhibitDownload', None))
             break
     for md in mds:
         if md.release_message:
-            elements.append(('LVFS::UpdateMessage', md.release_message))
+            metadata.append(('LVFS::UpdateMessage', md.release_message))
             if md.release_image:
                 if metainfo or not md.screenshot_url_safe:
-                    elements.append(('LVFS::UpdateImage', md.release_image))
+                    metadata.append(('LVFS::UpdateImage', md.release_image))
                 else:
-                    elements.append(('LVFS::UpdateImage', md.release_image_safe))
+                    metadata.append(('LVFS::UpdateImage', md.release_image_safe))
             break
     for md in mds:
         verfmt = md.verfmt
         if verfmt:
             if verfmt.fallbacks and not _is_verfmt_supported_by_fwupd(md, verfmt):
                 for fallback in verfmt.fallbacks.split(','):
-                    elements.append(('LVFS::VersionFormat', fallback))
-            elements.append(('LVFS::VersionFormat', verfmt.value))
+                    metadata.append(('LVFS::VersionFormat', fallback))
+            metadata.append(('LVFS::VersionFormat', verfmt.value))
             break
     for md in mds:
         if md.protocol:
-            elements.append(('LVFS::UpdateProtocol', md.protocol.value))
+            metadata.append(('LVFS::UpdateProtocol', md.protocol.value))
             break
-    if elements:
+    if metadata:
         parent = ET.SubElement(component, 'custom')
-        for key, value in elements:
+        for key, value in metadata:
             child = ET.Element('value')
             child.set('key', key)
             child.text = value
@@ -295,7 +300,7 @@ def _generate_metadata_mds(mds,
                 category.set('type', issue.kind)
 
     # add requires for each allowed vendor_ids
-    elements = []
+    requires: List[ET.Element] = []
     if not metainfo and not local:
 
         # create a superset of all vendors (there is typically just one)
@@ -334,7 +339,7 @@ def _generate_metadata_mds(mds,
             else:
                 child.set('compare', 'regex')
             child.set('version', '|'.join(vendor_ids))
-            elements.append(child)
+            requires.append(child)
 
     # add requires for <id>
     for md in mds:
@@ -350,7 +355,7 @@ def _generate_metadata_mds(mds,
                 child.set('version', rq.version)
             if rq.depth:
                 child.set('depth', rq.depth)
-            elements.append(child)
+            requires.append(child)
 
     # add requires for <firmware>
     for md in mds:
@@ -366,10 +371,10 @@ def _generate_metadata_mds(mds,
                 child.set('version', rq.version)
             if rq.depth:
                 child.set('depth', rq.depth)
-            elements.append(child)
+            requires.append(child)
 
     # add a single requirement for <hardware>
-    rq_hws = []
+    rq_hws: List[str] = []
     for md in mds:
         for rq in md.requirements:
             if rq.kind == 'hardware' and rq.value not in rq_hws:
@@ -377,17 +382,17 @@ def _generate_metadata_mds(mds,
     if rq_hws:
         child = ET.Element('hardware')
         child.text = '|'.join(rq_hws)
-        elements.append(child)
+        requires.append(child)
 
     # requires shared by all releases
-    if elements:
+    if requires:
         parent = ET.SubElement(component, 'requires')
-        for element in elements:
+        for element in requires:
             parent.append(element)
 
     # keywords shared by all releases
     if metainfo:
-        keywords = []
+        keywords: List[str] = []
         for md in mds:
             for kw in md.keywords:
                 if kw.priority != 5:
@@ -405,7 +410,10 @@ def _generate_metadata_mds(mds,
     # success
     return component
 
-def _generate_metadata_kind(fws, firmware_baseuri='', local=False, allow_unrestricted=True):
+def _generate_metadata_kind(fws: List[Firmware],
+                            firmware_baseuri: str = '',
+                            local: bool = False,
+                            allow_unrestricted: bool = True) -> bytes:
     """ Generates AppStream metadata of a specific kind """
 
     root = ET.Element('components')
@@ -413,7 +421,7 @@ def _generate_metadata_kind(fws, firmware_baseuri='', local=False, allow_unrestr
     root.set('version', '0.9')
 
     # build a map of appstream_id:mds
-    components = defaultdict(list)
+    components: Dict[str, List[Component]] = defaultdict(list)
     for fw in sorted(fws, key=lambda fw: fw.mds[0].appstream_id):
         for md in fw.mds:
             components[md.appstream_id].append(md)
@@ -434,7 +442,7 @@ def _generate_metadata_kind(fws, firmware_baseuri='', local=False, allow_unrestr
                                      xml_declaration=True,
                                      pretty_print=True))
 
-def _metadata_update_pulp(download_dir):
+def _metadata_update_pulp(download_dir: str):
 
     """ updates metadata for Pulp """
     with open(os.path.join(download_dir, 'PULP_MANIFEST'), 'w') as manifest:
@@ -460,7 +468,7 @@ def _metadata_update_pulp(download_dir):
                                                fw.checksum_signed_sha256,
                                                fw.mds[0].release_download_size))
 
-def _regenerate_and_sign_metadata_remote(r):
+def _regenerate_and_sign_metadata_remote(r: Remote):
 
     # already being regenerated
     if r.is_regenerating:
@@ -483,6 +491,10 @@ def _regenerate_and_sign_metadata_remote(r):
     # not needed
     if not r.is_dirty:
         return
+    if not r.filename:
+        return
+    if not r.filename_newest:
+        return
 
     # claim this
     r.regenerate_ts = datetime.datetime.utcnow()
@@ -490,6 +502,8 @@ def _regenerate_and_sign_metadata_remote(r):
 
     # set destination path from app config
     download_dir = app.config['DOWNLOAD_DIR']
+    if not download_dir:
+        return
     if not os.path.exists(download_dir):
         os.mkdir(download_dir)
 
@@ -531,6 +545,12 @@ def _regenerate_and_sign_metadata_remote(r):
 
     # write each signed file
     for blob in ploader.metadata_sign(blob_xmlgz):
+
+        # not required
+        if not blob.data:
+            continue
+        if not blob.filename_ext:
+            continue
 
         # add GPG only to archive for backwards compat with older fwupd
         if blob.kind == JcatBlobKind.GPG:

@@ -11,7 +11,8 @@ from flask_login import login_required
 from lvfs import db
 
 from lvfs.util import admin_login_required
-from lvfs.models import Agreement
+
+from .models import Agreement
 
 bp_agreements = Blueprint('agreements', __name__, template_folder='templates')
 

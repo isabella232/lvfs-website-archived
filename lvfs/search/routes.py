@@ -12,11 +12,14 @@ from sqlalchemy import func
 
 from lvfs import db
 
-from lvfs.models import Guid, Keyword, Vendor, SearchEvent, Component, ComponentIssue, Firmware, Remote
-from lvfs.models import _split_search_string
+from lvfs.components.models import ComponentGuid, ComponentKeyword, Component, ComponentIssue
+from lvfs.firmware.models import Firmware
 from lvfs.hash import _addr_hash
-from lvfs.util import admin_login_required
-from lvfs.util import _get_client_address
+from lvfs.metadata.models import Remote
+from lvfs.util import admin_login_required, _split_search_string, _get_client_address
+from lvfs.vendors.models import Vendor
+
+from .models import SearchEvent
 
 bp_search = Blueprint('search', __name__, template_folder='templates')
 
@@ -64,43 +67,43 @@ def route_fw(max_results=100):
 
     # use keywords first
     fws = db.session.query(Firmware).join(Component).\
-                           join(Keyword).\
-                           filter(Keyword.value.in_(keywords)).\
-                           distinct(Keyword.component_id).\
-                           order_by(Keyword.component_id.desc(), Firmware.timestamp.desc()).\
+                           join(ComponentKeyword).\
+                           filter(ComponentKeyword.value.in_(keywords)).\
+                           distinct(ComponentKeyword.component_id).\
+                           order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                            limit(max_results).all()
 
     # try GUIDs
     if not fws:
         fws = db.session.query(Firmware).join(Component).\
-                               join(Guid).\
-                               filter(Guid.value.in_(keywords)).\
-                               distinct(Keyword.component_id).\
-                               order_by(Keyword.component_id.desc(), Firmware.timestamp.desc()).\
+                               join(ComponentGuid).\
+                               filter(ComponentGuid.value.in_(keywords)).\
+                               distinct(ComponentKeyword.component_id).\
+                               order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
 
     # try version numbers
     if not fws:
         fws = db.session.query(Firmware).join(Component).\
                                filter(Component.version.in_(keywords)).\
-                               distinct(Keyword.component_id).\
-                               order_by(Keyword.component_id.desc(), Firmware.timestamp.desc()).\
+                               distinct(ComponentKeyword.component_id).\
+                               order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
 
     # try appstream ID
     if not fws:
         fws = db.session.query(Firmware).join(Component).\
                                filter(Component.appstream_id.startswith(keywords[0])).\
-                               distinct(Keyword.component_id).\
-                               order_by(Keyword.component_id.desc(), Firmware.timestamp.desc()).\
+                               distinct(ComponentKeyword.component_id).\
+                               order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
 
     # try CVE, e.g. CVE-2018-3646
     if not fws:
         fws = db.session.query(Firmware).join(Component).join(ComponentIssue).\
                                filter(ComponentIssue.value.in_(keywords)).\
-                               distinct(Keyword.component_id).\
-                               order_by(Keyword.component_id.desc(), Firmware.timestamp.desc()).\
+                               distinct(ComponentKeyword.component_id).\
+                               order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
 
     # filter by ACL
@@ -129,9 +132,9 @@ def route_search(max_results=150):
 
     # components that match
     keywords = _split_search_string(request.args['value'])
-    ids = db.session.query(Keyword.component_id).\
-                           filter(Keyword.value.in_(keywords)).\
-                           group_by(Keyword.component_id).\
+    ids = db.session.query(ComponentKeyword.component_id).\
+                           filter(ComponentKeyword.value.in_(keywords)).\
+                           group_by(ComponentKeyword.component_id).\
                            having(func.count() == len(keywords)).\
                            subquery()
     mds = []

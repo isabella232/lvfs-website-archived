@@ -15,7 +15,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from lvfs import db
-from lvfs.models import Client, _get_datestr_from_datetime
+from lvfs.main.models import Client
+from lvfs.util import _get_datestr_from_datetime
 
 def upgrade():
     if 1:

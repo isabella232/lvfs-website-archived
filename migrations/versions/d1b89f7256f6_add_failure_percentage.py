@@ -14,7 +14,7 @@ from alembic import op
 import sqlalchemy as sa
 
 from lvfs import db
-from lvfs.models import Firmware
+from lvfs.firmware.models import Firmware
 
 def upgrade():
     op.add_column('firmware', sa.Column('failure_minimum', sa.Integer(), nullable=True))

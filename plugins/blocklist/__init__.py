@@ -14,9 +14,11 @@ import yara
 from lvfs import db
 from lvfs.pluginloader import PluginBase, PluginError
 from lvfs.pluginloader import PluginSettingBool, PluginSettingTextList
-from lvfs.models import Test, Claim
+from lvfs.tests.models import Test
+from lvfs.claims.models import Claim
+from lvfs.components.models import Component
 
-def _run_on_blob(self, test, md, title, blob):
+def _run_on_blob(self, test: Test, md: Component, title: str, blob: bytes) -> None:
     matches = self.rules.match(data=blob)
     for match in matches:
 
@@ -46,8 +48,8 @@ def _run_on_blob(self, test, md, title, blob):
             md.add_claim(claim)
 
 class Plugin(PluginBase):
-    def __init__(self, plugin_id=None):
-        PluginBase.__init__(self, plugin_id)
+    def __init__(self):
+        PluginBase.__init__(self)
         self.rules = None
         self.name = 'Blocklist'
         self.summary = 'Use YARA to check firmware for problems'
@@ -97,9 +99,9 @@ class Plugin(PluginBase):
 # run with PYTHONPATH=. ./env/bin/python3 plugins/blocklist/__init__.py
 if __name__ == '__main__':
     import sys
-    from lvfs.models import Firmware, Component
+    from lvfs.firmware.models import Firmware
 
-    plugin = Plugin('blocklist')
+    plugin = Plugin()
     _test = Test(plugin_id=plugin.id)
     _fw = Firmware()
     _md = Component()

@@ -12,7 +12,7 @@ import csv
 
 from lvfs import app, db
 
-from lvfs.models import Firmware
+from lvfs.firmware.models import Firmware
 
 def _write_report_for_plugin_id(writer, plugin_id):
 

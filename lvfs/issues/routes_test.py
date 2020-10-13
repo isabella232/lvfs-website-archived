@@ -31,7 +31,7 @@ class LocalTestCase(LvfsTestCase):
         rv = self._enable_issue()
         assert b'Issue can not be enabled without conditions' in rv.data, rv.data
 
-        # add Condition
+        # add IssueCondition
         self.add_issue_condition()
         rv = self._add_issue_condition()
         assert b'Key DistroId already exists' in rv.data, rv.data
@@ -66,7 +66,7 @@ class LocalTestCase(LvfsTestCase):
         assert b'The failure is a known issue' not in rv.data, rv.data
         assert b'https://github.com/fwupd/fwupd/wiki/Arch-Linux' not in rv.data, rv.data
 
-        # remove Condition
+        # remove condition
         rv = self.app.post('/lvfs/issues/1/condition/1/delete', follow_redirects=True)
         assert b'Deleted condition' in rv.data, rv.data
         rv = self.app.post('/lvfs/issues/1/condition/1/delete', follow_redirects=True)

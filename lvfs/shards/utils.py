@@ -9,9 +9,9 @@
 
 from lvfs import db, tq
 
-from lvfs.models import ComponentShard, ComponentShardInfo
+from lvfs.components.models import ComponentShard, ComponentShardInfo
 
-def _generate_stats_shard_info(info):
+def _generate_stats_shard_info(info: ComponentShardInfo):
 
     cnt = db.session.query(ComponentShard.component_shard_id)\
                     .filter(ComponentShard.guid == info.guid)\

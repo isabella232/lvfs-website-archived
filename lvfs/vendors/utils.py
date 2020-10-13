@@ -9,8 +9,9 @@ import hashlib
 import hmac
 
 from lvfs import app
+from lvfs.vendors.models import Vendor
 
-def _vendor_hash(vendor):
+def _vendor_hash(vendor: Vendor) -> str:
     """ Generate a HMAC of the vendor name """
     return hmac.new(key=app.config['SECRET_VENDOR_SALT'].encode(),
                     msg=vendor.group_id.encode(),

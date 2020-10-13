@@ -10,12 +10,14 @@
 import os
 import struct
 import uuid
+from typing import Optional
 
 from collections import namedtuple
 
 from lvfs import db
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool
-from lvfs.models import Test, ComponentShard
+from lvfs.tests.models import Test
+from lvfs.components.models import Component, ComponentShard
 
 INTELME_PART_ENTRY = '<4sIIIIIII'
 INTELME_PART_HEADER = '<16s4sIBBBBHHII'
@@ -43,7 +45,7 @@ class PartitionEntry():
             self.blob = buf[self.data.offset:self.data.offset + self.data.len]
 
     @property
-    def sig(self):
+    def sig(self) -> Optional[str]:
         if not self.data:
             return None
         if self.data.sig == b'\0\0\0\0':
@@ -51,13 +53,13 @@ class PartitionEntry():
         return self.data.sig.decode('ascii').replace('\x00', '')
 
     @property
-    def appstream_id(self):
+    def appstream_id(self) -> Optional[str]:
         if not self.sig:
             return None
         return 'com.intel.ManagementEngine.' + self.sig
 
     @property
-    def guid(self):
+    def guid(self) -> Optional[str]:
         if not self.appstream_id:
             return None
         return str(uuid.uuid5(uuid.NAMESPACE_DNS, self.appstream_id))
@@ -96,7 +98,7 @@ class PartitionHeader():
             offset += struct.calcsize(INTELME_PART_ENTRY)
             self.entries.append(entry)
 
-def _add_shards(self, fpt, md):
+def _add_shards(self, fpt: PartitionHeader, md: Component) -> None:
 
     # remove any old shards we added
     for shard in md.shards:
@@ -117,9 +119,12 @@ def _add_shards(self, fpt, md):
         shard.set_blob(entry.blob, checksums='SHA256')
         md.shards.append(shard)
 
-def _run_intelme_on_blob(self, test, md):
+def _run_intelme_on_blob(self, test: Test, md: Component) -> None:
 
     # find and parse FPT
+    if not md.blob:
+        test.add_fail('No component data')
+        return
     offset = md.blob.find(b'$FPT')
     if offset == -1:
         # not an error if there's no ME...
@@ -159,8 +164,8 @@ def _run_intelme_on_blob(self, test, md):
     test.add_pass('Found {}'.format(','.join(entries)))
 
 class Plugin(PluginBase):
-    def __init__(self, plugin_id=None):
-        PluginBase.__init__(self, plugin_id)
+    def __init__(self):
+        PluginBase.__init__(self)
         self.name = 'Intel ME'
         self.summary = 'Analyse modules in Intel ME firmware'
 
@@ -196,3 +201,29 @@ class Plugin(PluginBase):
 
         # run intelme on the capsule data
         _run_intelme_on_blob(self, test, md)
+
+# run with PYTHONPATH=. ./env/bin/python3 plugins/intelme/__init__.py
+if __name__ == '__main__':
+    import sys
+
+    from lvfs.categories.models import Category
+    from lvfs.firmware.models import Firmware
+    from lvfs.protocols.models import Protocol
+
+    for _argv in sys.argv[1:]:
+        print('Processing', _argv)
+        plugin = Plugin()
+        _test = Test(plugin_id=plugin.id)
+        _fw = Firmware()
+        _md = Component()
+        _md.component_id = 999999
+        _md.category = Category(value='X-ManagementEngine')
+        _md.filename_contents = 'filename.bin'
+        _md.protocol = Protocol(value='org.uefi.capsule')
+        with open(_argv, 'rb') as _f:
+            _md.blob = _f.read()
+        plugin.run_test_on_md(_test, _md)
+        for attribute in _test.attributes:
+            print(attribute)
+        for _shard in _md.shards:
+            print(_shard.guid, _shard.name, _shard.checksum)
