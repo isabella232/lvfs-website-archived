@@ -11,6 +11,8 @@ import enum
 import datetime
 import hashlib
 
+from typing import Any, Optional, Dict
+
 class JcatBlobKind(enum.IntEnum):
     UNKNOWN = 0
     SHA256 = 1
@@ -24,14 +26,17 @@ class JcatBlobFlags(enum.IntEnum):
 
 class JcatBlob():
 
-    def __init__(self, kind=JcatBlobKind.UNKNOWN, data=None, flags=JcatBlobFlags.NONE):
+    def __init__(self,
+                 kind: JcatBlobKind = JcatBlobKind.UNKNOWN,
+                 data: Optional[bytes] = None,
+                 flags: JcatBlobFlags = JcatBlobFlags.NONE):
         self.kind = kind
         self.data = data
         self.flags = flags
         self.appstream_id = None
         self.timestamp = int(datetime.datetime.utcnow().timestamp())
 
-    def __len__(self):
+    def __len__(self) -> int:
         if not self.data:
             return 0
         return len(self.data)
@@ -39,14 +44,15 @@ class JcatBlob():
     def __repr__(self):
         return 'JcatBlob({}:{:x})'.format(str(self.kind), len(self))
 
-    def save(self):
-        node = {}
+    def save(self) -> Dict[str, Any]:
+        node: Dict[str, Any] = {}
         node['Kind'] = self.kind
         node['Flags'] = self.flags
         if self.appstream_id:
             node['AppstreamId'] = self.appstream_id
         node['Timestamp'] = self.timestamp
-        node['Data'] = self.data.decode()
+        if self.data:
+            node['Data'] = self.data.decode()
         return node
 
     def load(self, node):
@@ -57,7 +63,7 @@ class JcatBlob():
         self.data = node.get('Data', None).encode()
 
     @property
-    def filename_ext(self):
+    def filename_ext(self) -> Optional[str]:
         if self.kind == JcatBlobKind.SHA256:
             return 'sha256'
         if self.kind == JcatBlobKind.GPG:
@@ -68,17 +74,17 @@ class JcatBlob():
 
 class JcatBlobText(JcatBlob):
 
-    def __init__(self, kind, data_str):
+    def __init__(self, kind: JcatBlobKind, data_str: str):
         JcatBlob.__init__(self, kind, data_str.encode(), JcatBlobFlags.IS_UTF8)
 
 class JcatBlobSha1(JcatBlobText):
 
-    def __init__(self, blob):
+    def __init__(self, blob: bytes):
         data_str = hashlib.sha1(blob).hexdigest()
         JcatBlobText.__init__(self, JcatBlobKind.SHA1, data_str)
 
 class JcatBlobSha256(JcatBlobText):
 
-    def __init__(self, blob):
+    def __init__(self, blob: bytes):
         data_str = hashlib.sha256(blob).hexdigest()
         JcatBlobText.__init__(self, JcatBlobKind.SHA256, data_str)

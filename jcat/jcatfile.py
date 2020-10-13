@@ -10,6 +10,8 @@
 import json
 import gzip
 
+from typing import Any, Optional, Dict, List
+
 from . jcatitem import JcatItem
 
 class NotSupportedError(NotImplementedError):
@@ -18,14 +20,14 @@ class NotSupportedError(NotImplementedError):
 class JcatFile():
     """An object representing a Jcat archive """
 
-    def __init__(self, buf=None):
+    def __init__(self, buf: Optional[bytes] = None):
         self.version_major = 0
         self.version_minor = 1
-        self.items = []
+        self.items: List[JcatItem] = []
         if buf:
             self.load(buf)
 
-    def get_item(self, jid):
+    def get_item(self, jid: str) -> JcatItem:
         for item in self.items:
             if item.id == jid:
                 return item
@@ -36,13 +38,13 @@ class JcatFile():
         self.items.append(item)
         return item
 
-    def add_item(self, item):
+    def add_item(self, item: JcatItem) -> None:
         if item in self.items:
             return
         self.items.append(item)
 
-    def save(self):
-        node = {}
+    def save(self) -> bytes:
+        node: Dict[str, Any] = {}
         node['JcatVersionMajor'] = self.version_major
         node['JcatVersionMinor'] = self.version_minor
         if self.items:
@@ -51,7 +53,7 @@ class JcatFile():
                 node['Items'].append(item.save())
         return gzip.compress(json.dumps(node).encode())
 
-    def load(self, blob):
+    def load(self, blob: bytes) -> None:
         node = json.loads(gzip.decompress(blob))
         self.version_major = node.get('JcatVersionMajor', 0)
         self.version_minor = node.get('JcatVersionMinor', 0)
