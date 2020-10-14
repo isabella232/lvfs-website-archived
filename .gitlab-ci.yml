@@ -1,7 +1,7 @@
 docs:
   image: alpine:latest
   variables:
-    TOKEN: "$RTD_TOKEN"
+    TOKEN: brap
   script:
     - apk --no-cache add curl
     - ash build-docs.sh
