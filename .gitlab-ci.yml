@@ -1,7 +1,7 @@
 docs:
   image: alpine:latest
   script:
-    - apk --no-cache add curl
-    - curl -X POST -H 'Authorization: Token "$RTD_TOKEN"' -H 'Content-Length: 0' https://readthedocs.org/api/v3/projects/lvfs/versions/latest/builds/
+  - apk --no-cache add curl
+  - "curl -X POST -H 'Authorization: Token ${RTD_TOKEN}' -H 'Content-Length:0' https://readthedocs.org/api/v3/projects/lvfs/versions/latest/builds/"
   only:
-    - master
+  - master
