@@ -18,5 +18,6 @@ fi
 
 if [ "$DEPLOY" = "beat" ]
 then
-    exec celery -A lvfs.celery beat
+    PATH="/app/env/bin:$PATH"
+    celery -A lvfs.celery beat
 fi
