@@ -293,14 +293,14 @@ def _upload_firmware():
 
     flash('Uploaded file %s to %s' % (ufile.fw.filename, target), 'info')
 
-    # asynchronously sign
-    _async_sign_fw.apply_async(args=(fw.firmware_id,), queue='firmware')
-
     # invalidate
     if target == 'embargo':
         remote.is_dirty = True
         g.user.vendor.remote.is_dirty = True
         db.session.commit()
+
+    # asynchronously sign
+    _async_sign_fw.apply_async(args=(fw.firmware_id,), queue='firmware')
 
     return redirect(url_for('firmware.route_show', firmware_id=fw.firmware_id))
 
