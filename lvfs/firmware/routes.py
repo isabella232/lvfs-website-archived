@@ -645,7 +645,7 @@ def route_analytics_clients(firmware_id):
         flash('Permission denied: Insufficient permissions to view analytics', 'danger')
         return redirect(url_for('firmware.route_show', firmware_id=firmware_id))
     clients = db.session.query(Client).filter(Client.firmware_id == fw.firmware_id).\
-                order_by(Client.id.desc()).limit(10).all()
+                order_by(Client.id.desc(), Client.timestamp.desc()).limit(10).all()
     return render_template('firmware-analytics-clients.html',
                            category='firmware',
                            fw=fw,
