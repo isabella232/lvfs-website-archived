@@ -3,6 +3,7 @@ docs:
   variables:
     TOKEN: "$RTD_TOKEN"
   script:
+    - apk --no-cache add curl
     - ash build-docs.sh
   only:
     - master
