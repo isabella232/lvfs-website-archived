@@ -15,3 +15,8 @@ if [ "$DEPLOY" = "yara" ]
 then
     exec celery -A lvfs.celery.worker --queues yara
 fi
+
+if [ "$DEPLOY" = "beat" ]
+then
+    exec celery -A lvfs.celery beat
+fi
