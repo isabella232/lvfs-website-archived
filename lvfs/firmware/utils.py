@@ -150,7 +150,7 @@ def _show_diff(blob_old: bytes, blob_new: bytes) -> None:
 def _async_sign_fw(firmware_id):
     fw = db.session.query(Firmware)\
                    .filter(Firmware.firmware_id == firmware_id)\
-                   .filter(Firmware.is_dirty)\
+                   .filter(Firmware.signed_timestamp == None)\
                    .first()
     if not fw:
         return

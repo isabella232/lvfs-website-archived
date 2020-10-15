@@ -84,7 +84,7 @@ class Firmware(db.Model):
     checksum_signed_sha1 = Column(String(40), nullable=False)
     checksum_signed_sha256 = Column(String(64), nullable=False)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
-    signed_timestamp = Column(DateTime, default=None)
+    signed_timestamp = Column(DateTime, default=None) # waiting to be signed
     is_dirty = Column(Boolean, default=False)  # waiting to be included in metadata
     _banned_country_codes = Column(
         "banned_country_codes", Text, default=None

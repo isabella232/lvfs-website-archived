@@ -227,6 +227,7 @@ def route_resign(firmware_id):
 
     # asynchronously sign
     fw.mark_dirty()
+    fw.signed_timestamp = None
     db.session.commit()
     _async_sign_fw.apply_async(args=(fw.firmware_id,), queue='firmware')
 
