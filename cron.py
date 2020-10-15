@@ -17,11 +17,8 @@ from lvfs import app, db, ploader
 
 from lvfs.components.models import Component
 from lvfs.firmware.models import Firmware
-from lvfs.metadata.models import Remote
 from lvfs.users.models import User
 from lvfs.util import _get_sanitized_basename
-from lvfs.vendors.models import Vendor
-from lvfs.vendors.utils import _vendor_hash
 
 def _repair_fn():
     for firmware_id, in db.session.query(Firmware.firmware_id)\
@@ -54,32 +51,6 @@ def _fsck():
         fn = fw.absolute_path
         if not os.path.isfile(fn):
             print('firmware {} is missing, expected {}'.format(fw.firmware_id, fn))
-
-def _repair_vendor():
-
-    # fix all the checksums and file sizes
-    for v in db.session.query(Vendor):
-        hmac_dig = _vendor_hash(v)
-        icon = 'vendor-{}.png'.format(hmac_dig)
-        if v.icon and icon != v.icon:
-            print('moving {} to {}'.format(v.icon, icon))
-            try:
-                os.rename(os.path.join(app.config['UPLOAD_DIR'], v.icon),
-                          os.path.join(app.config['UPLOAD_DIR'], icon))
-                v.icon = icon
-            except FileNotFoundError as _:
-                pass
-        if not v.legal_name:
-            v.legal_name = v.display_name
-
-    for r in db.session.query(Remote):
-        if not r.access_token:
-            # this is to preserve compatibility with old clients
-            salt = app.config['SECRET_VENDOR_SALT']
-            r.access_token = hashlib.sha1((salt + r.name[8:]).encode('utf-8')).hexdigest()
-
-    # all done
-    db.session.commit()
 
 def _repair_tests():
 
@@ -181,8 +152,6 @@ def _main_with_app_context():
         _repair_fn()
     if 'repair-csum' in sys.argv:
         _repair_csum()
-    if 'repair-vendor' in sys.argv:
-        _repair_vendor()
     if 'repair-verfmt' in sys.argv:
         _repair_verfmt()
     if 'repair-tests' in sys.argv:
