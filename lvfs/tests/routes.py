@@ -16,7 +16,7 @@ from lvfs import db, ploader, tq
 from lvfs.tests.models import Test
 from lvfs.util import admin_login_required
 
-from .utils import _async_test_run, _async_test_run_all
+from .utils import _async_test_run, _async_test_run_all, _async_test_ensure
 
 bp_tests = Blueprint('tests', __name__, template_folder='templates')
 
@@ -163,6 +163,17 @@ def route_retry(test_id):
     # log
     flash('Test %s will be re-run soon' % test.plugin_id, 'info')
     return redirect(url_for('firmware.route_tests', firmware_id=test.fw.firmware_id))
+
+@bp_tests.route('/ensure', methods=['POST'])
+@login_required
+@admin_login_required
+def route_ensure():
+
+    # asynchronously run
+    _async_test_ensure.apply_async()
+
+    flash('All firmware will be scanned and new tests added soon', 'info')
+    return redirect(url_for('tests.route_overview'))
 
 @bp_tests.route('/waive/<int:test_id>', methods=['POST'])
 @login_required

@@ -89,9 +89,9 @@ class Firmware(db.Model):
     _banned_country_codes = Column(
         "banned_country_codes", Text, default=None
     )  # ISO 3166, delimiter ','
-    report_success_cnt = Column(Integer, default=0)  # updated by cron.py
-    report_failure_cnt = Column(Integer, default=0)  # updated by cron.py
-    report_issue_cnt = Column(Integer, default=0)  # updated by cron.py
+    report_success_cnt = Column(Integer, default=0)  # updated by celery task
+    report_failure_cnt = Column(Integer, default=0)  # updated by celery task
+    report_issue_cnt = Column(Integer, default=0)  # updated by celery task
     failure_minimum = Column(Integer, default=0)
     failure_percentage = Column(Integer, default=0)
     _do_not_track = Column("do_not_track", Boolean, default=False)
