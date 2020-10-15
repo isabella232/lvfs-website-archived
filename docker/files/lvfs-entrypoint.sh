@@ -19,5 +19,5 @@ fi
 if [ "$DEPLOY" = "beat" ]
 then
     PATH="/app/env/bin:$PATH"
-    celery -A lvfs.tq beat
+    FLASK_APP=lvfs/__init__.py celery -A lvfs.tq beat
 fi
