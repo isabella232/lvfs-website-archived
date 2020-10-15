@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from lvfs import db, ploader, tq
 
+from lvfs.firmware.models import Firmware
 from lvfs.tests.models import Test
 from lvfs.util import _event_log
 
@@ -105,3 +106,16 @@ def _async_test_run_for_firmware(firmware_id):
     if not tests:
         return
     _test_run_all(tests)
+
+@tq.task(max_retries=3, default_retry_delay=60, task_time_limit=60 * 60)
+def _async_test_ensure():
+
+    # ensure the test has been added for the firmware type
+    for firmware_id, in db.session.query(Firmware.firmware_id)\
+                                  .order_by(Firmware.timestamp):
+        fw = db.session.query(Firmware)\
+                       .filter(Firmware.firmware_id == firmware_id)\
+                       .one()
+        if not fw.is_deleted:
+            ploader.ensure_test_for_fw(fw)
+            db.session.commit()
