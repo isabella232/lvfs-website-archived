@@ -229,7 +229,7 @@ class ComponentShard(db.Model):
             if not os.path.exists(fn):
                 return None
             with open(fn, "rb") as f:
-                self._blob = zlib.decompress(f.read())
+                self._blob = zlib.decompressobj().decompress(f.read())
         return self._blob
 
     @blob.setter
