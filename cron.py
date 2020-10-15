@@ -9,7 +9,6 @@
 
 import os
 import sys
-import hashlib
 
 from flask import g
 
@@ -75,43 +74,6 @@ def _repair_verfmt():
     # all done
     db.session.commit()
 
-def _repair_csum():
-
-    # fix all the checksums and file sizes
-    for firmware_id, in db.session.query(Firmware.firmware_id)\
-                                  .order_by(Firmware.firmware_id.asc()):
-        fw = db.session.query(Firmware)\
-                       .filter(Firmware.firmware_id == firmware_id)\
-                       .one()
-        try:
-            print('checking {}…'.format(fw.filename_absolute))
-            fn = fw.absolute_path
-            with open(fn, 'rb') as f:
-                buf = f.read()
-                checksum_signed_sha1 = hashlib.sha1(buf).hexdigest()
-                if checksum_signed_sha1 != fw.checksum_signed_sha1:
-                    print('repairing checksum from {} to {}'.format(fw.checksum_signed_sha1,
-                                                                    checksum_signed_sha1))
-                    fw.checksum_signed_sha1 = checksum_signed_sha1
-                    fw.mark_dirty()
-                checksum_signed_sha256 = hashlib.sha256(buf).hexdigest()
-                if checksum_signed_sha256 != fw.checksum_signed_sha256:
-                    print('repairing checksum from {} to {}'.format(fw.checksum_signed_sha256,
-                                                                    checksum_signed_sha256))
-                    fw.checksum_signed_sha256 = checksum_signed_sha256
-                    fw.mark_dirty()
-            sz = os.path.getsize(fn)
-            for md in fw.mds:
-                if sz != md.release_download_size:
-                    print('repairing size from {} to {}'.format(md.release_download_size, sz))
-                    md.release_download_size = sz
-                    md.fw.mark_dirty()
-        except FileNotFoundError as _:
-            print('skipping {}'.format(fw.filename_absolute))
-
-    # all done
-    db.session.commit()
-
 def _ensure_tests():
 
     # ensure the test has been added for the firmware type
@@ -127,8 +89,6 @@ def _ensure_tests():
 def _main_with_app_context():
     if 'repair-fn' in sys.argv:
         _repair_fn()
-    if 'repair-csum' in sys.argv:
-        _repair_csum()
     if 'repair-verfmt' in sys.argv:
         _repair_verfmt()
     if 'fsck' in sys.argv:
