@@ -17,29 +17,6 @@ from lvfs import app, db, ploader
 from lvfs.components.models import Component
 from lvfs.firmware.models import Firmware
 from lvfs.users.models import User
-from lvfs.util import _get_sanitized_basename
-
-def _repair_fn():
-    for firmware_id, in db.session.query(Firmware.firmware_id)\
-                                  .order_by(Firmware.firmware_id.asc()):
-        fw = db.session.query(Firmware)\
-                       .filter(Firmware.firmware_id == firmware_id)\
-                       .one()
-        filename = _get_sanitized_basename(fw.filename)
-        if filename != fw.filename:
-
-            print('moving {} to {}'.format(fw.filename, filename))
-            fn_old = fw.absolute_path
-            fn_new = os.path.join(os.path.dirname(fn_old), filename)
-            try:
-                os.rename(fn_old, fn_new)
-                fw.filename = filename
-                fw.mark_dirty()
-            except FileNotFoundError as _:
-                pass
-
-    # all done
-    db.session.commit()
 
 def _fsck():
     for firmware_id, in db.session.query(Firmware.firmware_id)\
@@ -87,8 +64,6 @@ def _ensure_tests():
             db.session.commit()
 
 def _main_with_app_context():
-    if 'repair-fn' in sys.argv:
-        _repair_fn()
     if 'repair-verfmt' in sys.argv:
         _repair_verfmt()
     if 'fsck' in sys.argv:
