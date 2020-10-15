@@ -7,7 +7,6 @@
 #
 # pylint: disable=singleton-comparison
 
-import os
 import sys
 
 from flask import g
@@ -16,16 +15,6 @@ from lvfs import app, db, ploader
 
 from lvfs.firmware.models import Firmware
 from lvfs.users.models import User
-
-def _fsck():
-    for firmware_id, in db.session.query(Firmware.firmware_id)\
-                                  .order_by(Firmware.firmware_id.asc()):
-        fw = db.session.query(Firmware)\
-                       .filter(Firmware.firmware_id == firmware_id)\
-                       .one()
-        fn = fw.absolute_path
-        if not os.path.isfile(fn):
-            print('firmware {} is missing, expected {}'.format(fw.firmware_id, fn))
 
 def _ensure_tests():
 
@@ -40,8 +29,6 @@ def _ensure_tests():
             db.session.commit()
 
 def _main_with_app_context():
-    if 'fsck' in sys.argv:
-        _fsck()
     if 'ensure' in sys.argv:
         _ensure_tests()
 
