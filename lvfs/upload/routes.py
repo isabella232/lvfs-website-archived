@@ -20,7 +20,6 @@ from lvfs import app, db, ploader, csrf
 
 from lvfs.agreements.models import Agreement
 from lvfs.categories.models import Category
-from lvfs.components.models import Component
 from lvfs.emails import send_email
 from lvfs.firmware.models import Firmware, FirmwareEvent
 from lvfs.firmware.utils import _firmware_delete, _async_sign_fw
@@ -187,25 +186,6 @@ def _upload_firmware():
             flash('Failed to upload file: A firmware file for this device with '
                   'version %s already exists' % ','.join(versions_for_display), 'danger')
             return redirect('/lvfs/firmware/%s' % fw.firmware_id)
-
-    # check if the file dropped a GUID previously supported
-    for umd in ufile.fw.mds:
-        new_guids = [guid.value for guid in umd.guids]
-        for md in db.session.query(Component).\
-                        filter(Component.appstream_id == umd.appstream_id):
-            if md.fw.is_deleted:
-                continue
-            for old_guid in [guid.value for guid in md.guids]:
-                if old_guid in new_guids:
-                    continue
-                fw_str = str(md.fw.firmware_id)
-                if g.user.check_acl('@qa') or g.user.check_acl('@robot'):
-                    flash('Firmware drops GUID {} previously supported '
-                          'in firmware {}'.format(old_guid, fw_str), 'warning')
-                else:
-                    flash('Firmware would drop GUID {} previously supported '
-                          'in firmware {}'.format(old_guid, fw_str), 'danger')
-                    return redirect(request.url)
 
     # allow plugins to copy any extra files from the source archive
     for cffile in ufile.cabarchive_upload.values():
