@@ -79,8 +79,8 @@ config values to their defaults.
 
 ## Running Celery ##
 
-    ./env/bin/celery -A lvfs.celery worker --queues metadata,firmware,celery,yara
-    ./env/bin/celery -A lvfs.celery beat
+    ./env/bin/celery -A lvfs.tq worker --queues metadata,firmware,celery,yara
+    ./env/bin/celery -A lvfs.tq beat
 
 ## Generating a SSL certificate ##
 

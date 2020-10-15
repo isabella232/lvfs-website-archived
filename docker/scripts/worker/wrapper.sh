@@ -21,7 +21,7 @@ while sleep 60; do
 	"checking for running processes"
 	ps aux | grep celery-worker.sh | grep -q -v grep
 	WORKER_STATUS=$?
-	ps aux | grep celery-beati.sh | grep -q -v grep
+	ps aux | grep celery-beat.sh | grep -q -v grep
 	BEAT_STATUS=$?
 	if [ $WORKER_STATUS -ne 0 -o $BEAT_STATUS -ne 0 ]; then
 		echo "A process has exited."

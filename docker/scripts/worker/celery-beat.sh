@@ -1,4 +1,4 @@
 #!/bin/bash
 
-#celery -A lvfs.celery beat
+celery -A lvfs.tq beat
 echo "started celery beat"
