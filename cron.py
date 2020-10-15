@@ -14,7 +14,6 @@ from flask import g
 
 from lvfs import app, db, ploader
 
-from lvfs.components.models import Component
 from lvfs.firmware.models import Firmware
 from lvfs.users.models import User
 
@@ -27,29 +26,6 @@ def _fsck():
         fn = fw.absolute_path
         if not os.path.isfile(fn):
             print('firmware {} is missing, expected {}'.format(fw.firmware_id, fn))
-
-def _repair_verfmt():
-
-    # fix all the checksums and file sizes
-    for component_id, in db.session.query(Component.component_id)\
-                                   .filter(Component.verfmt_id == None)\
-                                   .order_by(Component.component_id.asc()):
-        md = db.session.query(Component)\
-                       .filter(Component.component_id == component_id)\
-                       .one()
-        if md.protocol and md.protocol.verfmt:
-            md.verfmt = md.protocol.verfmt
-            print('repairing Component {} verfmt to {} using protocol {}'\
-                  .format(md.component_id, md.verfmt.value, md.protocol.value))
-            continue
-        if md.fw.vendor.verfmt and md.protocol and md.protocol.value == 'org.uefi.capsule':
-            md.verfmt = md.fw.vendor.verfmt
-            print('repairing Component {} verfmt to {} using vendor'\
-                  .format(md.component_id, md.verfmt.value))
-            continue
-
-    # all done
-    db.session.commit()
 
 def _ensure_tests():
 
@@ -64,8 +40,6 @@ def _ensure_tests():
             db.session.commit()
 
 def _main_with_app_context():
-    if 'repair-verfmt' in sys.argv:
-        _repair_verfmt()
     if 'fsck' in sys.argv:
         _fsck()
     if 'ensure' in sys.argv:
