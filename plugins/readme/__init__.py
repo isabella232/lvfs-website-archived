@@ -22,7 +22,7 @@ class Plugin(PluginBase):
         s.append(PluginSettingText('info_readme_filename', 'Filename',
                                    'README.txt'))
         s.append(PluginSettingText('info_readme_template', 'Template',
-                                   'plugins/info-readme/template.txt'))
+                                   'plugins/readme/template.txt'))
         return s
 
     def archive_finalize(self, cabarchive, metadata):
