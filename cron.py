@@ -15,45 +15,13 @@ from flask import g
 
 from lvfs import app, db, ploader
 
-from lvfs.categories.models import Category
 from lvfs.components.models import Component
 from lvfs.firmware.models import Firmware
 from lvfs.metadata.models import Remote
-from lvfs.protocols.models import Protocol
-from lvfs.upload.uploadedfile import UploadedFile, MetadataInvalid
 from lvfs.users.models import User
 from lvfs.util import _get_sanitized_basename
 from lvfs.vendors.models import Vendor
 from lvfs.vendors.utils import _vendor_hash
-
-def _repair_ts():
-
-    # fix any timestamps that are incorrect
-    for md in db.session.query(Component).filter(Component.release_timestamp < 1980):
-        fn = md.fw.absolute_path
-        if not os.path.exists(fn):
-            continue
-        print(fn, md.release_timestamp)
-        try:
-            ufile = UploadedFile(is_strict=False)
-            for cat in db.session.query(Category):
-                ufile.category_map[cat.value] = cat.category_id
-            for pro in db.session.query(Protocol):
-                ufile.protocol_map[pro.value] = pro.protocol_id
-            with open(fn, 'rb') as f:
-                ufile.parse(os.path.basename(fn), f.read())
-        except MetadataInvalid as e:
-            print('failed to parse file: {}'.format(str(e)))
-            continue
-        for md_local in ufile.fw.mds:
-            if md_local.appstream_id == md.appstream_id:
-                print('repairing timestamp from {} to {}'.format(md.release_timestamp,
-                                                                 md_local.release_timestamp))
-                md.release_timestamp = md_local.release_timestamp
-                md.fw.mark_dirty()
-
-    # all done
-    db.session.commit()
 
 def _repair_fn():
     for firmware_id, in db.session.query(Firmware.firmware_id)\
@@ -209,8 +177,6 @@ def _ensure_tests():
             db.session.commit()
 
 def _main_with_app_context():
-    if 'repair-ts' in sys.argv:
-        _repair_ts()
     if 'repair-fn' in sys.argv:
         _repair_fn()
     if 'repair-csum' in sys.argv:
