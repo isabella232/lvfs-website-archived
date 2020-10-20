@@ -1,0 +1,26 @@
+{% extends "default.html" %}
+{% block title %}File System Checks{% endblock %}
+
+{% block content %}
+
+<form action="{{url_for('fsck.route_update_descriptions')}}" method="POST">
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">
+      Update Description
+    </h2>
+    <p class="card-text">
+      Replace text in the update description. Be careful!
+    </p>
+    <div class="form-group">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+      <input class="" type="text" name="search" value="" required/>
+      →
+      <input class="" type="text" name="replace" value="" required/>
+    </div>
+    <input class="card-link btn btn-warning" type="submit" value="Go!"/>
+  </div>
+</div>
+</form>
+
+{% endblock %}
