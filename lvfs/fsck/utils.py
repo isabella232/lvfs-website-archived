@@ -13,6 +13,8 @@ from lvfs.components.models import Component
 def _fsck_update_descriptions(search: str, replace: str):
 
     for md in db.session.query(Component):
+        if not md.release_description:
+            continue
         if md.release_description.find(search) != -1:
             md.release_description = md.release_description.replace(search, replace)
     db.session.commit()
