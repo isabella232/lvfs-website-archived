@@ -101,7 +101,7 @@ def route_fw(max_results=100):
     # try CVE, e.g. CVE-2018-3646
     if not fws:
         fws = db.session.query(Firmware).join(Component).join(ComponentIssue).\
-                               filter(ComponentIssue.value.in_(keywords)).\
+                               filter(func.lower(ComponentIssue.value).in_(keywords)).\
                                distinct(ComponentKeyword.component_id).\
                                order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
