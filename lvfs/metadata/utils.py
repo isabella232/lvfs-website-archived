@@ -22,7 +22,7 @@ from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 
 from lvfs import db, app, ploader, tq
 
-from lvfs.components.models import Component
+from lvfs.components.models import Component, ComponentRequirement
 from lvfs.firmware.models import Firmware
 from lvfs.util import _get_settings, _xml_from_markdown, _event_log
 from lvfs.verfmts.models import Verfmt
@@ -58,6 +58,17 @@ def _use_hex_release_version(md: Component) -> bool:
     if not md.verfmt or md.verfmt.value == 'plain':
         return False
     return True
+
+def _get_unique_requirements(mds: List[Component], kind: str):
+    rqs_unique: Dict[str, ComponentRequirement] = {}
+    for md in mds:
+        for rq in md.requirements:
+            if rq.kind != kind:
+                continue
+            if str(rq) in rqs_unique:
+                continue
+            rqs_unique[str(rq)] = rq
+    return rqs_unique.values()
 
 def _generate_metadata_mds(mds: List[Component],
                            firmware_baseuri: str = '',
@@ -342,36 +353,30 @@ def _generate_metadata_mds(mds: List[Component],
             requires.append(child)
 
     # add requires for <id>
-    for md in mds:
-        for rq in md.requirements:
-            if rq.kind != 'id':
-                continue
-            child = ET.Element(rq.kind)
-            if rq.value:
-                child.text = rq.value
-            if rq.compare:
-                child.set('compare', rq.compare)
-            if rq.version:
-                child.set('version', rq.version)
-            if rq.depth:
-                child.set('depth', rq.depth)
-            requires.append(child)
+    for rq in _get_unique_requirements(mds, 'id'):
+        child = ET.Element(rq.kind)
+        if rq.value:
+            child.text = rq.value
+        if rq.compare:
+            child.set('compare', rq.compare)
+        if rq.version:
+            child.set('version', rq.version)
+        if rq.depth:
+            child.set('depth', rq.depth)
+        requires.append(child)
 
     # add requires for <firmware>
-    for md in mds:
-        for rq in md.requirements:
-            if rq.kind != 'firmware':
-                continue
-            child = ET.Element(rq.kind)
-            if rq.value:
-                child.text = rq.value
-            if rq.compare:
-                child.set('compare', rq.compare)
-            if rq.version:
-                child.set('version', rq.version)
-            if rq.depth:
-                child.set('depth', rq.depth)
-            requires.append(child)
+    for rq in _get_unique_requirements(mds, 'firmware'):
+        child = ET.Element(rq.kind)
+        if rq.value:
+            child.text = rq.value
+        if rq.compare:
+            child.set('compare', rq.compare)
+        if rq.version:
+            child.set('version', rq.version)
+        if rq.depth:
+            child.set('depth', rq.depth)
+        requires.append(child)
 
     # add a single requirement for <hardware>
     rq_hws: List[str] = []
