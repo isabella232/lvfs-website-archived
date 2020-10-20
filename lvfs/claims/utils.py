@@ -37,7 +37,7 @@ def _check_both(problems: List[Claim], txt: str):
         _add_problem(problems, "Uppercase only sentences are not allowed", txt)
     if txt.find("http://") != -1 or txt.find("https://") != -1:
         _add_problem(problems, "Links cannot be included in update descriptions", txt)
-    if txt.find("CVE-") != -1:
+    if txt.find("CVE-") != -1 or txt.find("CVE201") != -1 or txt.find("CVE202") != -1:
         _add_problem(problems, "CVEs in update description")
     if txt.find("LEN-") != -1:
         _add_problem(problems, "Lenovo-specific security advisory tag in description")
