@@ -37,6 +37,9 @@ def _check_both(problems: List[Claim], txt: str):
         _add_problem(problems, "Uppercase only sentences are not allowed", txt)
     if txt.find("http://") != -1 or txt.find("https://") != -1:
         _add_problem(problems, "Links cannot be included in update descriptions", txt)
+
+    # look for tokens that should not exist in the update description
+    txt = txt.upper().replace('_', '-')
     if txt.find("CVE-") != -1 or txt.find("CVE201") != -1 or txt.find("CVE202") != -1:
         _add_problem(problems, "CVEs in update description")
     if txt.find("LEN-") != -1:
@@ -47,7 +50,7 @@ def _check_both(problems: List[Claim], txt: str):
         _add_problem(problems, "Intel-specific security advisory tag in description")
     if txt.find("INTEL-TA-") != -1:
         _add_problem(problems, "Intel-specific technical advisory tag in description")
-    if txt.find("REMOVE_ME") != -1:
+    if txt.find("REMOVE-ME") != -1:
         _add_problem(problems, "Description should be checked after importing issues")
 
 
