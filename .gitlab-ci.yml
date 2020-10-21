@@ -6,7 +6,6 @@ stages:
     - deploy
 
 build:
-  when: manual
   image: docker:latest
   stage: build
   only:
