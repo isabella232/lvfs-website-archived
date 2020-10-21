@@ -72,6 +72,8 @@ docs:
 
 tag for release:
   image: docker:latest
+  services:
+    - docker:dind
   stage: tag
   when: manual
   before_script:
