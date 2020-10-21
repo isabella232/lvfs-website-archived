@@ -6,6 +6,7 @@ stages:
     - deploy
 
 build:
+  when: manual
   image: docker:latest
   stage: build
   only:
@@ -82,7 +83,7 @@ tag for release:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
-    - docker tag "$CI_COMMIT_SHORT_SHA" fwupd/lvfs-website:latest
+    - docker tag fwupd/lvfs-website:"$CI_COMMIT_SHORT_SHA" fwupd/lvfs-website:latest
     - docker push fwupd/lvfs-website:latest
     
 deploy web:
