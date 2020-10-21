@@ -71,6 +71,7 @@ docs:
     - master
 
 tag for release:
+  image: docker:latest
   stage: tag
   when: manual
   before_script:
