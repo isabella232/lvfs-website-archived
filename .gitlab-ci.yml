@@ -81,10 +81,8 @@ tag for release:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - echo "#### variable expansion test ####"
-    - echo "ci registry image $CI_REGISTRY_IMAGE"
-    - echo "ci commit short sha $CI_COMMIT_SHORT_SHA"
-    - echo "#### variable expansion test ####"
+    - echo ci registry image "$CI_REGISTRY_IMAGE"
+    - echo ci commit short sha "$CI_COMMIT_SHORT_SHA"
     - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker image ls
     - docker tag lvfs-website:"$CI_COMMIT_SHORT_SHA" lvfs-website:latest
