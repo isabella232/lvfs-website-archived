@@ -28,7 +28,7 @@ from lvfs.util import _get_datestr_from_datetime, _split_search_string
 from lvfs.util import admin_login_required
 from lvfs.util import _get_chart_labels_months, _get_chart_labels_days
 
-from .models import AnalyticUseragent, AnalyticUseragentKind, AnalyticVendor
+from .models import AnalyticUseragent, AnalyticUseragentKind, AnalyticVendor, AnalyticFirmware
 from .utils import _async_generate_stats
 
 bp_analytics = Blueprint('analytics', __name__, template_folder='templates')
@@ -373,6 +373,76 @@ def route_vendor(timespan_days=30, vendor_cnt=6, smoothing=0):
         datasets.append(dataset)
 
     return render_template('analytics-vendor.html',
+                           category='analytics',
+                           labels_user_agent=_get_chart_labels_days(timespan_days)[::-1],
+                           datasets=datasets)
+
+@bp_analytics.route('/firmware')
+@bp_analytics.route('/firmware/<int:timespan_days>')
+@bp_analytics.route('/firmware/<int:timespan_days>/<int:firmware_cnt>')
+@bp_analytics.route('/firmware/<int:timespan_days>/<int:firmware_cnt>/<int:smoothing>')
+@login_required
+@admin_login_required
+def route_firmware(timespan_days=30, firmware_cnt=6, smoothing=0):
+    """ A analytics screen to show information about users """
+
+    # get data for this time period
+    cnt_total = defaultdict(int)
+    cached_cnt = defaultdict(int)
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    datestr_start = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=timespan_days))
+    datestr_end = _get_datestr_from_datetime(yesterday)
+    print('get data for', datestr_start, datestr_end)
+    for ug in db.session.query(AnalyticFirmware)\
+                        .filter(AnalyticFirmware.cnt > 5)\
+                        .filter(and_(AnalyticFirmware.datestr >= datestr_start,
+                                     AnalyticFirmware.datestr <= datestr_end)):
+        display_name = ug.firmware.md_prio.names[0]
+        key = str(ug.datestr) + display_name
+        cached_cnt[key] += ug.cnt
+        cnt_total[display_name] += ug.cnt
+
+    # find most popular user agent strings
+    most_popular = []
+    for key, value in sorted(iter(cnt_total.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
+        most_popular.append(key)
+        if len(most_popular) >= firmware_cnt:
+            break
+
+    # optionally smooth
+    if not smoothing:
+        smoothing = int(timespan_days / 25)
+
+    # generate enough for the template
+    datasets = []
+    palette = [
+        'ef4760',   # red
+        'ffd160',   # yellow
+        '06c990',   # green
+        '2f8ba0',   # teal
+        '845f80',   # purple
+        'ee8510',   # orange
+    ]
+    idx = 0
+    for value in sorted(most_popular):
+        dataset = {}
+        dataset['label'] = value
+        dataset['color'] = palette[idx % 6]
+        idx += 1
+        data = []
+        for i in range(timespan_days, 0, -1):
+            datestr = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=i))
+            key = str(datestr) + value
+            dataval = 0
+            if key in cached_cnt:
+                dataval = cached_cnt[key]
+            data.append(dataval)
+        if smoothing > 1:
+            data = _running_mean(data, smoothing)
+        dataset['data'] = json.dumps(data)
+        datasets.append(dataset)
+
+    return render_template('analytics-firmware.html',
                            category='analytics',
                            labels_user_agent=_get_chart_labels_days(timespan_days)[::-1],
                            datasets=datasets)
