@@ -81,6 +81,7 @@ tag for release:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
+    - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker image ls
     - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" lvfs-website:latest
     - docker image ls
