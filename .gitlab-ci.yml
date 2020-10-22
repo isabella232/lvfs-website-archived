@@ -83,9 +83,9 @@ tag for release:
   script:
     - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker image ls
-    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" lvfs-website:latest
+    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
     - docker image ls
-    - docker push lvfs-website:latest
+    - docker push "$CI_REGISTRY_IMAGE:latest"
     
 deploy web:
   stage: deploy
