@@ -1,13 +1,12 @@
 stages:
     - build
-    - test
     - docs
-    - tag
     - deploy
 
 build:
   image: docker:latest
   stage: build
+  interruptible: true
   only:
     - master
   services:
@@ -20,7 +19,8 @@ build:
 
 test:
   image: centos:centos8
-  stage: test
+  stage: build
+  interruptible: true
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
@@ -52,10 +52,8 @@ test:
     - pip install pip -U
     - pip install -r requirements.txt --use-feature=2020-resolver
     - pip install mypy
-    # required for tests
     - redis-server &
   script:
-    #- source env/bin/activate
     - pytest --cov=lvfs --cov=plugins --cov=pkgversion --cov=infparser --cov=cabarchive --cov-fail-under=60
     - env/bin/python ./pylint_test.py
 
@@ -63,6 +61,8 @@ docs:
   when: manual
   image: alpine:latest
   stage: docs
+  interruptible: true
+  allow_failure: true
   variables:
     TOKEN: "$RTD_TOKEN"
   script:
@@ -75,21 +75,21 @@ tag for release:
   image: docker:latest
   services:
     - docker:dind
-  stage: tag
+  stage: deploy
   when: manual
+  interruptible: true
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
-    - docker image ls
     - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
-    - docker image ls
     - docker push "$CI_REGISTRY_IMAGE:latest"
     
 deploy web:
   stage: deploy
   when: manual
   image: python:latest
+  interruptible: true
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_WEB_SERVICE" --force-new-deployment --region us-west-2
@@ -100,6 +100,7 @@ deploy metadata:
   stage: deploy
   when: manual
   image: python:latest
+  interruptible: true
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_METADATA_SERVICE" --force-new-deployment --region us-west-2
@@ -110,6 +111,7 @@ deploy yara:
   stage: deploy
   when: manual
   image: python:latest
+  interruptible: true
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_YARA_SERVICE" --force-new-deployment --region us-west-2
@@ -120,6 +122,7 @@ deploy beat:
   stage: deploy
   when: manual
   image: python:latest
+  interruptible: true
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_BEAT_SERVICE" --force-new-deployment --region us-west-2
