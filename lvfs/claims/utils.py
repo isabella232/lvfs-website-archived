@@ -32,7 +32,7 @@ def _add_problem(
     )
 
 
-def _check_both(problems: List[Claim], txt: str):
+def _check_both(problems: List[Claim], txt: str) -> None:
     if txt.isupper():
         _add_problem(problems, "Uppercase only sentences are not allowed", txt)
     if txt.find("http://") != -1 or txt.find("https://") != -1:

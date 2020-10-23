@@ -12,12 +12,14 @@ import hashlib
 import os
 import random
 import uuid
+from typing import Dict, List
 
 from sqlalchemy import func
+from sqlalchemy.orm import Query
 
-def _execute_count_star(q) -> int:
+def _execute_count_star(q: Query) -> int:
     count_query = q.statement.with_only_columns([func.count()]).order_by(None)
-    return q.session.execute(count_query).scalar()
+    return int(q.session.execute(count_query).scalar())
 
 def _make_boring(val: str) -> str:
     out = ''
@@ -39,11 +41,6 @@ def _make_boring(val: str) -> str:
         out = out.replace(suffix, '')
     return out
 
-def _should_anonymize(v):
-    if v.group_id == 'hughski': # this is my hobby; I have no secrets
-        return False
-    return True
-
 def _make_fake_ip_address() -> str:
     return '%i.%i.%i.%i' % (random.randint(1, 254),
                             random.randint(1, 254),
@@ -55,12 +52,12 @@ def _make_fake_version() -> str:
                          random.randint(1, 16),
                          random.randint(1, 254))
 
-def anonymize_db(db):
+def anonymize_db(db) -> None:
     from .vendors.models import Vendor
     from .firmware.models import Firmware
 
     # get vendor display names
-    vendor_names = []
+    vendor_names: List[str] = []
     with gzip.open('data/vendors.txt.gz', 'rb') as f:
         for ln in f.read().decode().split('\n'):
             if not ln:
@@ -69,7 +66,7 @@ def anonymize_db(db):
     random.shuffle(vendor_names)
 
     # get some plausible user names
-    user_names = []
+    user_names: List[str] = []
     with gzip.open('data/users.txt.gz', 'rb') as f:
         for ln in f.read().decode().split('\n'):
             if not ln:
@@ -78,7 +75,7 @@ def anonymize_db(db):
     random.shuffle(user_names)
 
     # get some plausible device names
-    device_names = []
+    device_names: List[str] = []
     with gzip.open('data/devices.txt.gz', 'rb') as f:
         for ln in f.read().decode().split('\n'):
             if not ln:
@@ -87,9 +84,9 @@ def anonymize_db(db):
     random.shuffle(device_names)
 
     # get some random words for keywords
-    generic_words = []
-    with open('/usr/share/dict/words', 'rb') as f:
-        for ln in f.read().decode().split('\n'):
+    generic_words: List[str] = []
+    with open('/usr/share/dict/words', 'rb') as f2:
+        for ln in f2.read().decode().split('\n'):
             if not ln:
                 continue
             generic_words.append(ln)
@@ -100,7 +97,7 @@ def anonymize_db(db):
     idx_user_names = 0
     idx_vendor_names = 0
     for v in db.session.query(Vendor):
-        if not _should_anonymize(v):
+        if not v.should_anonymize:
             continue
         v.display_name = vendor_names[idx_vendor_names]
         v.group_id = _make_boring(v.display_name)
@@ -132,9 +129,9 @@ def anonymize_db(db):
 
     # anonymize firmware
     idx_device_names = 0
-    device_names_existing = {}
+    device_names_existing: Dict[str, str] = {}
     for fw in db.session.query(Firmware):
-        if not _should_anonymize(fw.vendor):
+        if not fw.vendor.should_anonymize:
             continue
         for md in fw.mds:
             md.checksum_contents_sha1 = hashlib.sha1(os.urandom(32)).hexdigest()
@@ -184,7 +181,7 @@ def anonymize_db(db):
     # phew!
     db.session.commit()
 
-def init_db(db):
+def init_db(db) -> None:
 
     # ensure all tables exist
     db.metadata.create_all(bind=db.engine)
@@ -245,5 +242,5 @@ def init_db(db):
                             vendor_id=1))
         db.session.commit()
 
-def drop_db(db):
+def drop_db(db) -> None:
     db.metadata.drop_all(bind=db.engine)

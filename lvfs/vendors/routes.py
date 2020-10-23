@@ -36,7 +36,7 @@ from .utils import _vendor_hash
 bp_vendors = Blueprint('vendors', __name__, template_folder='templates')
 
 def _count_vendor_fws_public(vendor: Vendor, remote_name: str) -> int:
-    dedupe_csum = {}
+    dedupe_csum: Dict[str, bool] = {}
     for fw in vendor.fws:
         if fw.remote.name == remote_name:
             dedupe_csum[fw.checksum_upload_sha256] = True
@@ -50,12 +50,12 @@ def _count_vendor_fws_downloads(vendor: Vendor, remote_name: str) -> int:
     return cnt
 
 def _count_vendor_fws_devices(vendor: Vendor, remote_name: str) -> int:
-    guids = {}
+    guids: Dict[str, bool] = {}
     for fw in vendor.fws:
         if fw.remote.name == remote_name:
             for md in fw.mds:
                 for gu in md.guids:
-                    guids[gu.value] = 1
+                    guids[gu.value] = True
     return len(guids)
 
 class VendorStat:
@@ -85,9 +85,9 @@ def _get_vendorlist_stats(vendors: List[Vendor],
         stat.testing += cnt_testing
 
     # build graph data
-    labels = []
-    data_stable = []
-    data_testing = []
+    labels: List[str] = []
+    data_stable: List[float] = []
+    data_testing: List[float] = []
     keys: Iterable = display_names.items()
     vendors = sorted(list(keys),
                      key=lambda k: k[1].stable + k[1].testing,
@@ -104,7 +104,7 @@ def _abs_to_pc(data: List[float], data_other: List[float]) -> List[float]:
         total += num
     for num in data_other:
         total += num
-    data_pc = []
+    data_pc: List[float] = []
     for num in data:
         data_pc.append(round(num * 100 / total, 2))
     return data_pc
@@ -748,7 +748,7 @@ def route_affiliations(vendor_id):
     }
 
     # add other vendors
-    vendors = []
+    vendors: List[Vendor] = []
     for v in db.session.query(Vendor).order_by(Vendor.display_name):
         if v.vendor_id == vendor_id:
             continue
@@ -906,7 +906,7 @@ def route_exports(vendor_id):
         return redirect(url_for('vendors.route_show', vendor_id=vendor_id))
 
     # add other vendors
-    vendors = []
+    vendors: List[Vendor] = []
     for v in db.session.query(Vendor).order_by(Vendor.display_name):
         if v.vendor_id == vendor_id:
             continue

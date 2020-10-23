@@ -7,6 +7,7 @@
 
 import os
 import sys
+from typing import List
 
 from glob import glob
 from pylint import epylint
@@ -16,7 +17,7 @@ def main():
     # find python files
     filenames = [y for x in os.walk('.') for y in glob(os.path.join(x[0], '*.py'))]
     rc = 0
-    argv = []
+    argv: List[str] = []
     for fn in sorted(filenames):
         if fn == 'setup.py':
             continue

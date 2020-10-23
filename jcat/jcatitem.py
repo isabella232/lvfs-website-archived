@@ -5,28 +5,24 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from . jcatblob import JcatBlob
 
 class JcatItem():
 
-    def __init__(self, jid: str = None):
+    def __init__(self, jid: Optional[str] = None):
         self.id = jid
         self.blobs: List[JcatBlob] = []
         self.alias_ids: List[str] = []
 
-    def save(self):
-        node = {}
+    def save(self) -> Dict[str, Any]:
+        node: Dict[str, Any] = {}
         node['Id'] = self.id
         if self.alias_ids:
-            node['AliasIds'] = []
-            for jid in self.alias_ids:
-                node['AliasIds'].append(jid)
+            node['AliasIds'] = self.alias_ids
         if self.blobs:
-            node['Blobs'] = []
-            for blob in self.blobs:
-                node['Blobs'].append(blob.save())
+            node['Blobs'] = [blob.save() for blob in self.blobs]
         return node
 
     def load(self, node: Dict[str, Any]) -> None:
@@ -50,5 +46,5 @@ class JcatItem():
             return
         self.alias_ids.append(jid)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'JcatItem({})'.format(self.id)

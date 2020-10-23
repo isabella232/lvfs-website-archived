@@ -63,7 +63,7 @@ class UserCertificate(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "UserCertificate object %s" % self.serial
 
 
@@ -78,7 +78,7 @@ class UserAction(db.Model):
 
     user = relationship("User", foreign_keys=[user_id], back_populates="actions")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<UserAction {}>".format(self.value)
 
 
@@ -188,7 +188,7 @@ class User(db.Model):
     def verify_totp(self, token: str) -> bool:
         return onetimepass.valid_totp(token, self.otp_secret)
 
-    def check_acl(self, action: str = None) -> bool:
+    def check_acl(self, action: Optional[str] = None) -> bool:
 
         # disabled users can do nothing
         if self.auth_type == "disabled":
@@ -286,5 +286,5 @@ class User(db.Model):
     def get_id(self) -> str:
         return str(self.username)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "User object %s" % self.username

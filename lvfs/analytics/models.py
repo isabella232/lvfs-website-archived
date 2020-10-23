@@ -22,7 +22,7 @@ class Analytic(db.Model):
     datestr = Column(Integer, primary_key=True)
     cnt = Column(Integer, default=1)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Analytic object %s" % self.datestr
 
 
@@ -39,7 +39,7 @@ class AnalyticVendor(db.Model):
 
     vendor = relationship("Vendor", foreign_keys=[vendor_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "AnalyticVendor object %s:%s" % (self.datestr, self.vendor_id)
 
 
@@ -56,7 +56,7 @@ class AnalyticFirmware(db.Model):
 
     firmware = relationship("Firmware", foreign_keys=[firmware_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "AnalyticFirmware object %s:%s" % (self.datestr, self.firmware_id)
 
 
@@ -77,5 +77,5 @@ class AnalyticUseragent(db.Model):
     value = Column(Text, default=None)
     cnt = Column(Integer, default=1)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "AnalyticUseragent object {}:{}".format(self.kind, self.datestr)

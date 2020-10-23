@@ -31,7 +31,7 @@ class TestAttribute(db.Model):
 
     test = relationship("Test", back_populates="attributes")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "TestAttribute object %s=%s" % (self.title, self.message)
 
 
@@ -62,12 +62,12 @@ class Test(db.Model):
 
     fw = relationship("Firmware", back_populates="tests")
 
-    def add_pass(self, title, message: str = None) -> None:
+    def add_pass(self, title, message: Optional[str] = None) -> None:
         self.attributes.append(
             TestAttribute(title=title, message=message, success=True)
         )
 
-    def add_fail(self, title, message: str = None) -> None:
+    def add_fail(self, title, message: Optional[str] = None) -> None:
         self.attributes.append(
             TestAttribute(title=title, message=message, success=False)
         )
@@ -156,5 +156,5 @@ class Test(db.Model):
                 return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Test object %s(%s)" % (self.plugin_id, self.success)

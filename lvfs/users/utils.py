@@ -8,11 +8,13 @@
 # pylint: disable=singleton-comparison
 
 import datetime
+from typing import List
 
 from flask import render_template
 
 from lvfs import db, tq
 
+from lvfs.firmware.models import Firmware
 from lvfs.emails import send_email
 from lvfs.util import _event_log
 from .models import User
@@ -57,8 +59,8 @@ def _user_email_report():
                           .filter(User.auth_type != 'disabled'):
         if not user.get_action('notify-non-public'):
             continue
-        fws_embargo = []
-        fws_testing = []
+        fws_embargo: List[Firmware] = []
+        fws_testing: List[Firmware] = []
         for fw in user.fws:
             if fw.target_duration < datetime.timedelta(days=30):
                 continue

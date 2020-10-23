@@ -41,7 +41,7 @@ class JcatBlob():
             return 0
         return len(self.data)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'JcatBlob({}:{:x})'.format(str(self.kind), len(self))
 
     def save(self) -> Dict[str, Any]:
@@ -55,7 +55,7 @@ class JcatBlob():
             node['Data'] = self.data.decode()
         return node
 
-    def load(self, node):
+    def load(self, node: Dict[str, Any]) -> None:
         self.kind = node.get('Kind', JcatBlobKind.UNKNOWN)
         self.flags = node.get('Flags', 0)
         self.appstream_id = node.get('AppstreamId', None)

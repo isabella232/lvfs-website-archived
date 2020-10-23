@@ -31,9 +31,9 @@ def _fix_component_name(name: Optional[str],
     for nuke in ['(R)']:
         name = name.replace(nuke, '')
 
-    words_new = []
-    words_banned = ['firmware', 'update', 'system', 'device', 'bios', 'me',
-                    'embedded', 'controller']
+    words_new: List[str] = []
+    words_banned: List[str] = ['firmware', 'update', 'system', 'device', 'bios',
+                               'me', 'embedded', 'controller']
     if developer_name:
         words_banned.append(developer_name.lower())
     for word in name.split(' '):
@@ -73,7 +73,7 @@ def _validate_guid(guid: str) ->bool:
 
 def _unwrap_xml_text(txt: str) -> str:
     txt = txt.replace('\r', '')
-    new_lines = []
+    new_lines: List[str] = []
     for line in txt.split('\n'):
         if not line:
             continue
@@ -139,7 +139,7 @@ def _xml_from_markdown(markdown: str) -> Optional[ET.Element]:
             ET.SubElement(root, 'p').text = line
     return root
 
-def _get_settings(prefix: str = None) -> Dict[str, str]:
+def _get_settings(prefix: Optional[str] = None) -> Dict[str, str]:
     """ return a dict of all the settings """
     from lvfs import db
     from lvfs.settings.models import Setting
@@ -161,7 +161,7 @@ def _get_client_address() -> str:
     """ Gets user IP address """
     try:
         if request.headers.getlist("X-Forwarded-For"):
-            return request.headers.getlist("X-Forwarded-For")[0]
+            return str(request.headers.getlist("X-Forwarded-For")[0])
         if not request.remote_addr:
             return '127.0.0.1'
         return request.remote_addr
@@ -189,12 +189,12 @@ def _event_log(msg: str, is_important: bool = False) -> None:
     db.session.add(event)
     db.session.commit()
 
-def _error_internal(msg: str = None, errcode:int = 402) -> Tuple[str, int]:
+def _error_internal(msg: Optional[str] = None, errcode:int = 402) -> Tuple[str, int]:
     """ Error handler: Internal """
     flash("Internal error: %s" % msg, 'danger')
     return render_template('error.html'), errcode
 
-def _json_success(msg: str = None, uri: str = None, errcode:int = 200) -> Response:
+def _json_success(msg: Optional[str] = None, uri: Optional[str] = None, errcode:int = 200) -> Response:
     """ Success handler: JSON output """
     item: Dict[str, Any] = {}
     item['success'] = True
@@ -207,7 +207,7 @@ def _json_success(msg: str = None, uri: str = None, errcode:int = 200) -> Respon
                     status=errcode, \
                     mimetype="application/json")
 
-def _json_error(msg: str = None, errcode:int = 400) -> Response:
+def _json_error(msg: Optional[str] = None, errcode:int = 400) -> Response:
     """ Error handler: JSON output """
     item: Dict[str, Any] = {}
     item['success'] = False
@@ -221,7 +221,7 @@ def _json_error(msg: str = None, errcode:int = 400) -> Response:
 def _get_chart_labels_months(ts: int = 1) -> List[str]:
     """ Gets the chart labels """
     now = datetime.date.today()
-    labels = []
+    labels: List[str] = []
     for i in range(0, 12 * ts):
         then = now - datetime.timedelta((i + 1) * 30)
         labels.append('{} {}'.format(calendar.month_name[then.month], then.year))
@@ -230,7 +230,7 @@ def _get_chart_labels_months(ts: int = 1) -> List[str]:
 def _get_chart_labels_days(limit:int = 30) -> List[str]:
     """ Gets the chart labels """
     now = datetime.date.today()
-    labels = []
+    labels: List[str] = []
     for i in range(0, limit):
         then = now - datetime.timedelta(i + 1)
         labels.append("%02i-%02i-%02i" % (then.year, then.month, then.day))
@@ -238,7 +238,7 @@ def _get_chart_labels_days(limit:int = 30) -> List[str]:
 
 def _get_chart_labels_hours() -> List[str]:
     """ Gets the chart labels """
-    labels = []
+    labels: List[str] = []
     for i in range(0, 24):
         labels.append("%02i" % i)
     return labels
@@ -255,7 +255,7 @@ def _generate_password(size: int = 10,
 
 def _get_certtool() -> List[str]:
     from lvfs import app
-    return app.config['CERTTOOL'].split(' ')
+    return app.config['CERTTOOL'].split(' ')  # type: ignore
 
 def _pkcs7_certificate_info(text: str) -> Dict[str, str]:
 
@@ -362,16 +362,16 @@ def _pkcs7_signature_verify(certificate: str,
             pass
     return status == 'ok'
 
-def admin_login_required(f):
+def admin_login_required(f):  # type: ignore
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(*args, **kwargs):  # type: ignore
         if not g.user.check_acl('@admin'):
             flash('Only the admin team can access this resource', 'danger')
             return redirect(url_for('main.route_dashboard'))
         return f(*args, **kwargs)
     return decorated_function
 
-def _get_datestr_from_datetime(when):
+def _get_datestr_from_datetime(when: datetime.datetime) -> int:
     return int("%04i%02i%02i" % (when.year, when.month, when.day))
 
 def _is_keyword_valid(value: str) -> bool:

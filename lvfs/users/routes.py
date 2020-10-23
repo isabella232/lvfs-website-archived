@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 import datetime
+from typing import List
 
 from io import BytesIO
 import pyqrcode
@@ -720,7 +721,7 @@ def route_admin(user_id, page='admin'):
         return redirect(url_for('main.route_dashboard'))
 
     # get all the vendors with LVFS accounts
-    vendors = []
+    vendors: List[Vendor] = []
     if g.user.check_acl('@admin'):
         for v in db.session.query(Vendor).order_by(Vendor.display_name):
             if v.is_account_holder:

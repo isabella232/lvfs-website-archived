@@ -9,10 +9,11 @@
 
 import configparser
 import io
+from typing import List
 
 class InfParser(configparser.ConfigParser):
 
-    def __init__(self, buf):
+    def __init__(self, buf: str):
         configparser.ConfigParser.__init__(self, allow_no_value=True, interpolation=None)
 
         # fix registry keys to have a sane key=value structure
@@ -22,10 +23,9 @@ class InfParser(configparser.ConfigParser):
             if len(sect) == 5:
                 ln = '%s->%s=%s' % (sect[0].strip(), sect[2].strip(), sect[4].strip())
             contents_new.append(ln)
-        buf = io.StringIO('\n'.join(contents_new))
-        self.read_file(buf)
+        self.read_file(io.StringIO('\n'.join(contents_new)))
 
-    def get(self, group, key):
+    def get(self, group, key) -> str: # type: ignore
         val = configparser.ConfigParser.get(self, group, key, raw=True)
 
         # handle things in localised 'Strings'
@@ -33,7 +33,7 @@ class InfParser(configparser.ConfigParser):
             val = configparser.ConfigParser.get(self, 'Strings', val[1:-1])
 
         # format multiline comments
-        fixed = []
+        fixed: List[str] = []
         for ln in val.split('\n'):
 
             # microsoftism

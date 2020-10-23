@@ -101,7 +101,7 @@ def route_create():
     return redirect(url_for('settings.route_view'))
 
 def _textarea_string_to_text(value_unsafe: str) -> str:
-    values = []
+    values: List[str] = []
     for value in value_unsafe.replace('\r', '').split('\n'):
         value = value.strip()
         if value:

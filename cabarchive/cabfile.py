@@ -5,8 +5,10 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+from typing import Optional
+
 class CabFile():
-    def __init__(self, buf: bytes = None, filename: str = None):
+    def __init__(self, buf: Optional[bytes] = None, filename: Optional[str] = None):
         """ Set defaults """
         self.filename = filename
         self.buf = buf
@@ -16,5 +18,7 @@ class CabFile():
             return 0
         return len(self.buf)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        if not self.buf:
+            return 'CabFile({})'.format(self.filename)
         return 'CabFile({}:{:x})'.format(self.filename, len(self.buf))

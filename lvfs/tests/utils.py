@@ -16,7 +16,7 @@ from lvfs.firmware.models import Firmware
 from lvfs.tests.models import Test
 from lvfs.util import _event_log
 
-def _test_priority_sort_func(test):
+def _test_priority_sort_func(test: Test) -> int:
     plugin = ploader.get_by_id(test.plugin_id)
     if not plugin:
         return 0

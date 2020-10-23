@@ -5,6 +5,8 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+from typing import List
+
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 from flask_login import login_required
 
@@ -57,7 +59,7 @@ def route_fw(max_results=100):
         keywords_unsafe = request.args['value'].split(' ')
 
     # never allow empty keywords
-    keywords = []
+    keywords: List[str] = []
     for keyword in keywords_unsafe:
         if keyword:
             keywords.append(keyword)
@@ -107,7 +109,7 @@ def route_fw(max_results=100):
                                limit(max_results).all()
 
     # filter by ACL
-    fws_safe = []
+    fws_safe: List[Firmware] = []
     for fw in fws:
         if fw.check_acl('@view'):
             fws_safe.append(fw)
@@ -137,9 +139,9 @@ def route_search(max_results=150):
                            group_by(ComponentKeyword.component_id).\
                            having(func.count() == len(keywords)).\
                            subquery()
-    mds = []
-    appstream_ids = []
-    vendors = []
+    mds: List[Component] = []
+    appstream_ids: List[str] = []
+    vendors: List[Vendor] = []
     for md in db.session.query(Component).join(ids).\
                     join(Firmware).join(Remote).filter(Remote.is_public).\
                     order_by(Component.version.desc()).\
@@ -152,8 +154,8 @@ def route_search(max_results=150):
             vendors.append(md.fw.vendor)
 
     # get any vendor information as a fallback
-    keywords_good = []
-    keywords_bad = []
+    keywords_good: List[ComponentKeyword] = []
+    keywords_bad: List[ComponentKeyword] = []
     if mds:
         keywords_good.extend(keywords)
         search_method = 'FW'

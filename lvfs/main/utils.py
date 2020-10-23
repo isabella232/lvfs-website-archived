@@ -7,6 +7,8 @@
 #
 # pylint: disable=singleton-comparison
 
+from typing import Dict
+
 from lvfs import db, tq
 
 from lvfs.components.models import ComponentShardInfo, ComponentShard, Component
@@ -22,7 +24,7 @@ from lvfs.vendors.models import Vendor
 from .models import Client, ClientMetric
 
 def _regenerate_metrics():
-    values = {}
+    values: Dict[str, int] = {}
     values['ClientCnt'] = _execute_count_star(\
                                 db.session.query(Client))
     values['FirmwareCnt'] = _execute_count_star(\

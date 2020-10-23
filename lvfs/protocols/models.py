@@ -28,5 +28,5 @@ class Protocol(db.Model):
 
     verfmt = relationship("Verfmt", foreign_keys=[verfmt_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Protocol object %s:%s" % (self.protocol_id, self.value)

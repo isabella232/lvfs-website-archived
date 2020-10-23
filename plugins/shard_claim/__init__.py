@@ -7,6 +7,8 @@
 #
 # pylint: disable=no-self-use,no-member,too-few-public-methods,unused-argument,singleton-comparison
 
+from typing import Dict
+
 from lvfs import db
 from lvfs.pluginloader import PluginBase
 from lvfs.claims.models import Claim
@@ -30,8 +32,8 @@ class Plugin(PluginBase):
 
     def run_test_on_md(self, test, md):
 
-        infos_by_guid = {}
-        claims_by_csum = {}
+        infos_by_guid: Dict[str, ComponentShardInfo] = {}
+        claims_by_csum: Dict[str, ComponentShardClaim] = {}
 
         # find any infos that indicate a claim
         for info in db.session.query(ComponentShardInfo)\

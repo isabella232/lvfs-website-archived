@@ -34,5 +34,5 @@ class Category(db.Model):
                     return True
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Category object %s:%s" % (self.category_id, self.value)

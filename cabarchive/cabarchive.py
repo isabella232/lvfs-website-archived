@@ -8,6 +8,7 @@
 # pylint: disable=wrong-import-position
 
 import os
+from typing import Optional
 
 import gi
 
@@ -25,7 +26,7 @@ class NotSupportedError(NotImplementedError):
 class CabArchive(dict):
     """An object representing a Microsoft Cab archive """
 
-    def __init__(self, buf: bytes = None, flattern: bool = True):
+    def __init__(self, buf: Optional[bytes] = None, flattern: bool = True):
         """ Parses a MS Cabinet archive """
         dict.__init__(self)
 
@@ -46,7 +47,7 @@ class CabArchive(dict):
                         fn = os.path.basename(fn)
                     self[fn] = CabFile(cffile.get_bytes().get_data())
 
-    def __setitem__(self, key: str, val: CabFile):
+    def __setitem__(self, key: str, val: CabFile) -> None:
         assert isinstance(key, str)
         assert isinstance(val, CabFile)
         val.filename = key
@@ -70,5 +71,5 @@ class CabArchive(dict):
         cfarchive.write_simple(ostream)
         return Gio.MemoryOutputStream.steal_as_bytes(ostream).get_data()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'CabArchive({})'.format([str(self[cabfile]) for cabfile in self])

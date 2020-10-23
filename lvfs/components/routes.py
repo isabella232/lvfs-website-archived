@@ -5,6 +5,8 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+from typing import List
+
 from flask import Blueprint, request, url_for, redirect, render_template, flash, make_response
 from flask_login import login_required
 
@@ -38,7 +40,7 @@ def route_problems():
     """
     Show all components with problems
     """
-    mds = []
+    mds: List[Component] = []
     for md in db.session.query(Component).\
                 order_by(Component.release_timestamp.desc()):
         if not md.problems:
@@ -58,7 +60,7 @@ def route_problems_remote(remote_name):
     """
     Show all components with problems
     """
-    mds = []
+    mds: List[Component] = []
     for md in db.session.query(Component).join(Firmware).join(Remote).\
                 filter(Remote.name == remote_name).\
                 order_by(Component.release_timestamp.desc()):
@@ -568,7 +570,7 @@ def route_issue_delete(component_id, component_issue_id):
                             page='issues'))
 
 def _autoimport_issues(md, prefix: str, kind: str) -> int:
-    issues = []
+    issues: List[ComponentIssue] = []
     start = 0
     tmp = md.release_description
     description_new = ''

@@ -10,6 +10,8 @@
 import os
 import fnmatch
 import json
+from typing import Dict
+
 import requests
 
 from lvfs.pluginloader import PluginBase, PluginError
@@ -47,7 +49,7 @@ class Plugin(PluginBase):
 
         # purge
         url = self.get_setting('cdn_purge_uri', required=True) + basename
-        headers = {}
+        headers: Dict[str, str] = {}
         accesskey = self.get_setting('cdn_purge_accesskey')
         if accesskey:
             headers['AccessKey'] = accesskey

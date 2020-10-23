@@ -10,7 +10,7 @@
 import os
 import struct
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 from collections import namedtuple
 
@@ -68,7 +68,7 @@ class PartitionHeader():
 
     def __init__(self):
         self.data = None
-        self.entries = []
+        self.entries: List[PartitionEntry] = []
 
     def __str__(self):
         tmp = str(self.data)
@@ -157,7 +157,7 @@ def _run_intelme_on_blob(self, test: Test, md: Component) -> None:
     _add_shards(self, fpt, md)
 
     # success
-    entries = []
+    entries: List[str] = []
     for entry in fpt.entries:
         if entry.sig:
             entries.append(entry.sig)

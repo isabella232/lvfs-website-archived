@@ -8,6 +8,7 @@
 # pylint: disable=singleton-comparison
 
 import datetime
+from typing import Dict, Optional, Tuple
 
 from lvfs import db, tq
 
@@ -22,7 +23,7 @@ from lvfs.vendors.models import Vendor
 
 from .models import AnalyticFirmware, Analytic, AnalyticVendor, AnalyticUseragent, AnalyticUseragentKind
 
-def _generate_stats_for_vendor(v, datestr):
+def _generate_stats_for_vendor(v: Vendor, datestr: int) -> None:
 
     # is datestr older than firmware
     if not v.ctime:
@@ -43,7 +44,7 @@ def _generate_stats_for_vendor(v, datestr):
     print('adding %s:%s = %i' % (datestr, v.group_id, cnt))
     db.session.add(analytic)
 
-def _generate_stats_for_firmware(fw, datestr):
+def _generate_stats_for_firmware(fw: Firmware, datestr: int) -> None:
 
     # is datestr older than firmware
     if datestr < _get_datestr_from_datetime(fw.timestamp):
@@ -56,17 +57,17 @@ def _generate_stats_for_firmware(fw, datestr):
     analytic = AnalyticFirmware(firmware_id=fw.firmware_id, datestr=datestr, cnt=cnt)
     db.session.add(analytic)
 
-def _get_app_from_ua(ua):
+def _get_app_from_ua(ua: str) -> str:
     # always exists
     return ua.split(' ')[0]
 
-def _get_fwupd_from_ua(ua):
+def _get_fwupd_from_ua(ua: str) -> str:
     for part in ua.split(' '):
         if part.startswith('fwupd/'):
             return part[6:]
     return 'Unknown'
 
-def _get_lang_distro_from_ua(ua):
+def _get_lang_distro_from_ua(ua: str) -> Optional[Tuple[str, str]]:
     start = ua.find('(')
     end = ua.rfind(')')
     if start == -1 or end == -1:
@@ -76,7 +77,7 @@ def _get_lang_distro_from_ua(ua):
         return None
     return (parts[1], parts[2])
 
-def _generate_stats_for_datestr(datestr):
+def _generate_stats_for_datestr(datestr: int) -> None:
 
     # update AnalyticVendor
     for analytic in db.session.query(AnalyticVendor).filter(AnalyticVendor.datestr == datestr):
@@ -103,10 +104,10 @@ def _generate_stats_for_datestr(datestr):
     for agnt in db.session.query(AnalyticUseragent).filter(AnalyticUseragent.datestr == datestr):
         db.session.delete(agnt)
     db.session.commit()
-    ua_apps = {}
-    ua_fwupds = {}
-    ua_distros = {}
-    ua_langs = {}
+    ua_apps: Dict[str, int] = {}
+    ua_fwupds: Dict[str, int] = {}
+    ua_distros: Dict[str, int] = {}
+    ua_langs: Dict[str, int] = {}
     clients = db.session.query(Client.user_agent).\
                     filter(Client.datestr == datestr).all()
     for res in clients:

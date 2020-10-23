@@ -35,7 +35,7 @@ class HsiReportAttr(db.Model):
 
     report = relationship("HsiReport", back_populates="attrs")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "HsiReportAttr object %s=%s" % (self.key, self.value)
 
 
@@ -91,5 +91,5 @@ class HsiReport(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "HsiReport object {}".format(self.hsi_report_id)

@@ -12,6 +12,8 @@ import html
 import datetime
 import fnmatch
 import json
+from typing import Dict, List
+
 import humanize
 import iso3166
 
@@ -285,7 +287,7 @@ def route_dashboard():
 
     download_cnt = 0
     devices_cnt = 0
-    appstream_ids = {}
+    appstream_ids: Dict[str, Firmware] = {}
     for fw in g.user.vendor.fws:
         download_cnt += fw.download_cnt
         for md in fw.mds:
@@ -293,7 +295,7 @@ def route_dashboard():
     devices_cnt = len(appstream_ids)
 
     # this is somewhat klunky
-    data = []
+    data: List[int] = []
     datestr = _get_datestr_from_datetime(datetime.date.today() - datetime.timedelta(days=31))
     for cnt in db.session.query(AnalyticVendor.cnt).\
                     filter(AnalyticVendor.vendor_id == g.user.vendor.vendor_id).\
@@ -543,7 +545,7 @@ def route_profile():
 @bp_main.route('/lvfs/metrics')
 def route_metrics():
 
-    item = {}
+    item: Dict[str, int] = {}
     for metric in db.session.query(ClientMetric).order_by(ClientMetric.key):
         item[metric.key] = metric.value
     dat = json.dumps(item, indent=4, separators=(',', ': '))

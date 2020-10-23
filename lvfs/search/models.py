@@ -25,5 +25,5 @@ class SearchEvent(db.Model):
     count = Column(Integer, default=0)
     method = Column(Text, default=None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "SearchEvent object %s" % self.search_event_id

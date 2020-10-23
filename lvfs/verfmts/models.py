@@ -86,5 +86,5 @@ class Verfmt(db.Model):
             return self._uint32_to_str(int(version))
         return version
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Verfmt object %s:%s" % (self.verfmt_id, self.value)

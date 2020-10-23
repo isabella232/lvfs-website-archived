@@ -63,5 +63,5 @@ class JcatFile():
                 item.load(node_c)
                 self.items.append(item)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'JcatFile({})'.format([str(jcatitem) for jcatitem in self.items])

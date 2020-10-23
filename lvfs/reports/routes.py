@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 import json
-from typing import Optional
+from typing import Optional, Dict, List
 
 from flask import Blueprint, request, url_for, redirect, flash, Response, render_template
 from flask_login import login_required
@@ -36,7 +36,7 @@ def setup_periodic_tasks(sender, **_):
     )
 
 def _report_to_dict(report: Report) -> dict:
-    data = {}
+    data: Dict[str, str] = {}
     if report.state == 1:
         data['UpdateState'] = 'pending'
     elif report.state == 2:
@@ -175,8 +175,8 @@ def route_report():
     if len(metadata) == 0:
         return _json_error('no metadata included')
 
-    msgs = []
-    uris = []
+    msgs: List[str] = []
+    uris: List[str] = []
     for report in reports:
         for key in ['Checksum', 'UpdateState', 'Metadata']:
             if not key in report:

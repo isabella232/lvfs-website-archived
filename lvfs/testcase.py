@@ -15,6 +15,7 @@ import unittest
 import tempfile
 import subprocess
 import io
+from typing import List
 
 from contextlib import redirect_stdout
 
@@ -341,7 +342,7 @@ ma+I7fM5pmgsEL4tkCZAg0+CPTyhHkMV/cWuOZUjqTsYbDq1pZI=
 
         # default set
         if not actions:
-            actions = []
+            actions: List[str] = []
         if default_actions:
             actions.append('@modify-limit')
         for act in actions:

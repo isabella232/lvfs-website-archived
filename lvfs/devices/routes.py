@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-2.0+
 
 import datetime
+from typing import Dict, List
 
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required
@@ -16,7 +17,8 @@ from lvfs import db
 
 from lvfs.util import admin_login_required
 from lvfs.firmware.models import Firmware
-from lvfs.components.models import Component, ComponentGuid
+from lvfs.components.models import Component, ComponentGuid, ComponentShard
+from lvfs.vendors.models import Vendor
 from lvfs.metadata.models import Remote
 
 bp_devices = Blueprint('devices', __name__, template_folder='templates')
@@ -30,13 +32,13 @@ def route_list_admin():
     """
 
     # get all the appstream_ids we can target
-    devices = []
-    seen_appstream_id = {}
+    devices: List[str] = []
+    seen_appstream_id: Dict[str, bool] = {}
     for fw in db.session.query(Firmware):
         for md in fw.mds:
             if md.appstream_id in seen_appstream_id:
                 continue
-            seen_appstream_id[md.appstream_id] = 1
+            seen_appstream_id[md.appstream_id] = True
             devices.append(md.appstream_id)
 
     return render_template('devices.html', devices=devices)
@@ -72,7 +74,7 @@ def route_show(appstream_id):
 
     # work out the previous version for the shard diff
     fw_old = None
-    fw_previous = {}
+    fw_previous: Dict[Firmware, Firmware] = {}
     for fw in fws:
         if fw_old:
             fw_previous[fw_old] = fw
@@ -119,28 +121,28 @@ def route_shards_diff(component_id_old, component_id_new):
         return redirect(url_for('devices.route_list_admin'))
 
     # shards added
-    shard_guids = {}
+    shard_guids: Dict[str, ComponentShard] = {}
     for shard in md_old.shards:
         shard_guids[shard.guid] = shard
-    shards_added = []
+    shards_added: List[ComponentShard] = []
     for shard in md_new.shards:
         if shard.guid not in shard_guids:
             shards_added.append(shard)
 
     # shards removed
-    shard_guids = {}
+    shard_guids: Dict[str, ComponentShard] = {}
     for shard in md_new.shards:
         shard_guids[shard.guid] = shard
-    shards_removed = []
+    shards_removed: List[ComponentShard] = []
     for shard in md_old.shards:
         if shard.guid not in shard_guids:
             shards_removed.append(shard)
 
     # shards changed
-    shard_checksums = {}
+    shard_checksums: Dict[str, ComponentShard] = {}
     for shard in md_new.shards:
         shard_checksums[shard.checksum] = shard
-    shards_changed = []
+    shards_changed: List[ComponentShard] = []
     for shard in md_old.shards:
         if shard.guid in shard_guids:
             shard_old = shard_guids[shard.guid]
@@ -159,8 +161,8 @@ def route_analytics(appstream_id):
     """
     Show analytics for one device, which can be seen without a valid login
     """
-    data = []
-    labels = []
+    data: List[int] = []
+    labels: List[str] = []
     now = datetime.date.today()
     fws = _get_fws_for_appstream_id(appstream_id)
     if not fws:
@@ -193,8 +195,8 @@ def route_list():
                            join(Component).distinct(Component.appstream_id).\
                            order_by(Component.appstream_id, Firmware.timestamp.desc()).\
                            all()
-    vendors = []
-    mds_by_vendor = {}
+    vendors: List[Vendor] = []
+    mds_by_vendor: Dict[Vendor, List[Component]] = {}
     for fw in fws:
         vendor = fw.vendor
         if vendor not in vendors:

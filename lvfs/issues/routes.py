@@ -5,8 +5,12 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+from typing import List
+
 from flask import Blueprint, request, url_for, redirect, flash, g, render_template
 from flask_login import login_required
+
+from sqlalchemy.orm.query import Query
 
 from lvfs import db
 
@@ -27,7 +31,7 @@ def route_list():
         return redirect(url_for('issues.route_list'))
 
     # only show issues with the correct group_id
-    issues = []
+    issues: List[Issue] = []
     for issue in db.session.query(Issue).order_by(Issue.priority.desc()):
         if issue.check_acl('@view'):
             issues.append(issue)
@@ -156,7 +160,7 @@ def route_delete(issue_id):
 def _create_query_for_conditions(issue: Issue):
 
     # use a set of subqueries for speed
-    subqs = []
+    subqs: List[Query] = []
     for cond in issue.conditions:
         if cond.compare == 'eq':
             subqs.append(db.session.query(ReportAttribute.report_id)\
@@ -320,8 +324,8 @@ def route_reports(issue_id):
         return redirect(url_for('issues.route_list'))
 
     # check firmware details are available to this user
-    reports = []
-    reports_hidden = []
+    reports: List[Report] = []
+    reports_hidden: List[Report] = []
     stmt = _create_query_for_conditions(issue)
     reports_unfiltered = stmt.order_by(Report.timestamp.desc()).limit(10).all()
     for report in reports_unfiltered:
