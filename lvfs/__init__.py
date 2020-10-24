@@ -75,6 +75,7 @@ from lvfs.issues.routes import bp_issues
 from lvfs.main.routes import bp_main
 from lvfs.metadata.routes import bp_metadata
 from lvfs.fsck.routes import bp_fsck
+from lvfs.geoip.routes import bp_geoip
 from lvfs.protocols.routes import bp_protocols
 from lvfs.queries.routes import bp_queries
 from lvfs.reports.routes import bp_reports
@@ -101,6 +102,7 @@ app.register_blueprint(bp_issues, url_prefix='/lvfs/issues')
 app.register_blueprint(bp_main)
 app.register_blueprint(bp_metadata, url_prefix='/lvfs/metadata')
 app.register_blueprint(bp_fsck, url_prefix='/lvfs/fsck')
+app.register_blueprint(bp_geoip, url_prefix='/lvfs/geoip')
 app.register_blueprint(bp_protocols, url_prefix='/lvfs/protocols')
 app.register_blueprint(bp_queries, url_prefix='/lvfs/queries')
 app.register_blueprint(bp_reports, url_prefix='/lvfs/reports')

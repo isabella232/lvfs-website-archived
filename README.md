@@ -63,7 +63,6 @@ On Fedora:
     sudo dnf install \
         bsdtar \
         cairo-gobject-devel \
-        GeoIP-devel \
         gnutls-utils \
         gobject-introspection-devel \
         postgresql-devel \

@@ -1,0 +1,37 @@
+{% extends "default.html" %}
+{% block title %}GeoIP{% endblock %}
+
+{% block content %}
+
+<form method="post" action="{{url_for('geoip.route_import')}}" class="form">
+<input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">GeoIP refresh</h2>
+    <p class="card-text">
+      Force the refresh of the GeoIP data.
+    </p>
+    <p class="card-text">
+      <input class="card-link btn btn-primary" type="submit" value="Refresh now">
+    </p>
+  </div>
+</div>
+</form>
+
+<form method="post" action="{{url_for('geoip.route_check')}}" class="form">
+<input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">GeoIP test</h2>
+    <p class="card-text">
+      Test GeoIP data.
+    </p>
+    <p class="card-text">
+      <input class="" type="text" name="ip_addr" value="" required/>
+      <input class="card-link btn btn-info" type="submit" value="Check"/>
+    </p>
+  </div>
+</div>
+</form>
+
+{% endblock %}

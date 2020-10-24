@@ -89,7 +89,7 @@ class LvfsTestCase(unittest.TestCase):
     def _logout(self):
         return self.app.get('/lvfs/logout', follow_redirects=True)
 
-    def login(self, username='sign-test@fwupd.org', password='Pa$$w0rd', accept_agreement=True):
+    def login(self, username='sign-test@fwupd.org', password='Pa$$w0rd', accept_agreement=True) -> None:
         rv = self._login(username, password)
         assert b'/lvfs/upload/firmware' in rv.data, rv.data
         assert b'Incorrect username' not in rv.data, rv.data
