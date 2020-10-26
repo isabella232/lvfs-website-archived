@@ -9,6 +9,8 @@ import os
 import datetime
 import shutil
 
+from typing import List
+
 from flask import Blueprint, request, url_for, redirect, render_template, flash, g
 from flask_login import login_required
 
@@ -19,6 +21,7 @@ from celery.schedules import crontab
 from lvfs import app, db, ploader, tq
 
 from lvfs.analytics.models import AnalyticFirmware
+from lvfs.claims.models import Claim
 from lvfs.components.models import Component, ComponentShard, ComponentShardChecksum
 from lvfs.emails import send_email
 from lvfs.main.models import Client
@@ -259,7 +262,7 @@ def route_promote(firmware_id, target):
 
     # vendor has to fix the problems first
     if target in ['stable', 'testing'] and fw.problems:
-        probs = []
+        probs: List[Claim] = []
         for problem in fw.problems:
             if problem.kind not in probs:
                 probs.append(problem.kind)
@@ -472,7 +475,7 @@ def route_affiliation(firmware_id):
 
     # add other vendors
     if g.user.check_acl('@admin'):
-        vendors = []
+        vendors: List[Vendor] = []
         for v in db.session.query(Vendor).order_by(Vendor.display_name):
             if not v.is_account_holder:
                 continue
@@ -595,8 +598,8 @@ def route_show(firmware_id):
         return redirect(url_for('firmware.route_firmware'))
 
     # get data for the last month or year
-    graph_data = []
-    graph_labels = None
+    graph_data: List[int] = []
+    graph_labels: List[str] = []
     if fw.check_acl('@view-analytics') and not fw.do_not_track:
         if fw.timestamp.replace(tzinfo=None) > datetime.datetime.today() - datetime.timedelta(days=30):
             datestr = _get_datestr_from_datetime(datetime.date.today() - datetime.timedelta(days=31))
@@ -730,7 +733,7 @@ def route_shard_search(kind, value):
         return _error_internal('No shards matched!')
 
     # filter by ACL
-    fws_safe = []
+    fws_safe: List[Firmware] = []
     for fw in fws:
         if fw.check_acl('@view'):
             fws_safe.append(fw)

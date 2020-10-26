@@ -66,7 +66,7 @@ class IssueCondition(db.Model):
             return 10
         return -1
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "IssueCondition object %s %s %s" % (self.key, self.compare, self.value)
 
 
@@ -124,5 +124,5 @@ class Issue(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Issue object %s" % self.url

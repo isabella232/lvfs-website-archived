@@ -4,7 +4,6 @@ EXPOSE 5000
 RUN dnf install -y epel-release dnf-plugins-core
 RUN dnf config-manager --set-enabled PowerTools epel
 RUN dnf -y install \
-	GeoIP-devel \
 	bsdtar \
 	cairo-gobject-devel \
 	clamav \

@@ -36,7 +36,7 @@ bp_upload = Blueprint('upload', __name__, template_folder='templates')
 
 def _get_plugin_metadata_for_uploaded_file(ufile: UploadedFile) -> Dict[str, str]:
     settings = _get_settings()
-    metadata = {}
+    metadata: Dict[str, str] = {}
     metadata['$DATE$'] = datetime.datetime.now().replace(microsecond=0).isoformat()
     metadata['$FWUPD_MIN_VERSION$'] = ufile.fwupd_min_version
     metadata['$CAB_FILENAME$'] = ufile.fw.filename
@@ -153,7 +153,7 @@ def _upload_firmware():
 
     # check the guid and version does not already exist
     fws = db.session.query(Firmware).all()
-    fws_already_exist = []
+    fws_already_exist: List[Firmware] = []
     for md in ufile.fw.mds:
         provides_value = md.guids[0].value
         fw = _filter_fw_by_id_guid_version(fws,
@@ -178,7 +178,7 @@ def _upload_firmware():
                 flash('Firmware %i was auto-deleted due to robot upload' % fw.firmware_id)
                 _firmware_delete(fw)
         else:
-            versions_for_display = []
+            versions_for_display: List[str] = []
             for fw in fws_already_exist:
                 for md in fw.mds:
                     if not md.version_display in versions_for_display:

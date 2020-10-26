@@ -16,7 +16,7 @@ import zlib
 import uuid
 import struct
 from collections import namedtuple
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from lvfs import db
 from lvfs.pluginloader import PluginBase, PluginError, PluginSettingBool, PluginSettingText, PluginSettingInteger
@@ -31,8 +31,8 @@ class PfsFile:
     PFS_INFO = '<I16sHHHH4sH'
 
     def __init__(self, blob=None):
-        self.shards = []
-        self._names = {}
+        self.shards: List[ComponentShard] = []
+        self._names: Dict[str, str] = {}
         if blob:
             self.parse(blob)
 
@@ -112,7 +112,7 @@ class PfsFile:
 class InfoTxtFile:
 
     def __init__(self, blob=None):
-        self._data = {}
+        self._data: Dict[str, str] = {}
         if blob:
             self.parse(blob)
 
@@ -124,7 +124,7 @@ class InfoTxtFile:
             except ValueError as _:
                 pass
 
-    def get(self, key: str) -> str:
+    def get(self, key: str) -> Optional[str]:
         return self._data.get(key)
 
     def get_int(self, key: str) -> int:
@@ -145,7 +145,7 @@ class PfatFile:
     PFAT_BLOCK_SIGN = '<II64II64I'
 
     def __init__(self, blob=None):
-        self.shards = []
+        self.shards: List[ComponentShard] = []
         if blob:
             self.parse(blob)
 
@@ -172,7 +172,7 @@ class PfatFile:
         PfatSection = namedtuple(
             'PfatSection', ['flash', 'param', 'blockcnt', 'filename']
         )
-        sections = []
+        sections: List[PfatSection] = []
         for entry in section_data[1:]:
             entry_data = entry.split(' ')
             sections.append(
@@ -245,8 +245,8 @@ class Plugin(PluginBase):
     def _convert_files_to_shards(self, files: List[str]) -> List[ComponentShard]:
 
         # parse each EFI binary as a shard
-        shards = []
-        shard_by_checksum = {}
+        shards: List[ComponentShard] = []
+        shard_by_checksum: Dict[str, ComponentShard] = {}
         for fn in files:
             dirname = os.path.dirname(fn)
             try:
@@ -273,6 +273,8 @@ class Plugin(PluginBase):
                 for src in [' ', '(', ')']:
                     name = name.replace(src, '_')
             kind = data.get('Type')
+            if not kind:
+                continue
             subkind = data.get('Subtype')
             guid = data.get('File GUID')
             if guid:
@@ -355,6 +357,10 @@ class Plugin(PluginBase):
             shard = ComponentShard(plugin_id=self.id, name=appstream_id, guid=guid)
             shard.set_blob(payload)
 
+            # skip invalid shards
+            if not shard.checksum:
+                continue
+
             # do not add duplicates!
             if shard.checksum in shard_by_checksum:
                 #print('skipping duplicate {}'.format(guid))
@@ -434,7 +440,7 @@ class Plugin(PluginBase):
 
     def _find_zlib_sections(self, blob: bytes) -> List[bytes]:
         offset = 0
-        sections = []
+        sections: List[bytes] = []
         while 1:
             # find Zlib header for default compression
             offset = blob.find(b'\x78\x9C', offset)
@@ -471,7 +477,7 @@ class Plugin(PluginBase):
         # is this a AMI BIOS with PFAT sections
         if md.blob[8:16] == b'_AMIPFAT':
             pfat = PfatFile(md.blob)
-            shards = []
+            shards: List[ComponentShard] = []
             for shard in pfat.shards:
                 shards.append(shard)
                 if shard.name == 'com.ami.BIOS_FV_BB.bin':

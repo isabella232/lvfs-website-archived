@@ -11,13 +11,13 @@ from lvfs import app, mail, tq
 
 from .util import _event_log
 
-@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=10)
-def _async_send_email(subject, recipient, text_body):
+@tq.task(max_retries=3, default_retry_delay=5, task_time_limit=10)  # type: ignore
+def _async_send_email(subject: str, recipient: str, text_body: str) -> None:
     msg = Message(subject, recipients=[recipient])
     msg.body = text_body
     mail.send(msg)
 
-def send_email(subject: str, recipient: str, text_body: str):
+def send_email(subject: str, recipient: str, text_body: str) -> None:
     if 'MAIL_SUPPRESS_SEND' in app.config and app.config['MAIL_SUPPRESS_SEND']:
         if 'DEBUG' in app.config and app.config['DEBUG']:
             # also save the email *contents* -- which could be password...

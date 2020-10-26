@@ -38,7 +38,7 @@ class PluginSettingInteger:
 
 class PluginSettingTextList:
 
-    def __init__(self, key: str, name: str, default: List[str] = None):
+    def __init__(self, key: str, name: str, default: Optional[List[str]] = None):
         self.key = key
         self.name = name
         if default:
@@ -72,7 +72,7 @@ class PluginBase:
         raise NotImplementedError
     def archive_sign(self, blob: bytes) -> bytes:
         raise NotImplementedError
-    def archive_copy(self, cabarchive: CabArchive, cabfile: CabFile):
+    def archive_copy(self, cabarchive: CabArchive, cabfile: CabFile) -> None:
         raise NotImplementedError
     def archive_finalize(self,
                          cabarchive: CabArchive,
@@ -119,16 +119,16 @@ class PluginBase:
                 return self.get_setting_bool(setting.key)
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Plugin object %s" % self.id
 
 class PluginGeneral(PluginBase):
-    def __init__(self):
+    def __init__(self) -> None:
         PluginBase.__init__(self, 'general')
         self.name = 'General'
         self.summary = 'General server settings'
 
-    def settings(self) -> List:
+    def settings(self) -> List[Any]:
         s: List[Any] = []
         s.append(PluginSettingText('server_warning', 'Server Warning',
                                    'This is a test instance and may be broken at any time.'))
@@ -160,7 +160,7 @@ class Pluginloader:
             if not os.path.exists(location_init):
                 continue
             mod = __import__(f)
-            plugins[f] = mod.Plugin() # type: ignore
+            plugins[f] = mod.Plugin()
             if not plugins[f].id:
                 plugins[f].id = f
         sys.path.pop(0)
@@ -220,7 +220,7 @@ class Pluginloader:
     def metadata_sign(self, blob: bytes) -> List[JcatBlob]:
         if not self.loaded:
             self.load_plugins()
-        blobs = []
+        blobs: List[JcatBlob] = []
         for plugin in self._plugins:
             if not plugin.enabled:
                 continue
@@ -237,7 +237,7 @@ class Pluginloader:
     def archive_sign(self, blob: bytes) -> List[bytes]:
         if not self.loaded:
             self.load_plugins()
-        blobs = []
+        blobs: List[bytes] = []
         for plugin in self._plugins:
             if not plugin.enabled:
                 continue
@@ -251,7 +251,7 @@ class Pluginloader:
         return blobs
 
     # an archive is being built
-    def archive_copy(self, cabarchive: CabArchive, cabfile: CabFile):
+    def archive_copy(self, cabarchive: CabArchive, cabfile: CabFile) -> None:
         if not self.loaded:
             self.load_plugins()
         for plugin in self._plugins:
@@ -268,7 +268,7 @@ class Pluginloader:
     # an archive is being built
     def archive_finalize(self,
                          cabarchive: CabArchive,
-                         metadata: Dict[str, str] = None) -> None:
+                         metadata: Optional[Dict[str, str]] = None) -> None:
         if not self.loaded:
             self.load_plugins()
         if not metadata:

@@ -35,7 +35,7 @@ class ReportAttribute(db.Model):
     def __lt__(self, other) -> bool:
         return self.key < other.key
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ReportAttribute object %s=%s" % (self.key, self.value)
 
 
@@ -100,5 +100,5 @@ class Report(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Report object %s" % self.report_id

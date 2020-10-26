@@ -5,5 +5,5 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
-from . cabarchive import CabArchive, NotSupportedError
-from . cabfile import CabFile
+from .cabarchive import CabArchive, NotSupportedError
+from .cabfile import CabFile

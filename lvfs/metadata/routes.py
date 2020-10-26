@@ -5,6 +5,8 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
+from typing import Dict, List
+
 import humanize
 
 from flask import Blueprint, render_template, make_response, flash, redirect, url_for
@@ -43,7 +45,7 @@ def route_remote(group_id):
         return redirect(url_for('metadata.route_view'))
 
     # generate file
-    remote = []
+    remote: List[str] = []
     remote.append('[fwupd Remote]')
     remote.append('Enabled=true')
     remote.append('Title=Embargoed for ' + group_id)
@@ -65,11 +67,11 @@ def route_view():
     """
 
     # show all embargo metadata URLs when admin user
-    vendors = []
+    vendors: List[Vendor] = []
     for vendor in db.session.query(Vendor):
         if vendor.is_account_holder and vendor.check_acl('@view-metadata'):
             vendors.append(vendor)
-    remotes = {}
+    remotes: Dict[str, Remote] = {}
     for r in db.session.query(Remote):
         remotes[r.name] = r
     return render_template('metadata.html',

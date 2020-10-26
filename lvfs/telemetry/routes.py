@@ -18,7 +18,7 @@ from lvfs.firmware.models import Firmware
 bp_telemetry = Blueprint('telemetry', __name__, template_folder='templates')
 
 def _get_split_names_for_firmware(fw: Firmware) -> List[str]:
-    names = []
+    names: List[str] = []
     for md in fw.mds:
         name_split = md.name.split('/')
         all_substrings_long_enough = True
@@ -47,7 +47,7 @@ def route_show(age=0, sort_key='success', sort_direction='down'):
         return redirect(url_for('main.route_dashboard'))
 
     # get data
-    fws = []
+    fws: List[Firmware] = []
     stmt = db.session.query(Firmware)
     if age:
         stmt = stmt.filter(Firmware.timestamp > datetime.date.today() - datetime.timedelta(days=age))

@@ -8,6 +8,7 @@
 import datetime
 import json
 from collections import defaultdict
+from typing import Dict, List, Tuple
 
 from sqlalchemy import and_
 
@@ -42,7 +43,7 @@ def setup_periodic_tasks(sender, **_):
 
 def _get_chart_labels_hours(limit=24):
     """ Gets the chart labels """
-    labels = []
+    labels: List[str] = []
     for i in range(0, limit):
         labels.append("%02i" % i)
     return labels
@@ -73,7 +74,7 @@ def route_month():
     """ A analytics screen to show information about users """
 
     # this is somewhat klunky
-    data = []
+    data: List[int] = []
     now = datetime.date.today() - datetime.timedelta(days=1)
     for _ in range(30):
         datestr = _get_datestr_from_datetime(now)
@@ -101,7 +102,7 @@ def route_year(ts=3):
     """ A analytics screen to show information about users """
 
     # this is somewhat klunky
-    data = []
+    data: List[int] = []
     now = datetime.date.today() - datetime.timedelta(days=1)
     for _ in range(12 * ts):
         datestrold = _get_datestr_from_datetime(now)
@@ -152,8 +153,8 @@ def route_user_agents(kind='APP', timespan_days=30):
         return redirect(url_for('analytics.route_user_agents'))
 
     # get data for this time period
-    cnt_total = {}
-    cached_cnt = {}
+    cnt_total: Dict[str, int] = {}
+    cached_cnt: Dict[str, int] = {}
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     datestr_start = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=timespan_days))
     datestr_end = _get_datestr_from_datetime(yesterday)
@@ -177,14 +178,14 @@ def route_user_agents(kind='APP', timespan_days=30):
         cnt_total[user_agent_safe] += ug.cnt
 
     # find most popular user agent strings
-    most_popular = []
+    most_popular: List[str] = []
     for key, value in sorted(iter(cnt_total.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
         most_popular.append(key)
         if len(most_popular) >= 6:
             break
 
     # generate enough for the template
-    datasets = []
+    datasets: List[str] = []
     palette = [
         'ef4760',   # red
         'ffd160',   # yellow
@@ -195,11 +196,11 @@ def route_user_agents(kind='APP', timespan_days=30):
     ]
     idx = 0
     for value in most_popular:
-        dataset = {}
+        dataset: Dict[str, str] = {}
         dataset['label'] = value
         dataset['color'] = palette[idx % 6]
         idx += 1
-        data = []
+        data: List[str] = []
         for i in range(timespan_days):
             datestr = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=i))
             key = str(datestr) + value
@@ -236,11 +237,11 @@ def route_reportattrs_kind(kind, timespan_days=90):
     """ A analytics screen to show information about users """
 
     # get data for this time period
-    cnt_total = {}
+    cnt_total: Dict[str, int] = {}
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     datestr_start = yesterday - datetime.timedelta(days=timespan_days)
-    cnt_total = {}
-    cached_cnt = {}
+    cnt_total: Dict[str, int] = {}
+    cached_cnt: Dict[str, int] = {}
     for report_ts, attr_val in db.session.query(Report.timestamp,
                                                 ReportAttribute.value)\
                           .filter(ReportAttribute.key == kind)\
@@ -259,14 +260,14 @@ def route_reportattrs_kind(kind, timespan_days=90):
         cnt_total[attr_val] += 1
 
     # find most popular user agent strings
-    most_popular = []
+    most_popular: List[str] = []
     for key, value in sorted(iter(cnt_total.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
         most_popular.append(key)
         if len(most_popular) >= 6:
             break
 
     # generate enough for the template
-    datasets = []
+    datasets: List[str] = []
     palette = [
         'ef4760',   # red
         'ffd160',   # yellow
@@ -277,11 +278,11 @@ def route_reportattrs_kind(kind, timespan_days=90):
     ]
     idx = 0
     for value in most_popular:
-        dataset = {}
+        dataset: Dict[str, str] = {}
         dataset['label'] = value
         dataset['color'] = palette[idx % 6]
         idx += 1
-        data = []
+        data: List[str] = []
         for i in range(timespan_days):
             datestr = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=i))
             key = str(datestr) + value
@@ -333,7 +334,7 @@ def route_vendor(timespan_days=30, vendor_cnt=6, smoothing=0):
         cnt_total[display_name] += ug.cnt
 
     # find most popular user agent strings
-    most_popular = []
+    most_popular: List[str] = []
     for key, value in sorted(iter(cnt_total.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
         most_popular.append(key)
         if len(most_popular) >= vendor_cnt:
@@ -344,7 +345,7 @@ def route_vendor(timespan_days=30, vendor_cnt=6, smoothing=0):
         smoothing = int(timespan_days / 25)
 
     # generate enough for the template
-    datasets = []
+    datasets: List[str] = []
     palette = [
         'ef4760',   # red
         'ffd160',   # yellow
@@ -355,11 +356,11 @@ def route_vendor(timespan_days=30, vendor_cnt=6, smoothing=0):
     ]
     idx = 0
     for value in sorted(most_popular):
-        dataset = {}
+        dataset: Dict[str, str] = {}
         dataset['label'] = value
         dataset['color'] = palette[idx % 6]
         idx += 1
-        data = []
+        data: List[str] = []
         for i in range(timespan_days, 0, -1):
             datestr = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=i))
             key = str(datestr) + value
@@ -403,7 +404,7 @@ def route_firmware(timespan_days=30, firmware_cnt=6, smoothing=0):
         cnt_total[display_name] += ug.cnt
 
     # find most popular user agent strings
-    most_popular = []
+    most_popular: List[str] = []
     for key, value in sorted(iter(cnt_total.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
         most_popular.append(key)
         if len(most_popular) >= firmware_cnt:
@@ -414,7 +415,7 @@ def route_firmware(timespan_days=30, firmware_cnt=6, smoothing=0):
         smoothing = int(timespan_days / 25)
 
     # generate enough for the template
-    datasets = []
+    datasets: List[str] = []
     palette = [
         'ef4760',   # red
         'ffd160',   # yellow
@@ -425,11 +426,11 @@ def route_firmware(timespan_days=30, firmware_cnt=6, smoothing=0):
     ]
     idx = 0
     for value in sorted(most_popular):
-        dataset = {}
+        dataset: Dict[str, str] = {}
         dataset['label'] = value
         dataset['color'] = palette[idx % 6]
         idx += 1
-        data = []
+        data: List[str] = []
         for i in range(timespan_days, 0, -1):
             datestr = _get_datestr_from_datetime(yesterday - datetime.timedelta(days=i))
             key = str(datestr) + value
@@ -492,21 +493,21 @@ def route_search_stats(limit=20):
                         order_by(SearchEvent.timestamp.desc()).\
                         limit(99999).all()
 
-    keywords = {}
+    keywords: Dict[str, int] = {}
     for ev in search_events:
         for tok in _split_search_string(ev.value):
             if tok in keywords:
                 keywords[tok] += 1
                 continue
             keywords[tok] = 1
-    results = []
+    results: List[Tuple[str, Dict[str, int]]] = []
     for keyword in keywords:
         results.append((keyword, keywords[keyword]))
     results.sort(key=lambda k: k[1], reverse=True)
 
     # generate the graph data
-    labels = []
-    data = []
+    labels: List[str] = []
+    data: List[str] = []
     for res in results[0:limit]:
         labels.append(str(res[0]))
         data.append(res[1])

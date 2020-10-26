@@ -170,7 +170,7 @@ def _add_version_formats(ufile):
         ufile.version_formats[verfmt.value] = verfmt
 
 class InMemoryZip:
-    def __init__(self):
+    def __init__(self) -> None:
         self.in_memory_zip = io.BytesIO()
 
     def __del__(self):

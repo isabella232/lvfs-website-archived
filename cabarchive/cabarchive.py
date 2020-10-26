@@ -8,24 +8,27 @@
 # pylint: disable=wrong-import-position
 
 import os
+from typing import Optional
 
 import gi
 
-gi.require_version('GCab', '1.0')
+gi.require_version("GCab", "1.0")
 
 from gi.repository import GCab
 from gi.repository import Gio
 from gi.repository import GLib
 
-from . cabfile import CabFile
+from .cabfile import CabFile
+
 
 class NotSupportedError(NotImplementedError):
     pass
 
+
 class CabArchive(dict):
     """An object representing a Microsoft Cab archive """
 
-    def __init__(self, buf: bytes = None, flattern: bool = True):
+    def __init__(self, buf: Optional[bytes] = None, flattern: bool = True):
         """ Parses a MS Cabinet archive """
         dict.__init__(self)
 
@@ -41,12 +44,12 @@ class CabArchive(dict):
             for cffolder in cfarchive.get_folders():
                 for cffile in cffolder.get_files():
                     # replace win32-style backslashes
-                    fn = cffile.get_name().replace('\\', '/')
+                    fn = cffile.get_name().replace("\\", "/")
                     if flattern:
                         fn = os.path.basename(fn)
                     self[fn] = CabFile(cffile.get_bytes().get_data())
 
-    def __setitem__(self, key: str, val: CabFile):
+    def __setitem__(self, key: str, val: CabFile) -> None:
         assert isinstance(key, str)
         assert isinstance(val, CabFile)
         val.filename = key
@@ -57,7 +60,9 @@ class CabArchive(dict):
         cfarchive = GCab.Cabinet.new()
 
         # add a default folder with no compress
-        cffolders = GCab.Folder.new(GCab.Compression.MSZIP if compress else GCab.Compression.NONE)
+        cffolders = GCab.Folder.new(
+            GCab.Compression.MSZIP if compress else GCab.Compression.NONE
+        )
         cfarchive.add_folder(cffolders)
 
         # add each file
@@ -70,5 +75,5 @@ class CabArchive(dict):
         cfarchive.write_simple(ostream)
         return Gio.MemoryOutputStream.steal_as_bytes(ostream).get_data()
 
-    def __repr__(self):
-        return 'CabArchive({})'.format([str(self[cabfile]) for cabfile in self])
+    def __repr__(self) -> str:
+        return "CabArchive({})".format([str(self[cabfile]) for cabfile in self])

@@ -10,7 +10,7 @@ from lvfs import db, tq
 from lvfs.components.models import Component
 
 
-def _fsck_update_descriptions(search: str, replace: str):
+def _fsck_update_descriptions(search: str, replace: str) -> None:
 
     for md in db.session.query(Component):
         if not md.release_description:

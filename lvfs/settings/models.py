@@ -20,5 +20,5 @@ class Setting(db.Model):
     key = Column("config_key", Text)
     value = Column("config_value", Text)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Setting object %s" % self.key

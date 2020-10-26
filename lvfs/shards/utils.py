@@ -7,6 +7,8 @@
 #
 # pylint: disable=singleton-comparison
 
+from typing import Dict
+
 from lvfs import db, tq
 
 from lvfs.components.models import ComponentShard, ComponentShardInfo
@@ -23,7 +25,7 @@ def _generate_stats_shard_info(info: ComponentShardInfo):
 def _regenerate_shard_infos():
 
     # Set ComponentShardInfo in ComponentShard if GUID matches
-    infos = {}
+    infos: Dict[str, ComponentShardInfo] = {}
     for info in db.session.query(ComponentShardInfo):
         infos[info.guid] = info
     for component_shard_id, in db.session.query(ComponentShard.component_shard_id)\

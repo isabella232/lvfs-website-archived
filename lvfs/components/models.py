@@ -12,7 +12,7 @@ import collections
 import math
 import hashlib
 import zlib
-from typing import Optional, List
+from typing import Optional, List, Dict
 from distutils.version import StrictVersion
 
 from flask import g, url_for
@@ -52,7 +52,7 @@ class ComponentShardInfo(db.Model):
     shards = relationship("ComponentShard", cascade="all,delete,delete-orphan")
     claim = relationship("Claim")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentShardInfo object %s" % self.component_shard_info_id
 
 
@@ -72,7 +72,7 @@ class ComponentShardChecksum(db.Model):
 
     shard = relationship("ComponentShard")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentShardChecksum object %s(%s)" % (self.kind, self.value)
 
 
@@ -104,8 +104,8 @@ class ComponentShardCertificate(db.Model):
             return "danger"
         return "success"
 
-    def __repr__(self):
-        data = []
+    def __repr__(self) -> str:
+        data: List[str] = []
         if self.serial_number:
             data.append("serial_number:{}".format(self.serial_number))
         if self.not_before:
@@ -137,7 +137,7 @@ class ComponentShardClaim(db.Model):
     info = relationship("ComponentShardInfo")
     claim = relationship("Claim")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentShardClaim object {},{} -> {}({})".format(
             self.info.guid, self.checksum, self.kind, self.value
         )
@@ -158,7 +158,7 @@ class ComponentShardAttribute(db.Model):
 
     component_shard = relationship("ComponentShard", back_populates="attributes")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentShardAttribute object %s=%s" % (self.key, self.value)
 
 
@@ -243,7 +243,7 @@ class ComponentShard(db.Model):
                 return csum.value
         return None
 
-    def set_blob(self, value: bytes, checksums: List[str] = None) -> None:
+    def set_blob(self, value: bytes, checksums: Optional[List[str]] = None) -> None:
         """ Set data blob and add checksum objects """
         self._blob = value
         self.size = len(value)
@@ -277,7 +277,7 @@ class ComponentShard(db.Model):
         with open(fn, "wb") as f:
             f.write(zlib.compress(self._blob))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentShard object %s" % self.component_shard_id
 
 
@@ -402,7 +402,7 @@ class ComponentIssue(db.Model):
             description="Issue kind {} not supported".format(self.kind),
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<ComponentIssue {}>".format(self.value)
 
 
@@ -427,7 +427,7 @@ class ComponentClaim(db.Model):
     md = relationship("Component", back_populates="component_claims")
     claim = relationship("Claim")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<ComponentClaim {}>".format(self.component_claim_id)
 
 
@@ -471,7 +471,7 @@ class ComponentRef(db.Model):
             return "{} ({})".format(self.release_tag, self.version)
         return self.version
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<ComponentRef {}>".format(self.version)
 
 
@@ -630,7 +630,7 @@ class Component(db.Model):
 
     @property
     def autoclaims(self) -> List[Claim]:
-        claims = []
+        claims: List[Claim] = []
         if self.protocol:
             if self.protocol.is_signed:
                 claims.append(
@@ -711,7 +711,7 @@ class Component(db.Model):
 
     @property
     def security_level(self) -> int:
-        claims = {}
+        claims: Dict[str, Claim] = {}
         for claim in self.autoclaims:
             claims[claim.kind] = claim
         if "signed-firmware" in claims and "device-checksum" in claims:
@@ -1100,7 +1100,7 @@ class Component(db.Model):
         return False
 
     def add_keywords_from_string(self, value: str, priority: int = 0) -> None:
-        existing_keywords = {}
+        existing_keywords: Dict[str, ComponentKeyword] = {}
         for kw in self.keywords:
             existing_keywords[kw.value] = kw
         for keyword in _split_search_string(value):
@@ -1152,7 +1152,7 @@ class Component(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Component object %s" % self.appstream_id
 
 
@@ -1172,7 +1172,7 @@ class ComponentRequirement(db.Model):
 
     md = relationship("Component", back_populates="requirements")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentRequirement object %s/%s/%s/%s" % (
             self.kind,
             self.value,
@@ -1192,7 +1192,7 @@ class ComponentGuid(db.Model):
 
     md = relationship("Component", back_populates="guids")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentGuid object %s" % self.guid_id
 
 
@@ -1209,7 +1209,7 @@ class ComponentKeyword(db.Model):
 
     md = relationship("Component", back_populates="keywords")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentKeyword object %s" % self.value
 
 
@@ -1226,5 +1226,5 @@ class ComponentChecksum(db.Model):
 
     md = relationship("Component")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ComponentChecksum object %s(%s)" % (self.kind, self.value)

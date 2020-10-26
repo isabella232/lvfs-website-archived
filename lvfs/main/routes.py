@@ -12,6 +12,8 @@ import html
 import datetime
 import fnmatch
 import json
+from typing import Dict, List
+
 import humanize
 import iso3166
 
@@ -21,8 +23,6 @@ from flask_login import login_required, login_user, logout_user
 from sqlalchemy.orm import joinedload
 
 from celery.schedules import crontab
-
-import GeoIP
 
 from pkgversion import vercmp
 
@@ -36,6 +36,8 @@ from lvfs.components.models import ComponentRequirement
 from lvfs.firmware.models import Firmware
 from lvfs.metadata.models import Remote
 from lvfs.users.models import User
+from lvfs.geoip.models import Geoip
+from lvfs.geoip.utils import _convert_ip_addr_to_integer
 from lvfs.util import _event_log, _error_internal, _get_datestr_from_datetime
 from lvfs.util import _get_client_address, _get_settings, _xml_from_markdown, _get_chart_labels_days
 from lvfs.vendors.models import Vendor
@@ -120,12 +122,18 @@ def serveStaticResource(resource):
         # check the firmware vendor has no country block
         if fw.banned_country_codes:
             banned_country_codes = fw.banned_country_codes.split(',')
-            geo = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-            country_code = geo.country_code_by_addr(_get_client_address())
-            if country_code and country_code in banned_country_codes:
-                return Response(response='firmware not available from this IP range',
-                                status=451,
-                                mimetype="text/plain")
+            try:
+                ip_val = _convert_ip_addr_to_integer(_get_client_address())
+                country_code, = db.session.query(Geoip.country).\
+                                           filter(Geoip.addr_start < ip_val).\
+                                           filter(Geoip.addr_end > ip_val).first()
+                if country_code in banned_country_codes:
+                    return Response(response='firmware not available from this IP range [{}]'.\
+                                    format(country_code),
+                                    status=451,
+                                    mimetype="text/plain")
+            except TypeError as _:
+                pass
 
         # check any firmware download limits
         for fl in fw.limits:
@@ -285,7 +293,7 @@ def route_dashboard():
 
     download_cnt = 0
     devices_cnt = 0
-    appstream_ids = {}
+    appstream_ids: Dict[str, Firmware] = {}
     for fw in g.user.vendor.fws:
         download_cnt += fw.download_cnt
         for md in fw.mds:
@@ -293,7 +301,7 @@ def route_dashboard():
     devices_cnt = len(appstream_ids)
 
     # this is somewhat klunky
-    data = []
+    data: List[int] = []
     datestr = _get_datestr_from_datetime(datetime.date.today() - datetime.timedelta(days=31))
     for cnt in db.session.query(AnalyticVendor.cnt).\
                     filter(AnalyticVendor.vendor_id == g.user.vendor.vendor_id).\
@@ -543,7 +551,7 @@ def route_profile():
 @bp_main.route('/lvfs/metrics')
 def route_metrics():
 
-    item = {}
+    item: Dict[str, int] = {}
     for metric in db.session.query(ClientMetric).order_by(ClientMetric.key):
         item[metric.key] = metric.value
     dat = json.dumps(item, indent=4, separators=(',', ': '))

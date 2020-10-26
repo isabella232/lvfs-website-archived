@@ -32,7 +32,7 @@ from lvfs.util import _event_log
 
 from .models import Firmware, FirmwareEvent
 
-def _firmware_delete(fw: Firmware):
+def _firmware_delete(fw: Firmware) -> None:
 
     # find private remote
     remote = db.session.query(Remote).filter(Remote.name == 'deleted').first()

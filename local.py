@@ -10,7 +10,9 @@
 import os
 import sys
 import argparse
+from typing import List
 
+from lvfs.firmware.models import Firmware
 from lvfs.metadata.utils import _generate_metadata_kind
 from lvfs.upload.uploadedfile import UploadedFile, MetadataInvalid
 
@@ -26,7 +28,7 @@ def parse_args():
 
 def create_metadata(archive_dir, basename, metadata_fn):
     # process all archives in directory
-    fws = []
+    fws: List[Firmware] = []
     print('Searching %s' % archive_dir)
     for root, dirs, files in os.walk(archive_dir): #pylint: disable=unused-variable
         for filename in files:

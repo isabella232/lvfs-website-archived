@@ -7,6 +7,8 @@
 #
 # pylint: disable=singleton-comparison
 
+from typing import Dict, List
+
 from flask import Blueprint, url_for, redirect, flash, render_template
 from flask_login import login_required
 from sqlalchemy.orm import joinedload
@@ -15,6 +17,7 @@ from lvfs import db, ploader, tq
 
 from lvfs.tests.models import Test
 from lvfs.util import admin_login_required
+from lvfs.pluginloader import PluginBase
 
 from .utils import _async_test_run, _async_test_run_all, _async_test_ensure
 
@@ -37,16 +40,16 @@ def route_overview():
     tests = db.session.query(Test).\
                 options(joinedload('attributes')). \
                 order_by(Test.scheduled_ts.desc()).all()
-    plugin_ids = {}
+    plugin_ids: Dict[str, List[PluginBase]] = {}
     for test in tests:
         if test.plugin_id not in plugin_ids:
-            plugin_ids[test.plugin_id] = []
+            plugin_ids[test.plugin_id]: List[PluginBase] = []
         plugin_ids[test.plugin_id].append(test)
-    tests_pending = {}
-    tests_running = {}
-    tests_success = {}
-    tests_failed = {}
-    tests_waived = {}
+    tests_pending: Dict[str, List[Test]] = {}
+    tests_running: Dict[str, List[Test]] = {}
+    tests_success: Dict[str, List[Test]] = {}
+    tests_failed: Dict[str, List[Test]] = {}
+    tests_waived: Dict[str, List[Test]] = {}
     for plugin_id in plugin_ids:
         tests_pending[plugin_id] = []
         tests_running[plugin_id] = []
@@ -66,7 +69,7 @@ def route_overview():
                 tests_failed[plugin_id].append(test)
 
     # get the actual Plugin for the ID
-    plugins = {}
+    plugins: Dict[str, PluginBase] = {}
     for plugin_id in plugin_ids:
         plugins[plugin_id] = ploader.get_by_id(plugin_id)
 
@@ -121,7 +124,7 @@ def route_failed():
                 filter(Test.waived_ts == None). \
                 options(joinedload('attributes')). \
                 order_by(Test.scheduled_ts.desc()).all()
-    tests_failed = []
+    tests_failed: List[Test] = []
     for test in tests:
         if not test.success:
             tests_failed.append(test)
@@ -235,7 +238,7 @@ def route_waive_all(plugin_id):
                 filter(Test.plugin_id == plugin_id). \
                 order_by(Test.scheduled_ts.desc()).\
                 all()
-    tests_failed = []
+    tests_failed: List[Test] = []
     for test in tests:
         if not test.success:
             tests_failed.append(test)

@@ -23,7 +23,7 @@ from lvfs.tests.models import Test
 from lvfs.components.models import ComponentShardCertificate
 
 def _build_rfc2459_description(value) -> str:
-    descs = []
+    descs: List[str] = []
     for val in value:
         attr_type = val[0]['type']
         attr_value = str(val[0]['value'])[2:] # prefixed with uint16 length
@@ -77,7 +77,7 @@ def _extract_certs_from_authenticode_blob(buf: bytes) -> List[ComponentShardCert
     }
     content, _ = der_decoder.decode(contentInfo.getComponentByName('content'),
                                     asn1Spec=contentInfoMap[contentType])
-    certs = []
+    certs: List[ComponentShardCertificate] = []
     for cert in content['certificates']:
         tbscert = cert['certificate']['tbsCertificate']
         certs.append(_extract_authenticode_tbscerts(tbscert))

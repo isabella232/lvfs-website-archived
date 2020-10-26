@@ -44,7 +44,7 @@ class FirmwareEvent(db.Model):
     user = relationship("User", foreign_keys=[user_id])
     remote = relationship("Remote", foreign_keys=[remote_id], lazy="joined")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "FirmwareEvent object %s" % self.firmware_event_id
 
 
@@ -181,7 +181,7 @@ class Firmware(db.Model):
 
     @property
     def get_possible_users_to_email(self) -> List[User]:
-        users = []
+        users: List[User] = []
 
         # vendor that owns the firmware
         for u in self.vendor.users:
@@ -266,7 +266,7 @@ class Firmware(db.Model):
     def autoclaims(self) -> List[Claim]:
         # return the smallest of all the components, i.e. the least secure
         md_lowest = None
-        claims = []
+        claims: List[Claim] = []
         for md in self.mds:
             if not md_lowest or md.security_level < md_lowest.security_level:
                 md_lowest = md
@@ -327,7 +327,7 @@ class Firmware(db.Model):
     @property
     def problems(self) -> List[Claim]:
         # does the firmware have any warnings
-        problems = []
+        problems: List[Claim] = []
         if self.is_deleted:
             problems.append(
                 Claim(
@@ -540,5 +540,5 @@ class Firmware(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Firmware object %s" % self.checksum_upload_sha1

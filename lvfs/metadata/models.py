@@ -116,5 +116,5 @@ class Remote(db.Model):
         )
         return datetime.datetime.now() + datetime.timedelta(seconds=secs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Remote object %s [%s]" % (self.remote_id, self.name)

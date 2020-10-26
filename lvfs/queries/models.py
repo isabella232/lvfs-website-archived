@@ -9,7 +9,7 @@
 
 import datetime
 import functools
-from typing import Optional
+from typing import Optional, Dict
 
 from flask import g
 
@@ -19,6 +19,7 @@ from sqlalchemy.orm import relationship
 from lvfs import db
 
 from lvfs.users.models import User
+from lvfs.components.models import Component
 
 
 class YaraQueryResult(db.Model):
@@ -41,7 +42,7 @@ class YaraQueryResult(db.Model):
     shard = relationship("ComponentShard", foreign_keys=[component_shard_id])
     md = relationship("Component", lazy="joined", foreign_keys=[component_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<YaraQueryResult {}>".format(self.yara_query_result_id)
 
 
@@ -82,7 +83,7 @@ class YaraQuery(db.Model):
     @property  # type: ignore
     @functools.lru_cache()
     def mds(self):
-        mds = {}
+        mds: Dict[str, Component] = {}
         for result in self.results:
             key = "{} {}".format(result.md.fw.vendor.display_name, result.md.name)
             if key not in mds:
@@ -120,5 +121,5 @@ class YaraQuery(db.Model):
             "unknown security check action: %s:%s" % (self, action)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<YaraQuery {}>".format(self.yara_query_id)

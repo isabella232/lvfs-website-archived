@@ -315,7 +315,7 @@ def _generate_metadata_mds(mds: List[Component],
     if not metainfo and not local:
 
         # create a superset of all vendors (there is typically just one)
-        vendor_ids = []
+        vendor_ids: List[str] = []
         for md in mds:
 
             # the vendor can upload to any hardware
@@ -512,11 +512,11 @@ def _regenerate_and_sign_metadata_remote(r: Remote):
     if not os.path.exists(download_dir):
         os.mkdir(download_dir)
 
-    invalid_fns = []
+    invalid_fns: List[str] = []
     print('Updating: %s' % r.name)
 
     # create metadata for each remote
-    fws_filtered = []
+    fws_filtered: List[Firmware] = []
     for fw in db.session.query(Firmware):
         if fw.remote.name in ['private', 'deleted']:
             continue

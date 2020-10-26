@@ -7,6 +7,8 @@
 #
 # pylint: disable=no-self-use
 
+from typing import Dict
+
 import requests
 
 from lvfs.pluginloader import PluginBase, PluginError
@@ -52,7 +54,7 @@ class Plugin(PluginBase):
 
         # upload the file
         try:
-            headers = {}
+            headers: Dict[str, str] = {}
             headers['X-Apikey'] = self.get_setting('virustotal_api_key', required=True)
             headers['User-Agent'] = self.get_setting('virustotal_user_agent', required=True)
             files = {'file': ('filepath', md.blob, 'application/octet-stream')}

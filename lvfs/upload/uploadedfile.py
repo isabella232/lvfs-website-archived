@@ -40,7 +40,7 @@ class MetadataInvalid(Exception):
 
 def _repackage_archive(filename: str,
                        buf: bytes,
-                       tmpdir: str = None,
+                       tmpdir: Optional[str] = None,
                        flattern: bool = True) -> CabArchive:
     """ Unpacks an archive (typically a .zip) into a CabArchive object """
 
@@ -203,10 +203,10 @@ class UploadedFile:
         if tmp.lower() != '{f2e7dd72-6468-4e36-b6f1-6488f42c1b52}':
             raise MetadataInvalid('The inf file Version:ClassGuid was invalid')
         try:
-            tmp = cfg.get('Version', 'DriverVer').split(',')
-            if len(tmp) != 2:
+            version_display = cfg.get('Version', 'DriverVer').split(',')
+            if len(version_display) != 2:
                 raise MetadataInvalid('The inf file Version:DriverVer was invalid')
-            self.fw._version_display = tmp[1]
+            self.fw._version_display = version_display[1]
         except configparser.NoOptionError as _:
             pass
 
@@ -219,7 +219,7 @@ class UploadedFile:
                     if version_inf.startswith('0x'):
                         version_inf = str(int(version_inf[2:], 16))
                     if version_inf != '0':
-                        self._version_inf = version_inf
+                        self._version_inf = version_inf # type: ignore
             except (configparser.NoOptionError, configparser.NoSectionError) as _:
                 pass
 
@@ -675,6 +675,10 @@ class UploadedFile:
             cabfile_fw = self.cabarchive_upload[md.filename_contents]
         except KeyError as e:
             raise MetadataInvalid('No {} found in the archive'.format(md.filename_contents)) from e
+        if not cabfile_fw.buf:
+            raise MetadataInvalid('No firmware found in the archive')
+        if not cabfile_fw.filename:
+            raise MetadataInvalid('No filename found in the archive')
         self.cabarchive_repacked[cabfile_fw.filename] = cabfile_fw
         md.checksum_contents_sha1 = hashlib.sha1(cabfile_fw.buf).hexdigest()
         md.checksum_contents_sha256 = hashlib.sha256(cabfile_fw.buf).hexdigest()
@@ -713,7 +717,7 @@ class UploadedFile:
 
         # load metainfo files
         cabfiles = [cabfile for cabfile in self.cabarchive_upload.values()
-                    if fnmatch.fnmatch(cabfile.filename, '*.metainfo.xml')]
+                    if cabfile.filename and fnmatch.fnmatch(cabfile.filename, '*.metainfo.xml')]
         if not cabfiles:
             raise MetadataInvalid('The firmware file had no .metainfo.xml files')
 
@@ -723,13 +727,14 @@ class UploadedFile:
 
         # verify .inf files if they exists
         inffiles = [cabfile for cabfile in self.cabarchive_upload.values()
-                    if fnmatch.fnmatch(cabfile.filename, '*.inf')]
+                    if cabfile.filename and fnmatch.fnmatch(cabfile.filename, '*.inf')]
         for cabfile in inffiles:
 
             # add to the archive
-            self.cabarchive_repacked[cabfile.filename] = cabfile
+            if cabfile.filename:
+                self.cabarchive_repacked[cabfile.filename] = cabfile
 
             # parse
-            if self.enable_inf_parsing:
+            if cabfile.buf and self.enable_inf_parsing:
                 encoding = detect_encoding_from_bom(cabfile.buf)
                 self._parse_inf(cabfile.buf.decode(encoding))

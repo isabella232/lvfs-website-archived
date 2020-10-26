@@ -38,7 +38,7 @@ class VendorAffiliationAction(db.Model):
     user = relationship("User", foreign_keys=[user_id])
     affiliation = relationship("VendorAffiliation", foreign_keys=[affiliation_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<VendorAffiliationAction {}>".format(self.action)
 
 
@@ -69,7 +69,7 @@ class VendorAffiliation(db.Model):
                 return act
         return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "VendorAffiliation object %s" % self.affiliation_id
 
 
@@ -85,7 +85,7 @@ class VendorRestriction(db.Model):
 
     vendor = relationship("Vendor", back_populates="restrictions")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "VendorRestriction object %s" % self.restriction_id
 
 
@@ -104,7 +104,7 @@ class VendorBranch(db.Model):
     vendor = relationship("Vendor", back_populates="branches")
     user = relationship("User", foreign_keys=[user_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<VendorBranch {}>".format(self.value)
 
 
@@ -131,7 +131,7 @@ class VendorNamespace(db.Model):
             return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<VendorNamespace {}>".format(self.value)
 
 
@@ -279,6 +279,12 @@ class Vendor(db.Model):
         return self.users
 
     @property
+    def should_anonymize(self) -> bool:
+        if self.group_id == 'hughski': # this is my hobby; I have no secrets
+            return False
+        return True
+
+    @property
     def is_unrestricted(self) -> bool:
         for res in self.restrictions:
             if res.value == "*":
@@ -399,5 +405,5 @@ class Vendor(db.Model):
     def __eq__(self, other) -> bool:
         return self.vendor_id == other.vendor_id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Vendor object %s" % self.group_id

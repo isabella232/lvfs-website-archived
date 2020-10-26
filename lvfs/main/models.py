@@ -33,7 +33,7 @@ class Event(db.Model):
     vendor = relationship("Vendor", foreign_keys=[vendor_id])
     user = relationship("User", foreign_keys=[user_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Event object %s" % self.message
 
 
@@ -53,7 +53,7 @@ class Client(db.Model):
 
     fw = relationship("Firmware", foreign_keys=[firmware_id])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Client object %s" % self.id
 
 
@@ -65,5 +65,5 @@ class ClientMetric(db.Model):
     key = Column(Text, nullable=False)
     value = Column(Integer, default=0)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "ClientMetric object {}={}".format(self.key, self.value)

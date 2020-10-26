@@ -7,7 +7,7 @@
 
 import json
 import gzip
-from typing import List
+from typing import List, Dict, Union, Any
 
 from collections import defaultdict
 import dateutil.parser
@@ -27,7 +27,7 @@ from lvfs.vendors.models import Vendor
 bp_mdsync = Blueprint('mdsync', __name__, template_folder='templates')
 
 def _md_to_mdsync_dict(md: Component) -> dict:
-    obj = {}
+    obj: Dict[str, Union[str, int]] = {}
     obj['component_id'] = md.component_id
     obj['status'] = md.fw.remote.icon_name
     if md.fw.remote.is_public:
@@ -80,7 +80,7 @@ def route_export():
     # export the devices
     obj_devs = []
     for mds_by_id in mds_by_ids:
-        obj_dev = {}
+        obj_dev: Dict[str, Union[str, int]] = {}
 
         # don't include devices that have not had a single public release
         mds = mds_by_ids[mds_by_id]
@@ -98,7 +98,7 @@ def route_export():
         # add different versions
         obj_dev['versions'] = _mds_to_mdsync_dict(mds_by_ids[mds_by_id])
         obj_devs.append(obj_dev)
-    blob = {}
+    blob: Dict[str, Any] = {}
     blob['metadata'] = {'version': 0}
     blob['devices'] = obj_devs
     dat = json.dumps(blob, indent=4, separators=(',', ': '))
@@ -140,14 +140,14 @@ def route_import():
         return _json_error('No JSON object could be decoded: ' + str(e))
 
     # get available protocols
-    protocols = {}
+    protocols: Dict[str, Protocol] = {}
     for protocol in db.session.query(Protocol):
         protocols[protocol.value] = protocol
 
     # get available components
-    mds_by_id = {}
-    mds_by_tag = {}
-    mds_by_ver = {}
+    mds_by_id: Dict[str, Component] = {}
+    mds_by_tag: Dict[str, Component] = {}
+    mds_by_ver: Dict[str, Component] = {}
     for md in db.session.query(Component).\
                             join(Firmware).\
                             join(Remote).\
@@ -160,7 +160,7 @@ def route_import():
             mds_by_tag['{}/{}'.format(md.appstream_id, md.release_tag.casefold())] = md
 
     # get available vendors
-    vendors = {}
+    vendors: Dict[str, Vendor] = {}
     for vendor in db.session.query(Vendor).filter(Vendor.visible):
         vendors[vendor.vendor_id] = vendor
 
@@ -309,7 +309,7 @@ def route_show(vendor_id_partner, vendor_id):
 
     # create filtered list
     mdrefs_by_id = defaultdict(list)
-    md_by_id = {}
+    md_by_id: Dict[str, Component] = {}
     mdrefs = db.session.query(ComponentRef).\
                     filter(ComponentRef.vendor_id == vendor_id).\
                     filter(ComponentRef.vendor_id_partner == vendor_id_partner)

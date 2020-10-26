@@ -36,7 +36,6 @@ test:
         geolite2-country
         libcurl-devel
         libgcab1
-        GeoIP-devel
         cairo-gobject-devel
         gobject-introspection-devel
         gnutls-utils

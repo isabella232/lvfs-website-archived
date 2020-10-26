@@ -8,7 +8,6 @@ RUN dnf -y install \
 	bsdtar \
 	geolite2-country \
 	libgcab1 \
-	GeoIP-devel \
 	cairo-gobject-devel \
 	gobject-introspection-devel \
 	gnutls-utils \

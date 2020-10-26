@@ -9,6 +9,8 @@
 
 import os
 import glob
+from typing import Dict, List
+
 import yara
 
 from lvfs import db
@@ -74,13 +76,13 @@ class Plugin(PluginBase):
 
         # compile the list of rules
         if not self.rules:
-            fns = []
+            fns: List[str] = []
             for value in self.get_setting('blocklist_dirs', required=True).split(','):
                 fns.extend(glob.glob(os.path.join(value, '*.yar')))
             if not fns:
                 test.add_pass('No YARA rules to use')
                 return
-            filepaths = {}
+            filepaths: Dict[str, str] = {}
             for fn in fns:
                 filepaths[os.path.basename(fn)] = fn
             try:

@@ -45,5 +45,5 @@ class Claim(db.Model):
             return ["far", "fa-clock", "text-info"]
         return ["far", "fa-{}".format(self.icon)]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Claim object {}:{}->{}".format(self.claim_id, self.kind, self.icon)
