@@ -7,7 +7,8 @@
 
 from typing import Optional
 
-class CabFile():
+
+class CabFile:
     def __init__(self, buf: Optional[bytes] = None, filename: Optional[str] = None):
         """ Set defaults """
         self.filename = filename
@@ -20,5 +21,5 @@ class CabFile():
 
     def __repr__(self) -> str:
         if not self.buf:
-            return 'CabFile({})'.format(self.filename)
-        return 'CabFile({}:{:x})'.format(self.filename, len(self.buf))
+            return "CabFile({})".format(self.filename)
+        return "CabFile({}:{:x})".format(self.filename, len(self.buf))

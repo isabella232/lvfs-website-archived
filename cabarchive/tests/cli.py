@@ -11,15 +11,17 @@ import os
 import sys
 
 # allows us to run this from the project root
-sys.path.append(os.path.realpath('.'))
+sys.path.append(os.path.realpath("."))
 
 from cabarchive import CabArchive
 
+
 def main():
     for fn in sys.argv[1:]:
-        with open(fn, 'rb') as f:
+        with open(fn, "rb") as f:
             for cabfile in CabArchive(f.read()):
                 print(cabfile)
+
 
 if __name__ == "__main__":
     main()

@@ -13,53 +13,61 @@ import unittest
 import hashlib
 
 # allows us to run this from the project root
-sys.path.append(os.path.realpath('.'))
+sys.path.append(os.path.realpath("."))
 
 from cabarchive import CabArchive, CabFile, NotSupportedError
 
-class TestCabArchive(unittest.TestCase):
 
+class TestCabArchive(unittest.TestCase):
     def test_checksums(self):
-        with open('contrib/hughski-colorhug2-2.0.3.cab', 'rb') as f:
+        with open("contrib/hughski-colorhug2-2.0.3.cab", "rb") as f:
             cabarchive = CabArchive(f.read())
         results = {
-            'firmware.bin' : 'c57c7de8f7029acc44a4bfad6efd6ab0a7092cc6',
-            'firmware.inf' : 'b0cb43bfb2f55fd15a8814c5c5c7b9f2ce2f4572',
-            'firmware.metainfo.xml' : 'a8fda77f8baa56917ee1201b72747612c49e855b',
+            "firmware.bin": "c57c7de8f7029acc44a4bfad6efd6ab0a7092cc6",
+            "firmware.inf": "b0cb43bfb2f55fd15a8814c5c5c7b9f2ce2f4572",
+            "firmware.metainfo.xml": "a8fda77f8baa56917ee1201b72747612c49e855b",
         }
         for fn in results:
             self.assertEqual(hashlib.sha1(cabarchive[fn].buf).hexdigest(), results[fn])
 
     def test_missing(self):
-        with open('contrib/hughski-colorhug2-2.0.3.cab', 'rb') as f:
+        with open("contrib/hughski-colorhug2-2.0.3.cab", "rb") as f:
             cabarchive = CabArchive(f.read())
         with self.assertRaises(KeyError):
-            self.assertIsNone(cabarchive['README.txt'])
+            self.assertIsNone(cabarchive["README.txt"])
 
     def test_invalid(self):
         with self.assertRaises(NotSupportedError):
-            with open('contrib/pylint.sh', 'rb') as f:
+            with open("contrib/pylint.sh", "rb") as f:
                 _ = CabArchive(f.read())
 
     def test_cabfile_length(self):
-        self.assertEqual(len(CabFile(b'foofoofoofoofoofoofoofoo')), 24)
+        self.assertEqual(len(CabFile(b"foofoofoofoofoofoofoofoo")), 24)
 
     def test_uncompressed(self):
         cabarchive = CabArchive()
-        cabarchive['README.txt'] = CabFile(b'foofoofoofoofoofoofoofoo')
-        cabarchive['firmware.bin'] = CabFile(b'barbarbarbarbarbarbarbar')
+        cabarchive["README.txt"] = CabFile(b"foofoofoofoofoofoofoofoo")
+        cabarchive["firmware.bin"] = CabFile(b"barbarbarbarbarbarbarbar")
         buf = cabarchive.save()
         self.assertEqual(len(buf), 156)
-        self.assertEqual(hashlib.sha1(buf).hexdigest(), '676654685d6b5918d68081a786ae1d4dbfeb5e01')
-        self.assertEqual(str(cabarchive), "CabArchive(['CabFile(README.txt:18)', 'CabFile(firmware.bin:18)'])")
+        self.assertEqual(
+            hashlib.sha1(buf).hexdigest(), "676654685d6b5918d68081a786ae1d4dbfeb5e01"
+        )
+        self.assertEqual(
+            str(cabarchive),
+            "CabArchive(['CabFile(README.txt:18)', 'CabFile(firmware.bin:18)'])",
+        )
 
     def test_compressed(self):
         cabarchive = CabArchive()
-        cabarchive['README.txt'] = CabFile(b'foofoofoofoofoofoofoofoo')
-        cabarchive['firmware.bin'] = CabFile(b'barbarbarbarbarbarbarbar')
+        cabarchive["README.txt"] = CabFile(b"foofoofoofoofoofoofoofoo")
+        cabarchive["firmware.bin"] = CabFile(b"barbarbarbarbarbarbarbar")
         buf = cabarchive.save(compress=True)
         self.assertEqual(len(buf), 122)
-        self.assertEqual(hashlib.sha1(buf).hexdigest(), '74e94703c403aa93b16d01b088eb52e3a9c73288')
+        self.assertEqual(
+            hashlib.sha1(buf).hexdigest(), "74e94703c403aa93b16d01b088eb52e3a9c73288"
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
