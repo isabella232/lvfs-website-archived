@@ -11,17 +11,19 @@ import os
 import sys
 
 # allows us to run this from the project root
-sys.path.append(os.path.realpath('.'))
+sys.path.append(os.path.realpath("."))
 
 from jcat import JcatFile
 
+
 def main():
     for fn in sys.argv[1:]:
-        with open(fn, 'rb') as f:
+        with open(fn, "rb") as f:
             for jcatitem in JcatFile(f.read()).items:
                 print(jcatitem)
                 for jcatblob in jcatitem.blobs:
                     print(jcatblob)
+
 
 if __name__ == "__main__":
     main()

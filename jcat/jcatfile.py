@@ -12,12 +12,14 @@ import gzip
 
 from typing import Any, Optional, Dict, List
 
-from . jcatitem import JcatItem
+from .jcatitem import JcatItem
+
 
 class NotSupportedError(NotImplementedError):
     pass
 
-class JcatFile():
+
+class JcatFile:
     """An object representing a Jcat archive """
 
     def __init__(self, buf: Optional[bytes] = None):
@@ -45,23 +47,23 @@ class JcatFile():
 
     def save(self) -> bytes:
         node: Dict[str, Any] = {}
-        node['JcatVersionMajor'] = self.version_major
-        node['JcatVersionMinor'] = self.version_minor
+        node["JcatVersionMajor"] = self.version_major
+        node["JcatVersionMinor"] = self.version_minor
         if self.items:
-            node['Items'] = []
+            node["Items"] = []
             for item in self.items:
-                node['Items'].append(item.save())
+                node["Items"].append(item.save())
         return gzip.compress(json.dumps(node).encode())
 
     def load(self, blob: bytes) -> None:
         node = json.loads(gzip.decompress(blob))
-        self.version_major = node.get('JcatVersionMajor', 0)
-        self.version_minor = node.get('JcatVersionMinor', 0)
-        if 'Items' in node:
-            for node_c in node['Items']:
+        self.version_major = node.get("JcatVersionMajor", 0)
+        self.version_minor = node.get("JcatVersionMinor", 0)
+        if "Items" in node:
+            for node_c in node["Items"]:
                 item = JcatItem()
                 item.load(node_c)
                 self.items.append(item)
 
     def __repr__(self) -> str:
-        return 'JcatFile({})'.format([str(jcatitem) for jcatitem in self.items])
+        return "JcatFile({})".format([str(jcatitem) for jcatitem in self.items])
