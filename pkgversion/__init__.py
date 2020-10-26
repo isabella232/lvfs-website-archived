@@ -5,4 +5,4 @@
 #
 # SPDX-License-Identifier: GPL-2.0+
 
-from . vercmp import vercmp
+from .vercmp import vercmp

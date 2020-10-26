@@ -8,12 +8,13 @@
 from itertools import zip_longest
 from typing import Tuple
 
+
 def _vercmp_char(chr1: str, chr2: str) -> int:
     if chr1 == chr2:
         return 0
-    if chr1 == '~':
+    if chr1 == "~":
         return -1
-    if chr2 == '~':
+    if chr2 == "~":
         return 1
     if not chr1:
         return -1
@@ -23,10 +24,11 @@ def _vercmp_char(chr1: str, chr2: str) -> int:
         return -1
     return 1
 
+
 def _strtoll(val: str) -> Tuple[int, str]:
     """ Parses a value, returning the numeric part and any string suffix """
-    num_part = ''
-    str_part = ''
+    num_part = ""
+    str_part = ""
     for char in val:
         if not str_part and char.isnumeric():
             num_part += char
@@ -36,24 +38,25 @@ def _strtoll(val: str) -> Tuple[int, str]:
         return 0, str_part
     return int(num_part), str_part
 
+
 def vercmp(version_a: str, version_b: str) -> int:
 
     # sanity check
     if not version_a or not version_b:
-        raise TypeError('Version cannot be None')
+        raise TypeError("Version cannot be None")
 
     # optimisation
     if version_a == version_b:
         return 0
 
     # convert from hex
-    if version_a.startswith('0x'):
+    if version_a.startswith("0x"):
         version_a = str(int(version_a[2:], 16))
-    if version_b.startswith('0x'):
+    if version_b.startswith("0x"):
         version_b = str(int(version_b[2:], 16))
 
     # split into sections, and try to parse
-    for split_a, split_b in zip_longest(version_a.split('.'), version_b.split('.')):
+    for split_a, split_b in zip_longest(version_a.split("."), version_b.split(".")):
 
         # we lost or gained a dot
         if not split_a:
