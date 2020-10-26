@@ -19,6 +19,9 @@ clean:
 run:
 	FLASK_DEBUG=1 FLASK_APP=lvfs/__init__.py $(VENV)/bin/flask run
 
+profile:
+	FLASK_DEBUG=1 FLASK_APP=lvfs/__init__.py $(VENV)/bin/python run-profile.py
+
 dbup:
 	FLASK_APP=lvfs/__init__.py $(FLASK) db upgrade
 

@@ -279,11 +279,7 @@ def route_index():
 @bp_main.route('/lvfs/dashboard')
 @login_required
 def route_dashboard():
-    user = db.session.query(User).filter(User.username == 'sign-test@fwupd.org').first()
     settings = _get_settings()
-    default_admin_password = False
-    if user and user.verify_password('Pa$$w0rd'):
-        default_admin_password = True
 
     # get the 10 most recent firmwares
     fws = db.session.query(Firmware).\
@@ -316,8 +312,7 @@ def route_dashboard():
                            labels_days=_get_chart_labels_days(limit=len(data))[::-1],
                            data_days=data,
                            server_warning=settings.get('server_warning', None),
-                           category='home',
-                           default_admin_password=default_admin_password)
+                           category='home')
 
 @bp_main.route('/lvfs/newaccount')
 def route_new_account():
