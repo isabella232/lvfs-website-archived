@@ -124,7 +124,7 @@ def serveStaticResource(resource):
             banned_country_codes = fw.banned_country_codes.split(',')
             try:
                 ip_val = _convert_ip_addr_to_integer(_get_client_address())
-                country_code, = db.session.query(Geoip.country).\
+                country_code, = db.session.query(Geoip.country_code).\
                                            filter(Geoip.addr_start < ip_val).\
                                            filter(Geoip.addr_end > ip_val).first()
                 if country_code in banned_country_codes:
