@@ -19,6 +19,7 @@ RUN dnf -y install \
 	python3-devel \
 	python3-pip \
 	python3-psutil \
+	python3-pycurl \
     s3cmd
 
 # create all our dirs
