@@ -10,7 +10,8 @@ fi
 
 if [ "$DEPLOY" = "metadata" ]
 then
-    exec celery -A lvfs.tq worker --queues metadata,firmware,celery
+    #exec celery -A lvfs.tq worker --queues metadata,firmware,celery
+    python envdump.py
 fi
 
 if [ "$DEPLOY" = "yara" ]
