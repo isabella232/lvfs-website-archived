@@ -44,6 +44,7 @@ COPY pkgversion/ /app/pkgversion/
 COPY jcat/ /app/jcat/
 COPY infparser/ /app/infparser/
 COPY plugins/ /app/plugins/
+COPY migrations/ /app/migrations/
 COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
 COPY docker/files/application/flaskapp.cfg /app/lvfs/flaskapp.cfg
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
