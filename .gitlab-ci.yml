@@ -41,7 +41,7 @@ test:
         gobject-introspection-devel
         gnutls-utils
         gcc
-        openssl-static.x86_64
+        openssl-devel
         python3-devel
         python3-pip
         python3-virtualenv
