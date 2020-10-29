@@ -39,7 +39,7 @@ RUN pip3 install -r conf/requirements.txt
 RUN pip3 install uwsgi
 
 # do this because of this bug/issue: https://github.com/celery/celery/issues/4654
-RUN pip uninstall pycurl
+RUN pip uninstall -y pycurl
 RUN export PYCURL_SSL_LIBRARY=nss
 RUN pip install --compile pycurl
 
