@@ -16,6 +16,7 @@ RUN dnf -y install \
 	libcurl-devel \
 	libgcab1 \
 	logrotate \
+	openssl-devel \
 	python3-celery \
 	python3-devel \
 	python3-pip \
