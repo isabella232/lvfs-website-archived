@@ -44,7 +44,8 @@ def route_status(vendor_id = None, category_id = None):
 
     query = db.session.query(Component)\
                       .join(Firmware)\
-                      .filter(Firmware.vendor_odm_id == vendor.vendor_id)\
+                      .filter((Firmware.vendor_id == vendor.vendor_id) | \
+                              (Firmware.vendor_odm_id == vendor.vendor_id))\
                       .join(Remote).filter(Remote.name != 'deleted')
     if category_id:
         query = query.filter(Component.category_id == category_id)
