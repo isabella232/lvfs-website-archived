@@ -75,7 +75,7 @@ def route_status(vendor_id = None, category_id = None):
             continue
 
         # replace with newer version
-        if old_md > md:
+        if md > old_md:
             md_by_remote[md.fw.remote.key] = md
 
     # get available categories
