@@ -8,20 +8,84 @@
 import datetime
 from typing import Dict, List
 
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for, g
 from flask_login import login_required
 
 from sqlalchemy import func
+from sqlalchemy.orm.exc import NoResultFound
 
 from lvfs import db
 
 from lvfs.util import admin_login_required
+from lvfs.categories.models import Category
 from lvfs.firmware.models import Firmware
 from lvfs.components.models import Component, ComponentGuid, ComponentShard
 from lvfs.vendors.models import Vendor
 from lvfs.metadata.models import Remote
 
 bp_devices = Blueprint('devices', __name__, template_folder='templates')
+
+
+@bp_devices.route('/status')
+@bp_devices.route('/status/<int:vendor_id>')
+@bp_devices.route('/status/<int:vendor_id>/<int:category_id>')
+@login_required
+def route_status(vendor_id = None, category_id = None):
+
+    # fall back to the current vendor
+    if not vendor_id:
+        vendor = g.user.vendor
+    else:
+        try:
+            vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).one()
+        except NoResultFound as _:
+            flash('No vendor with ID {} exists'.format(vendor_id), 'danger')
+            return redirect(url_for('devices.route_status'))
+
+    query = db.session.query(Component)\
+                      .join(Firmware)\
+                      .filter(Firmware.vendor_odm_id == vendor.vendor_id)\
+                      .join(Remote).filter(Remote.name != 'deleted')
+    if category_id:
+        query = query.filter(Component.category_id == category_id)
+
+    # find all the components uploaded by the vendor
+    appstream_ids: Dict[str, Dict[str, Component]] = {}
+    md_by_id: Dict[str, Component] = {}
+    for md in query:
+
+        # permission check
+        if not md.fw.check_acl('@view'):
+            continue
+        md_by_remote = appstream_ids.get(md.appstream_id)
+
+        # put something human readable in the UI
+        md_by_id[md.appstream_id] = md
+
+        # appstream ID not yet added
+        if not md_by_remote:
+            appstream_ids[md.appstream_id] = { md.fw.remote.key: md }
+            continue
+
+        # remote not yet added
+        old_md = md_by_remote.get(md.fw.remote.key)
+        if not old_md:
+            md_by_remote[md.fw.remote.key] = md
+            continue
+
+        # replace with newer version
+        if old_md > md:
+            md_by_remote[md.fw.remote.key] = md
+
+    # get available categories
+    cats = db.session.query(Category).order_by(Category.name.asc()).all()
+
+    return render_template('device-status.html',
+                           category='firmware',
+                           cats=cats,
+                           vendor=vendor,
+                           appstream_ids=appstream_ids,
+                           md_by_id=md_by_id)
 
 @bp_devices.route('/admin')
 @login_required
