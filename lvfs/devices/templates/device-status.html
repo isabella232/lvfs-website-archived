@@ -1,0 +1,71 @@
+{% extends "default.html" %}
+{% block title %}Device Status{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Device Status uploaded by {{vendor.display_name_with_team}}</h2>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle"
+              type="button" id="dropdownMenu1" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        Filter
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        <a class="dropdown-item"
+           href="{{url_for('devices.route_status', category_id=0, vendor_id=vendor.vendor_id)}}">
+          None
+        </a>
+{% for cat in cats %}
+        <a class="dropdown-item"
+           href="{{url_for('devices.route_status', category_id=cat.category_id, vendor_id=vendor.vendor_id)}}">
+          {{cat.name}}
+        </a>
+{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body">
+{% if not appstream_ids %}
+    <p class="card-text">No devices to show!</p>
+{% else %}
+    <table class="table card-text">
+      <tr class="row table-borderless">
+        <th class="col col-sm-4">Model</th>
+        <th class="col col-sm-2">Private</th>
+        <th class="col col-sm-2">Embargo</th>
+        <th class="col col-sm-2">Testing</th>
+        <th class="col col-sm-2">Stable</th>
+      </tr>
+{% for appstream_id in appstream_ids %}
+{% set md_by_remote = appstream_ids[appstream_id] %}
+<tr class="row">
+  <td class="col col-sm-4">
+    <h5>
+      {{md_by_id[appstream_id].name_with_vendor}}
+    </h5>
+    <code class="text-muted">{{appstream_id}}</code>
+  </td>
+{% for remote_id in ['private', 'embargo', 'testing', 'stable'] %}
+  <td class="col col-sm-2">
+    {% set md = md_by_remote.get(remote_id) %}
+{% if md %}
+    <a href="{{url_for('firmware.route_show', firmware_id=md.fw.firmware_id)}}">
+      {{md.version_display}}
+    </a>
+{% else %}
+      —
+{% endif %}
+  </td>
+{% endfor %}
+</tr>
+{% endfor %}
+    </table>
+
+{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -69,6 +69,12 @@ class Remote(db.Model):
         return None
 
     @property
+    def key(self) -> str:
+        if self.name.startswith("embargo"):
+            return "embargo"
+        return self.name
+
+    @property
     def is_signed(self) -> bool:
         return self.name != "deleted" and self.name != "private"
 

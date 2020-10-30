@@ -80,6 +80,9 @@
             <li class="nav-item {{'active' if request.url_rule.endpoint == 'firmware.route_firmware' and state == 'private'}}">
               <a class="nav-link" href="{{url_for('firmware.route_user')}}">User :: All</a>
             </li>
+            <li class="nav-item {{'active' if request.url_rule.endpoint == 'devices.route_status'}}">
+              <a class="nav-link" href="{{url_for('devices.route_status')}}">Devices</a>
+            </li>
 {% if g.user.check_acl('@view-issues') %}
             <li class="nav-item {{'active' if request.url_rule.endpoint == 'issues.route_list'}}">
               <a class="nav-link" href="{{url_for('issues.route_list')}}">Known Issues</a>

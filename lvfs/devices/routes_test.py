@@ -37,5 +37,20 @@ class LocalTestCase(LvfsTestCase):
         rv = self.app.get('/lvfs/devices/com.hughski.ColorHug2.firmware/analytics')
         assert 'ChartDevice' in rv.data.decode('utf-8'), rv.data.decode()
 
+    def test_device_status(self):
+
+        # upload to stable
+        self.login()
+        self.add_namespace(vendor_id=1)
+        self.upload()
+        self.run_cron_firmware()
+        rv = self.app.post('/lvfs/firmware/1/promote/stable', follow_redirects=True)
+        assert b'>stable<' in rv.data, rv.data.decode()
+
+        rv = self.app.get('/lvfs/devices/status')
+        assert 'com.hughski.ColorHug2.firmware' in rv.data.decode('utf-8'), rv.data.decode()
+        assert '/lvfs/firmware/1' in rv.data.decode('utf-8'), rv.data.decode()
+        assert '2.0.3' in rv.data.decode('utf-8'), rv.data.decode()
+
 if __name__ == '__main__':
     unittest.main()
