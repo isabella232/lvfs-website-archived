@@ -26,6 +26,12 @@
       </div>
     </div>
 {% endif %}
+    <div class="float-right">
+      <a class="card-link btn btn-info"
+         href="{{url_for('devices.route_status_csv', category_id=category_id, vendor_id=vendor.vendor_id)}}">
+        Export as CSV
+      </a>
+    </div>
   </div>
 </div>
 

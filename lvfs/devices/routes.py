@@ -8,7 +8,7 @@
 import datetime
 from typing import Dict, List
 
-from flask import Blueprint, render_template, flash, redirect, url_for, g
+from flask import Blueprint, render_template, flash, redirect, url_for, g, make_response
 from flask_login import login_required
 
 from sqlalchemy import func
@@ -88,8 +88,83 @@ def route_status(vendor_id = None, category_id = None):
                            category='firmware',
                            cats=cats_by_id.values(),
                            vendor=vendor,
+                           category_id=category_id,
                            appstream_ids=appstream_ids,
                            md_by_id=md_by_id)
+
+
+@bp_devices.route('/status/csv')
+@bp_devices.route('/status/csv/<int:vendor_id>')
+@bp_devices.route('/status/csv/<int:vendor_id>/<int:category_id>')
+@login_required
+def route_status_csv(vendor_id=None, category_id=None):
+
+    # fall back to the current vendor
+    if not vendor_id:
+        vendor = g.user.vendor
+    else:
+        try:
+            vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).one()
+        except NoResultFound as _:
+            flash('No vendor with ID {} exists'.format(vendor_id), 'danger')
+            return redirect(url_for('devices.route_status'))
+
+    # find all the components uploaded by the vendor
+    appstream_ids: Dict[str, Dict[str, Component]] = {}
+    md_by_id: Dict[str, Component] = {}
+    for md in db.session.query(Component)\
+                        .join(Firmware)\
+                        .filter((Firmware.vendor_id == vendor.vendor_id) | \
+                                (Firmware.vendor_odm_id == vendor.vendor_id))\
+                        .join(Remote).filter(Remote.name != 'deleted'):
+
+        # permission check
+        if not md.fw.check_acl('@view'):
+            continue
+
+        # filter
+        if category_id:
+            if category_id != md.category_id:
+                continue
+
+        # put something human readable in the UI
+        md_by_id[md.appstream_id] = md
+
+        # appstream ID not yet added
+        md_by_remote = appstream_ids.get(md.appstream_id)
+        if not md_by_remote:
+            appstream_ids[md.appstream_id] = {md.fw.remote.key: md}
+            continue
+
+        # remote not yet added
+        old_md = md_by_remote.get(md.fw.remote.key)
+        if not old_md:
+            md_by_remote[md.fw.remote.key] = md
+            continue
+
+        # replace with newer version
+        if md > old_md:
+            md_by_remote[md.fw.remote.key] = md
+
+    # header
+    csv: List[str] = []
+    remote_names: List[str] = ['private', 'embargo', 'testing', 'stable']
+    csv.append(','.join(['appstream_id', 'model'] + remote_names))
+    for appstream_id in appstream_ids:
+        md_by_remote = appstream_ids[appstream_id]
+        csv_line: List[str] = []
+        csv_line.append(appstream_id)
+        csv_line.append('"{}"'.format(md_by_id[appstream_id].name_with_vendor))
+        for remote_id in remote_names:
+            md = md_by_remote.get(remote_id)
+            csv_line.append(md.version_display if md else '')
+        csv.append(','.join(csv_line))
+
+    response = make_response('\n'.join(csv))
+    response.headers.set('Content-Type', 'text/csv')
+    response.headers.set('Content-Disposition', 'attachment', filename='device-status.csv')
+    return response
+
 
 @bp_devices.route('/admin')
 @login_required
