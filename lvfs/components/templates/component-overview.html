@@ -12,7 +12,7 @@
   </div>
 {% endif %}
 
-<fieldset {{ 'disabled="disabled"' if md.fw.remote.is_public }} >
+<fieldset {{ 'disabled="disabled"' if not g.user.check_acl('@admin') and md.fw.remote.is_public }} >
 <div class="card">
   <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
   <div class="card-body">
