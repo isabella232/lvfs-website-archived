@@ -5,8 +5,9 @@
 <div class="card">
   <div class="card-body">
     <h2 class="card-title">Device Status uploaded by {{vendor.display_name_with_team}}</h2>
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle"
+{% if cats|length > 1 %}
+    <div class="dropdown float-left">
+      <button class="card-link btn btn-secondary dropdown-toggle"
               type="button" id="dropdownMenu1" data-toggle="dropdown"
               aria-haspopup="true" aria-expanded="false">
         Filter
@@ -24,6 +25,7 @@
 {% endfor %}
       </div>
     </div>
+{% endif %}
   </div>
 </div>
 

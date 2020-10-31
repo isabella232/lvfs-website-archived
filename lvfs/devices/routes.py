@@ -42,28 +42,34 @@ def route_status(vendor_id = None, category_id = None):
             flash('No vendor with ID {} exists'.format(vendor_id), 'danger')
             return redirect(url_for('devices.route_status'))
 
-    query = db.session.query(Component)\
-                      .join(Firmware)\
-                      .filter((Firmware.vendor_id == vendor.vendor_id) | \
-                              (Firmware.vendor_odm_id == vendor.vendor_id))\
-                      .join(Remote).filter(Remote.name != 'deleted')
-    if category_id:
-        query = query.filter(Component.category_id == category_id)
-
     # find all the components uploaded by the vendor
     appstream_ids: Dict[str, Dict[str, Component]] = {}
     md_by_id: Dict[str, Component] = {}
-    for md in query:
+    cats_by_id: Dict[int, Category] = {}
+    for md in db.session.query(Component)\
+                        .join(Firmware)\
+                        .filter((Firmware.vendor_id == vendor.vendor_id) | \
+                                (Firmware.vendor_odm_id == vendor.vendor_id))\
+                        .join(Remote).filter(Remote.name != 'deleted'):
 
         # permission check
         if not md.fw.check_acl('@view'):
             continue
-        md_by_remote = appstream_ids.get(md.appstream_id)
+
+        # build available categories
+        if md.category_id:
+            cats_by_id[md.category_id] = md.category
+
+        # filter
+        if category_id:
+            if category_id != md.category_id:
+                continue
 
         # put something human readable in the UI
         md_by_id[md.appstream_id] = md
 
         # appstream ID not yet added
+        md_by_remote = appstream_ids.get(md.appstream_id)
         if not md_by_remote:
             appstream_ids[md.appstream_id] = { md.fw.remote.key: md }
             continue
@@ -78,12 +84,9 @@ def route_status(vendor_id = None, category_id = None):
         if md > old_md:
             md_by_remote[md.fw.remote.key] = md
 
-    # get available categories
-    cats = db.session.query(Category).order_by(Category.name.asc()).all()
-
     return render_template('device-status.html',
                            category='firmware',
-                           cats=cats,
+                           cats=cats_by_id.values(),
                            vendor=vendor,
                            appstream_ids=appstream_ids,
                            md_by_id=md_by_id)
