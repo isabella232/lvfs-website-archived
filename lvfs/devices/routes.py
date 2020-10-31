@@ -150,7 +150,7 @@ def route_status_csv(vendor_id=None, category_id=None):
     csv: List[str] = []
     remote_names: List[str] = ['private', 'embargo', 'testing', 'stable']
     csv.append(','.join(['appstream_id', 'model'] + remote_names))
-    for appstream_id in appstream_ids:
+    for appstream_id in sorted(appstream_ids):
         md_by_remote = appstream_ids[appstream_id]
         csv_line: List[str] = []
         csv_line.append(appstream_id)

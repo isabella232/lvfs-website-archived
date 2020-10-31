@@ -48,7 +48,7 @@
         <th class="col col-sm-2">Testing</th>
         <th class="col col-sm-2">Stable</th>
       </tr>
-{% for appstream_id in appstream_ids %}
+{% for appstream_id in appstream_ids|sort %}
 {% set md_by_remote = appstream_ids[appstream_id] %}
 <tr class="row">
   <td class="col col-sm-4">
