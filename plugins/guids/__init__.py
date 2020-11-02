@@ -35,8 +35,10 @@ def _test_dropped_guid(test, md: Component) -> None:
 
             test.add_fail(
                 "GUID dropped",
-                "Firmware drops GUID {} previously supported "
-                "in firmware {}".format(old_guid, str(md_tmp.fw.firmware_id)),
+                "Component {} drops GUID {} previously supported "
+                "in firmware {}".format(
+                    md.appstream_id, old_guid, str(md_tmp.fw.firmware_id)
+                ),
             )
 
 
