@@ -7,6 +7,7 @@ PYTEST=$(VENV)/bin/pytest
 MYPY=$(VENV)/bin/mypy
 SPHINX_BUILD=$(VENV)/bin/sphinx-build
 FLASK=$(VENV)/bin/flask
+CODESPELL=$(VENV)/bin/codespell
 
 setup: requirements.txt
 	virtualenv ./env
@@ -33,6 +34,27 @@ dbmigrate:
 
 docs:
 	$(SPHINX_BUILD) docs build
+
+codespell:
+	$(CODESPELL) --write-changes --builtin en-GB_to_en-US --skip \
+	.git,\
+	.mypy_cache,\
+	.coverage,\
+	*.pyc,\
+	*.cab,\
+	*.png,\
+	*.jpg,\
+	*.doctree,\
+	*.pdf,\
+	*.gz,\
+	*.ico,\
+	*.jcat,\
+	*.pickle,\
+	*.key,\
+	env,\
+	shards,\
+	owl.carousel.js,\
+	celerybeat-schedule
 
 check: $(PYTEST) contrib/blocklist.cab contrib/chipsec.cab
 	$(PYTEST) \

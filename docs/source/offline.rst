@@ -107,7 +107,7 @@ Doing all this has a few advantages, namely:
 * You can control the staged deployment, e.g. only allowing the same update to
   be deployed to 1000 servers per day
 * You can see failure reports from clients, to verify if the deployment is going well
-* You can see nice graphs about how many updates are being deployed across your organisation
+* You can see nice graphs about how many updates are being deployed across your organization
 
 However, running a secure LVFS instance is a lot of work as PostgreSQL has to be
 used as a database, Redis has to also be set up as a queue manager, and Celery

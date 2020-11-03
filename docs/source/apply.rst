@@ -80,5 +80,5 @@ state which allows users to promote firmware to the public remotes.
   for distribution to end users.
   <vendor> gives the LVFS explicit permission to redistribute the
   unmodified firmware binary however required without additional restrictions,
-  and permits the LVFS service to analyse the firmware package for any purpose.
+  and permits the LVFS service to analyze the firmware package for any purpose.
   <signature>, <date>, <title>*
