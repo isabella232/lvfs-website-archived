@@ -733,8 +733,11 @@ Here are some of our suggestions:
 ``<release tag="N1NET43W" …>``
 -------------------------------------
 
-* The release tag is **optional**, but can used to show a
-  vendor-specific text identifier that is different from the version number.
+* The release tag may be optional or required based on component category and
+  vendor policy. If provided it can used to show a vendor-specific text
+  identifier that is different from the version number.
 * The tag may be unique only to the model, or be unique for the entire vendor.
 * This attribute should not be used if the tag is not used to identify the
   specific firmware on the vendor homepage.
+* Depending on vendor policy, the release tag may be displayed with the header
+  *External release Software ID* or *Machine Type Model*.

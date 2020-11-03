@@ -135,6 +135,27 @@ class VendorNamespace(db.Model):
         return "<VendorNamespace {}>".format(self.value)
 
 
+class VendorTag(db.Model):
+
+    __tablename__ = "vendor_tags"
+
+    vendor_tag_id = Column(Integer, primary_key=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"), nullable=False, index=True)
+    name = Column(Text, default=None) # e.g. SWB
+    example = Column(Text, default=None) # e.g. N1CET75W
+    enforce = Column(Boolean, default=False)
+    category_id = Column(Integer, ForeignKey("categories.category_id"), nullable=True)
+    ctime = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+
+    vendor = relationship("Vendor", back_populates="tags")
+    user = relationship("User", foreign_keys=[user_id])
+    category = relationship("Category")
+
+    def __repr__(self) -> str:
+        return "<VendorTag {}>".format(self.vendor_tag_id)
+
+
 class Vendor(db.Model):
 
     __tablename__ = "vendors"
@@ -167,6 +188,9 @@ class Vendor(db.Model):
 
     users = relationship(
         "User", back_populates="vendor", cascade="all,delete,delete-orphan"
+    )
+    tags = relationship(
+        "VendorTag", back_populates="vendor", cascade="all,delete,delete-orphan"
     )
     restrictions = relationship(
         "VendorRestriction", back_populates="vendor", cascade="all,delete,delete-orphan"

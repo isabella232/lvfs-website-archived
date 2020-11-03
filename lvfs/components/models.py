@@ -36,6 +36,7 @@ from lvfs import app, db
 
 from lvfs.claims.models import Claim
 from lvfs.users.models import User
+from lvfs.vendors.models import VendorTag
 from lvfs.util import _split_search_string, _sanitize_keyword
 
 
@@ -567,6 +568,23 @@ class Component(db.Model):
         return vercmp(self.version_display, other.version_display) == 0
 
     @property
+    def vendor_tag(self) -> Optional[VendorTag]:
+
+        # category match
+        if self.category:
+            for tag in self.fw.vendor.tags:
+                if tag.category_id == self.category_id:
+                    return tag
+
+        # the 'any' category
+        for tag in self.fw.vendor.tags:
+            if not tag.category:
+                return tag
+
+        # failed
+        return None
+
+    @property
     def blob(self) -> Optional[bytes]:
         if not hasattr(self, "_blob") or not self._blob:
             self._blob = None
@@ -1069,6 +1087,49 @@ class Component(db.Model):
                         ),
                     )
                 )
+
+        # release tag is not provided and required or user has used the example
+        if self.category:
+            tag = self.vendor_tag
+            if tag:
+                if tag.enforce and not self.release_tag:
+                    problems.append(
+                        Claim(
+                            kind="release-id-invalid",
+                            icon="warning",
+                            summary="The component requries a release {}".format(
+                                tag.name
+                            ),
+                            description="All components for vendor {} with category {} "
+                            "must have a release {}.".format(
+                                self.fw.vendor.display_name_with_team,
+                                self.category.name,
+                                tag.name,
+                            ),
+                            url=url_for(
+                                "components.route_show", component_id=self.component_id
+                            ),
+                        )
+                    )
+                if tag.example == self.release_tag:
+                    problems.append(
+                        Claim(
+                            kind="release-id-invalid",
+                            icon="warning",
+                            summary="The component requries a valid release {}".format(
+                                tag.name
+                            ),
+                            description="All components for vendor {} with category {} "
+                            "must have the correct release {}.".format(
+                                self.fw.vendor.display_name_with_team,
+                                self.category.name,
+                                tag.name,
+                            ),
+                            url=url_for(
+                                "components.route_show", component_id=self.component_id
+                            ),
+                        )
+                    )
 
         # add all CVE problems
         for issue in self.issues:

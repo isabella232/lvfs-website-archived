@@ -18,11 +18,13 @@ from typing import Dict, List, Tuple, Iterable, Callable
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
 from sqlalchemy.orm import joinedload
+from werkzeug.exceptions import BadRequestKeyError
 
 from lvfs import app, db
 
 from lvfs.emails import send_email
 from lvfs.firmware.models import Firmware
+from lvfs.categories.models import Category
 from lvfs.hash import _otp_hash
 from lvfs.metadata.models import Remote
 from lvfs.metadata.utils import _async_regenerate_remote
@@ -30,7 +32,8 @@ from lvfs.users.models import User
 from lvfs.util import admin_login_required, _error_internal, _email_check, _generate_password
 from lvfs.verfmts.models import Verfmt
 
-from .models import Vendor, VendorAffiliation, VendorAffiliationAction, VendorBranch, VendorRestriction, VendorNamespace
+from .models import Vendor, VendorAffiliation, VendorAffiliationAction
+from .models import VendorBranch, VendorRestriction, VendorNamespace, VendorTag
 from .utils import _vendor_hash
 
 bp_vendors = Blueprint('vendors', __name__, template_folder='templates')
@@ -353,6 +356,23 @@ def route_namespaces(vendor_id):
                            category='vendors',
                            v=vendor)
 
+
+@bp_vendors.route('/<int:vendor_id>/tags')
+@login_required
+@admin_login_required
+def route_tags(vendor_id):
+    """ Allows changing a vendor [ADMIN ONLY] """
+    vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+    categories = db.session.query(Category).order_by(Category.name.asc()).all()
+    return render_template('vendor-tags.html',
+                           category='vendors',
+                           categories=categories,
+                           v=vendor)
+
+
 @bp_vendors.route('/<int:vendor_id>/branches')
 @login_required
 @admin_login_required
@@ -511,6 +531,54 @@ def route_namespace_delete(vendor_id, namespace_id):
             break
     flash('Deleted namespace', 'info')
     return redirect(url_for('vendors.route_namespaces', vendor_id=vendor_id), 302)
+
+
+@bp_vendors.route('/<int:vendor_id>/tag/create', methods=['POST', 'GET'])
+@login_required
+@admin_login_required
+def route_tag_create(vendor_id):
+    """ Allows creating a vendor tag [ADMIN ONLY] """
+
+    # check exists
+    vendor = db.session.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        flash('Failed to add tag: No vendor with that group ID', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+    try:
+        tag = VendorTag(vendor=vendor,
+                        name=request.form['name'],
+                        example=request.form['example'],
+                        enforce=bool(request.form.get('enforce', False)),
+                        category_id=request.form.get('category_id', 0) or None,
+                        user=g.user)
+    except BadRequestKeyError as _:
+        flash('Failed to add tag: Required values not found', 'warning')
+        return redirect(url_for('vendors.route_tags', vendor_id=vendor_id), 302)
+
+    vendor.tags.append(tag)
+    db.session.commit()
+    flash('Added tag {}'.format(tag.name), 'info')
+    return redirect(url_for('vendors.route_tags', vendor_id=vendor_id), 302)
+
+
+@bp_vendors.route('/<int:vendor_id>/tag/<int:tag_id>/delete', methods=['POST'])
+@login_required
+@admin_login_required
+def route_tag_delete(vendor_id, tag_id):
+    """ Allows deleting a vendor tag [ADMIN ONLY] """
+
+    # check exists
+    tag = db.session.query(VendorTag)\
+                    .filter(VendorTag.vendor_tag_id == tag_id)\
+                    .join(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not tag:
+        flash('Failed to delete tag: No tag with those IDs', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+    db.session.delete(tag)
+    db.session.commit()
+    flash('Deleted tag', 'info')
+    return redirect(url_for('vendors.route_tags', vendor_id=vendor_id), 302)
+
 
 @bp_vendors.route('/<int:vendor_id>/branch/create', methods=['POST', 'GET'])
 @login_required

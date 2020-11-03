@@ -77,6 +77,46 @@ class LocalTestCase(LvfsTestCase):
         assert b'Deleted namespace' in rv.data, rv.data
         assert b'com.dell' not in rv.data, rv.data
 
+        # create a tag
+        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(name='SWID', example="ABCDEF", enforce="1"),
+                           follow_redirects=True)
+        assert b'Added tag' in rv.data, rv.data.decode()
+
+        # create a tag without enough data
+        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(name='SWID2'),
+                           follow_redirects=True)
+        assert b'Failed to add tag' in rv.data, rv.data.decode()
+
+        # show the tags page
+        rv = self.app.get('/lvfs/vendors/2/tags')
+        assert b'SWID' in rv.data, rv.data.decode()
+        assert b'ABCDEF' in rv.data, rv.data.decode()
+
+        # show a firmware example
+        self.upload(vendor_id=2)
+        rv = self.app.get('/lvfs/components/1')
+        assert b'SWID' in rv.data, rv.data.decode()
+        assert b'ABCDEF' in rv.data, rv.data.decode()
+
+        # enforce, so add as problem if missing
+        rv = self.app.get('/lvfs/firmware/1/problems')
+        assert b' The component requries a release SWID' in rv.data, rv.data.decode()
+
+        # add tag to firmware
+        rv = self.app.post('/lvfs/components/1/modify', data=dict(
+            release_tag='N1235',
+        ), follow_redirects=True)
+        assert b'Component updated' in rv.data, rv.data
+
+        # verify the new problems
+        rv = self.app.get('/lvfs/firmware/1/problems')
+        assert b' The component requries a release SWID' not in rv.data, rv.data.decode()
+
+        # delete a tag
+        rv = self.app.post('/lvfs/vendors/2/tag/1/delete', follow_redirects=True)
+        assert b'Deleted tag' in rv.data, rv.data
+        assert b'ABCDEF' not in rv.data, rv.data.decode()
+
         # create a branch
         rv = self.app.post('/lvfs/vendors/2/branch/create', data=dict(value='dave'),
                            follow_redirects=True)

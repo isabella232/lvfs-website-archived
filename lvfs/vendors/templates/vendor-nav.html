@@ -20,6 +20,8 @@
         href="{{url_for('vendors.route_namespaces', vendor_id=v.vendor_id)}}">Namespaces</a>
       <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_branches' else 'default'}}"
         href="{{url_for('vendors.route_branches', vendor_id=v.vendor_id)}}">Branches</a>
+      <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_tags' else 'default'}}"
+        href="{{url_for('vendors.route_tags', vendor_id=v.vendor_id)}}">Tags</a>
 {% endif %}
 {% if v.check_acl('@view-affiliations') %}
       <a class="btn btn-falcon-{{'primary' if request.url_rule.endpoint == 'vendors.route_affiliations' else 'default'}}"

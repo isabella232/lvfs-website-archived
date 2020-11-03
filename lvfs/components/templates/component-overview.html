@@ -84,7 +84,15 @@
   </tr>
 {% endif %}
   <tr class="row">
-    <th class="col-3">Tag, e.g. <code>N1CET75W</code> (optional)</th>
+{% set tag = md.vendor_tag %}
+    <th class="col-3">
+{% if tag %}
+      {{tag.name}}, e.g. <code>{{tag.example}}</code>
+      {{ '(required)' if tag.enforce else '(optional)' }}
+{% else %}
+      Release tag, e.g. <code>N1CET75W</code> (optional)
+{% endif %}
+    </th>
 {% if md.check_acl('@modify-keywords') %}
     <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
     <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
