@@ -108,6 +108,13 @@ def route_fw(max_results=100):
                                order_by(ComponentKeyword.component_id.desc(), Firmware.timestamp.desc()).\
                                limit(max_results).all()
 
+    # try filename (with hash)
+    if not fws:
+        fws = db.session.query(Firmware).\
+                               filter(Firmware.filename.in_(keywords)).\
+                               order_by(Firmware.timestamp.desc()).\
+                               limit(max_results).all()
+
     # filter by ACL
     fws_safe: List[Firmware] = []
     for fw in fws:
