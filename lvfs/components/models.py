@@ -575,6 +575,11 @@ class Component(db.Model):
             for tag in self.fw.vendor.tags:
                 if tag.category_id == self.category_id:
                     return tag
+                if (
+                    self.category.fallback
+                    and tag.category_id == self.category.fallback.category_id
+                ):
+                    return tag
 
         # the 'any' category
         for tag in self.fw.vendor.tags:
