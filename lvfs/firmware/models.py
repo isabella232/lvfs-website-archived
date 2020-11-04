@@ -416,8 +416,11 @@ class Firmware(db.Model):
         return os.path.join(app.config["DOWNLOAD_DIR"], self.filename)
 
     def _ensure_blobs(self) -> None:
-        with open(self.absolute_path, "rb") as f:
-            cabarchive = CabArchive(f.read())
+        try:
+            with open(self.absolute_path, "rb") as f:
+                cabarchive = CabArchive(f.read())
+        except FileNotFoundError as _:
+            return
         for md in self.mds:
             try:
                 md._blob = cabarchive[md.filename_contents].buf
