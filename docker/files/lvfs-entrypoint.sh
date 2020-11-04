@@ -10,21 +10,26 @@ fi
 
 if [ "$DEPLOY" = "metadata" ]
 then
-    set
     echo "starting celery worker [metadata,firmware,celery]"
     exec celery -A lvfs.tq worker --queues metadata,firmware,celery
 fi
 
 if [ "$DEPLOY" = "yara" ]
 then
-    set
     echo "starting celery worker [yara]"
     exec celery -A lvfs.tq worker --queues yara
 fi
 
 if [ "$DEPLOY" = "beat" ]
 then
-    set
     echo "starting celery beat"
     exec celery -A lvfs.tq beat
+fi
+
+if [ "$DEPLOY" = "clam" ]
+then
+    echo "updating clam"
+    freshclam
+    echo "starting clam"
+    exec /usr/sbin/clamd -c /etc/clamd.d/scan.conf
 fi

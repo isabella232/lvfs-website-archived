@@ -126,3 +126,14 @@ deploy beat:
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_BEAT_SERVICE" --force-new-deployment --region us-west-2
   only:
     - master
+
+deploy clam:
+  stage: deploy
+  when: manual
+  image: python:latest
+  interruptible: true
+  script:
+    - pip install awscli
+    - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_CLAM_SERVICE" --force-new-deployment --region us-west-2
+  only:
+    - master
