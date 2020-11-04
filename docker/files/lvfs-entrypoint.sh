@@ -3,7 +3,6 @@ set -e
 
 if [ "$DEPLOY" = "application" ]
 then
-    PATH="/app/env/bin:$PATH"
     FLASK_APP=lvfs/__init__.py flask db upgrade
     exec uwsgi --ini /app/conf/uwsgi.ini
 fi
