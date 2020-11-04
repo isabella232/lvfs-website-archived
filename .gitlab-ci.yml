@@ -35,18 +35,14 @@ test:
     - dnf -y install
         bsdtar
         geolite2-country
-        libcurl-devel
         libgcab1
         cairo-gobject-devel
         gobject-introspection-devel
         gnutls-utils
-        gcc
-        openssl-devel
         python3-devel
         python3-pip
         python3-virtualenv
         python3-psutil
-        python3-pycurl
         redis
         words
     - virtualenv env
@@ -54,9 +50,6 @@ test:
     - pip install pip -U
     - pip install -r requirements.txt --use-feature=2020-resolver
     - pip install mypy
-    - pip uninstall pycurl
-    - export PYCURL_SSL_LIBRARY=nss
-    - pip install --compile pycurl
     - redis-server &
   script:
     - pytest --cov=lvfs --cov=plugins --cov=pkgversion --cov=infparser --cov=cabarchive --cov-fail-under=60

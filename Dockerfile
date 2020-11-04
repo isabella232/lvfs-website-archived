@@ -9,19 +9,15 @@ RUN dnf -y install \
 	clamav \
 	clamav-update \
 	fdupes \
-	gcc \
 	git \
 	gnutls-utils \
 	gobject-introspection-devel \
-	libcurl-devel \
 	libgcab1 \
 	logrotate \
-	openssl-devel \
-	python3-celery \
 	python3-devel \
 	python3-pip \
 	python3-psutil \
-    s3cmd
+	s3cmd
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
@@ -38,11 +34,6 @@ COPY requirements.txt /app/conf
 RUN pip3 install --upgrade pip
 RUN pip3 install -r conf/requirements.txt
 RUN pip3 install uwsgi
-
-# do this because of this bug/issue: https://github.com/celery/celery/issues/4654
-RUN pip uninstall -y pycurl
-RUN export PYCURL_SSL_LIBRARY=nss
-RUN pip install --compile pycurl
 
 # copy the app; various configs and scripts
 COPY lvfs/ /app/lvfs/
