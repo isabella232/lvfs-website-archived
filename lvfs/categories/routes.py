@@ -82,9 +82,9 @@ def route_modify(category_id):
 
     # modify category
     cat.expect_device_checksum = bool('expect_device_checksum' in request.form)
-    for key in ['name', 'fallbacks']:
+    for key in ['name', 'fallback_id']:
         if key in request.form:
-            setattr(cat, key, request.form[key])
+            setattr(cat, key, request.form[key] or None)
     db.session.commit()
 
     # success
@@ -104,6 +104,8 @@ def route_show(category_id):
         return redirect(url_for('categories.route_list'))
 
     # show details
+    categories = db.session.query(Category).order_by(Category.name.asc()).all()
     return render_template('category-details.html',
+                           categories=categories,
                            category='admin',
                            cat=cat)

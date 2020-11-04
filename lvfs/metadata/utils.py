@@ -156,10 +156,8 @@ def _generate_metadata_mds(mds: List[Component],
             continue
         if md.category.value not in cats:
             cats.append(md.category.value)
-        if md.category.fallbacks:
-            for fallback in md.category.fallbacks.split(','):
-                if fallback not in cats:
-                    cats.append(fallback)
+        if md.category.fallback and md.category.fallback.value not in cats:
+            cats.append(md.category.fallback.value)
     if cats:
         # use a non-standard prefix as we're still using .name_with_category
         if metainfo:

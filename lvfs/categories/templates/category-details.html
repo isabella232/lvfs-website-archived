@@ -16,8 +16,15 @@
     <input type="text" class="form-control" id="name" name="name" value="{{cat.name if cat.name}}" required />
   </div>
   <div class="form-group">
-    <label for="fallbacks">Fallbacks:</label>
-    <input type="text" class="form-control" id="fallbacks" name="fallbacks" value="{{cat.fallbacks if cat.fallbacks}}" />
+    <label for="fallback_id">Fallback:</label>
+    <select class="form-control" name="fallback_id">
+      <option value="" {{ 'selected' if not cat.fallback }}>None</option>
+{% for ca in categories %}
+      <option value="{{ca.category_id}}" {{ 'selected' if cat.fallback and cat.fallback.category_id == ca.category_id }}>
+        {{ ca.name if ca.name else ca.value}}
+      </option>
+{% endfor %}
+    </select>
   </div>
   <div class="form-group">
     <label for="expect_device_checksum">
