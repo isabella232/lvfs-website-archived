@@ -149,15 +149,24 @@ def route_status_csv(vendor_id=None, category_id=None):
     # header
     csv: List[str] = []
     remote_names: List[str] = ['private', 'embargo', 'testing', 'stable']
-    csv.append(','.join(['appstream_id', 'model'] + remote_names))
+    csv.append(','.join(['appstream_id', 'model'] + remote_names + ['vendor_odm', 'user']))
     for appstream_id in sorted(appstream_ids):
         md_by_remote = appstream_ids[appstream_id]
         csv_line: List[str] = []
         csv_line.append(appstream_id)
         csv_line.append('"{}"'.format(md_by_id[appstream_id].name_with_vendor))
+        md_best = None
         for remote_id in remote_names:
             md = md_by_remote.get(remote_id)
+            if md:
+                md_best = md
             csv_line.append(md.version_display if md else '')
+        if md_best:
+            csv_line.append(md_best.fw.vendor_odm.group_id)
+            csv_line.append(md_best.fw.user.username)
+        else:
+            csv_line.append('')
+            csv_line.append('')
         csv.append(','.join(csv_line))
 
     response = make_response('\n'.join(csv))
