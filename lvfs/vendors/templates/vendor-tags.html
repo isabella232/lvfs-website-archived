@@ -24,17 +24,19 @@
 <table class="table">
   <tr class="row table-borderless">
     <th class="col col-2">Name</th>
-    <th class="col col-2">Example</th>
-    <th class="col col-2">Enforce</th>
-    <th class="col col-4">Category</th>
+    <th class="col col-1">Example</th>
+    <th class="col col-1">Enforce</th>
+    <th class="col col-3">Category</th>
+    <th class="col col-3">Details URL</th>
     <th class="col col-sm-2">&nbsp;</th>
   </tr>
 {% for tag in v.tags %}
   <tr class="row">
     <td class="col col-2"><code>{{tag.name}}</code></td>
-    <td class="col col-2"><code>{{tag.example}}</code></td>
-    <td class="col col-2">{{'Yes' if tag.enforce else 'No'}}</td>
-    <td class="col col-4">{{tag.category.name if tag.category else '—'}}</td>
+    <td class="col col-1"><code>{{tag.example}}</code></td>
+    <td class="col col-1">{{'Yes' if tag.enforce else 'No'}}</td>
+    <td class="col col-3">{{tag.category.name if tag.category else '—'}}</td>
+    <td class="col col-3"><code>{{tag.details_url if tag.details_url else  '—'}}</code></td>
     <!-- added {{tag.ctime.strftime('%F %T')}} by {{tag.user.username}} -->
     <td class="col col-sm-2">
       <form action="{{url_for('vendors.route_tag_delete', vendor_id=v.vendor_id, tag_id=tag.vendor_tag_id)}}" method="POST">
@@ -62,7 +64,14 @@
       <label for="example">Example</label>
       <input type="text" class="form-control" id="example" name="example" value="" placeholder="N1CET75W..." required>
     </div>
-
+    <div class="form-group">
+      <label for="details_url">Details URL</label>
+      <input type="text" class="form-control" id="details_url" name="details_url" value="" placeholder="{{v.url}}">
+        <small class="form-text text-muted">
+          NOTE: You can use <code>$RELEASE_TAG$</code> and <code>$VERSION$</code>
+          to construct the URL as required.
+        </small>
+    </div>
     <div class="form-group">
       <label for="category_id">Category</label>
       <select class="form-control" id="category_id" name="category_id">

@@ -84,8 +84,8 @@
     <div class="col col-sm-2 font-weight-bold">Description</div>
     <div class="col col-sm-10">
       {{format_html_from_markdown(fw.md_prio.release_description)|safe}}
-{% if fw.md_prio.details_url %}
-      <a class="btn" href="{{fw.md_prio.details_url}}">More details</a>
+{% if fw.md_prio.details_url_with_fallback %}
+      <a class="btn" href="{{fw.md_prio.details_url_with_fallback}}">More details</a>
 {% endif %}
     </div>
   </div>

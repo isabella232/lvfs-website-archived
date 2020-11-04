@@ -548,6 +548,7 @@ def route_tag_create(vendor_id):
         tag = VendorTag(vendor=vendor,
                         name=request.form['name'],
                         example=request.form['example'],
+                        details_url=request.form.get('details_url', None),
                         enforce=bool(request.form.get('enforce', False)),
                         category_id=request.form.get('category_id', 0) or None,
                         user=g.user)

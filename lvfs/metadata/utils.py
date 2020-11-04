@@ -279,10 +279,10 @@ def _generate_metadata_mds(mds: List[Component],
             rel.append(_xml_from_markdown(markdown))
 
         # add details URL if set
-        if md.details_url:
+        if md.details_url_with_fallback:
             child = ET.SubElement(rel, 'url')
             child.set('type', 'details')
-            child.text = md.details_url
+            child.text = md.details_url_with_fallback
 
         # add source URL if set
         if md.source_url:

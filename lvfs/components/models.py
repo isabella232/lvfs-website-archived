@@ -567,12 +567,13 @@ class Component(db.Model):
     def __eq__(self, other) -> bool:
         return vercmp(self.version_display, other.version_display) == 0
 
-    @property
-    def vendor_tag(self) -> Optional[VendorTag]:
+    def _vendor_tag_with_attr(self, attr: Optional[str] = None) -> Optional[VendorTag]:
 
         # category match
         if self.category:
             for tag in self.fw.vendor.tags:
+                if attr and not getattr(tag, attr):
+                    continue
                 if tag.category_id == self.category_id:
                     return tag
                 if (
@@ -583,11 +584,44 @@ class Component(db.Model):
 
         # the 'any' category
         for tag in self.fw.vendor.tags:
+            if attr and not getattr(tag, attr):
+                continue
             if not tag.category:
                 return tag
 
         # failed
         return None
+
+    @property
+    def vendor_tag(self) -> Optional[VendorTag]:
+        return self._vendor_tag_with_attr()
+
+    @property
+    def details_url_with_fallback(self) -> Optional[str]:
+
+        # set explicitly
+        if self.details_url:
+            return self.details_url
+
+        # get tag for category
+        tag = self._vendor_tag_with_attr("details_url")
+        if not tag:
+            return None
+
+        # return with string substitutions; if not set then return invalid
+        details_url = tag.details_url
+        replacements: Dict[str, str] = {
+            "$RELEASE_TAG$": self.release_tag,
+            "$VERSION$": self.version_display,
+        }
+        for key in replacements:
+            if details_url.find(key) != -1:
+                if not replacements[key]:
+                    return None
+                details_url = details_url.replace(key, replacements[key])
+
+        # success
+        return details_url
 
     @property
     def blob(self) -> Optional[bytes]:

@@ -143,6 +143,7 @@ class VendorTag(db.Model):
     vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"), nullable=False, index=True)
     name = Column(Text, default=None) # e.g. SWB
     example = Column(Text, default=None) # e.g. N1CET75W
+    details_url = Column(Text, default=None) # e.g. https://foo/$RELEASE_TAG$/baz
     enforce = Column(Boolean, default=False)
     category_id = Column(Integer, ForeignKey("categories.category_id"), nullable=True)
     ctime = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)

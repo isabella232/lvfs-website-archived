@@ -93,6 +93,9 @@
       <input class="form-control" type="text" name="details_url" value="{{md.details_url if md.details_url}}"/>
       <p class="text-secondary">
         The optional URL listed here should refer specifically to this firmware release.
+{% if md.details_url_with_fallback %}
+        The URL will fallback to <code>{{md.details_url_with_fallback}}</code> if not set.
+{% endif %}
       </p>
   </div>
   <div class="form-group">

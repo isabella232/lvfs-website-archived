@@ -35,8 +35,8 @@ def _md_to_mdsync_dict(md: Component) -> dict:
             obj['date'] = md.fw.signed_timestamp.isoformat()
         if md.release_tag:
             obj['release_tag'] = md.release_tag
-        if md.details_url:
-            obj['changelog_url'] = md.details_url
+        if md.details_url_with_fallback:
+            obj['changelog_url'] = md.details_url_with_fallback
         if md.fw.success:
             obj['success'] = md.fw.success
             obj['success_confidence'] = md.fw.success_confidence
