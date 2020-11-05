@@ -1,0 +1,60 @@
+{% extends "default.html" %}
+{% block title %}Vendor Tag Details{% endblock %}
+
+{% block nav %}{% include 'vendor-nav.html' %}{% endblock %}
+
+{% block content %}
+
+
+<form id="modify" method="post" action="{{url_for('vendors.route_tag_modify', vendor_id=v.vendor_id, tag_id=tag.vendor_tag_id)}}">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+</form>
+<form id="delete" action="{{url_for('vendors.route_tag_delete', vendor_id=v.vendor_id, tag_id=tag.vendor_tag_id)}}" method="POST">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+</form>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">Tag for {{v.display_name_with_team}}</h2>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input form="modify" type="text" class="form-control" id="name" name="name" value="{{tag.name}}" placeholder="Software ID..." required>
+    </div>
+    <div class="form-group">
+      <label for="example">Example</label>
+      <input form="modify" type="text" class="form-control" id="example" name="example" value="{{tag.example if tag.example}}" placeholder="N1CET75W..." required>
+    </div>
+    <div class="form-group">
+      <label for="details_url">Details URL</label>
+      <input form="modify" type="text" class="form-control" id="details_url" name="details_url" value="{{tag.details_url if tag.details_url}}" placeholder="{{v.url}}">
+        <small class="form-text text-muted">
+          NOTE: You can use <code>$RELEASE_TAG$</code> and <code>$VERSION$</code>
+          to construct the URL as required.
+        </small>
+    </div>
+    <div class="form-group">
+      <label for="category_id">Category</label>
+      <select form="modify" class="form-control" id="category_id" name="category_id">
+        <option value="" {{ 'selected' if not tag.category }}>All</option>
+{% for cat in categories %}
+        <option value="{{cat.category_id}}" {{ 'selected' if tag.category_id == cat.category_id }}>
+          {{ cat.name if cat.name else cat.value}}
+        </option>
+{% endfor %}
+      </select>
+    </div>
+
+    <div class="form-check form-check-inline">
+      <input form="modify" class="form-check-input" type="checkbox" value="1" {{'checked' if tag.enforce }} id="enforce" name="enforce">
+      <label class="form-check-label" for="enforce">
+        Tag is <strong>always</strong> required for component
+      </label>
+    </div>
+    <div class="form-group mt-3 mb-0">
+    <input form="modify" type="submit" class="btn btn-primary" value="Modify">
+    <button form="delete" class="btn btn-danger ml-2">Delete</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

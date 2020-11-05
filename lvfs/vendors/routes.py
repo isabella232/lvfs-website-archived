@@ -366,11 +366,31 @@ def route_tags(vendor_id):
     if not vendor:
         flash('Failed to get vendor details: No a vendor with that group ID', 'warning')
         return redirect(url_for('vendors.route_list_admin'), 302)
-    categories = db.session.query(Category).order_by(Category.name.asc()).all()
     return render_template('vendor-tags.html',
                            category='vendors',
-                           categories=categories,
                            v=vendor)
+
+
+@bp_vendors.route('/<int:vendor_id>/tag/<int:tag_id>')
+@login_required
+@admin_login_required
+def route_tag_details(vendor_id, tag_id):
+    """ Allow editing a vendor tag [ADMIN ONLY] """
+
+    # check exists
+    tag = db.session.query(VendorTag)\
+                    .filter(VendorTag.vendor_tag_id == tag_id)\
+                    .join(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not tag:
+        flash('Failed to get tag: No tag with those IDs', 'warning')
+        return redirect(url_for('vendors.route_tags', vendor_id=vendor_id))
+    categories = db.session.query(Category).order_by(Category.name.asc()).all()
+    return render_template('vendor-tag-details.html',
+                           category='vendors',
+                           categories=categories,
+                           v=tag.vendor,
+                           tag=tag)
+
 
 
 @bp_vendors.route('/<int:vendor_id>/branches')
@@ -533,7 +553,7 @@ def route_namespace_delete(vendor_id, namespace_id):
     return redirect(url_for('vendors.route_namespaces', vendor_id=vendor_id), 302)
 
 
-@bp_vendors.route('/<int:vendor_id>/tag/create', methods=['POST', 'GET'])
+@bp_vendors.route('/<int:vendor_id>/tag/create', methods=['POST'])
 @login_required
 @admin_login_required
 def route_tag_create(vendor_id):
@@ -547,10 +567,6 @@ def route_tag_create(vendor_id):
     try:
         tag = VendorTag(vendor=vendor,
                         name=request.form['name'],
-                        example=request.form['example'],
-                        details_url=request.form.get('details_url', None),
-                        enforce=bool(request.form.get('enforce', False)),
-                        category_id=request.form.get('category_id', 0) or None,
                         user=g.user)
     except BadRequestKeyError as _:
         flash('Failed to add tag: Required values not found', 'warning')
@@ -559,7 +575,36 @@ def route_tag_create(vendor_id):
     vendor.tags.append(tag)
     db.session.commit()
     flash('Added tag {}'.format(tag.name), 'info')
-    return redirect(url_for('vendors.route_tags', vendor_id=vendor_id), 302)
+    return redirect(url_for('vendors.route_tag_details', vendor_id=vendor_id, tag_id=tag.vendor_tag_id), 302)
+
+
+@bp_vendors.route('/<int:vendor_id>/tag/<int:tag_id>/modify', methods=['POST'])
+@login_required
+@admin_login_required
+def route_tag_modify(vendor_id, tag_id):
+    """ Allows modifying a vendor tag [ADMIN ONLY] """
+
+    # check exists
+    tag = db.session.query(VendorTag)\
+                    .filter(VendorTag.vendor_tag_id == tag_id)\
+                    .join(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not tag:
+        flash('Failed to modify tag: No tag with those IDs', 'warning')
+        return redirect(url_for('vendors.route_list_admin'), 302)
+
+    try:
+        tag.name = request.form['name']
+        tag.example = request.form['example']
+        tag.details_url = request.form.get('details_url', None)
+        tag.enforce = bool(request.form.get('enforce', False))
+        tag.category_id = request.form.get('category_id', 0) or None
+    except BadRequestKeyError as _:
+        flash('Failed to modify tag: Required values not found', 'warning')
+        return redirect(url_for('vendors.route_tag_details', vendor_id=vendor_id, tag_id=tag_id), 302)
+
+    db.session.commit()
+    flash('Modified tag {}'.format(tag.name), 'info')
+    return redirect(url_for('vendors.route_tag_details', vendor_id=vendor_id, tag_id=tag_id), 302)
 
 
 @bp_vendors.route('/<int:vendor_id>/tag/<int:tag_id>/delete', methods=['POST'])

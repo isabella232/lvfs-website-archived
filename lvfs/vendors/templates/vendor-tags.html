@@ -7,7 +7,7 @@
 
 <div class="card mt-3">
   <div class="card-body">
-    <h2 class="card-title">Current tags</h2>
+    <h2 class="card-title">Current tags for {{v.display_name_with_team}}</h2>
 {% if v.tags|length == 0 %}
   <tr class="row table-borderless">
     <td class="col col-sm-12">
@@ -27,22 +27,21 @@
     <th class="col col-1">Example</th>
     <th class="col col-1">Enforce</th>
     <th class="col col-3">Category</th>
-    <th class="col col-3">Details URL</th>
+    <th class="col col-3">URL</th>
     <th class="col col-sm-2">&nbsp;</th>
   </tr>
 {% for tag in v.tags %}
   <tr class="row">
     <td class="col col-2"><code>{{tag.name}}</code></td>
-    <td class="col col-1"><code>{{tag.example}}</code></td>
+    <td class="col col-1"><code>{{tag.example if tag.example}}</code></td>
     <td class="col col-1">{{'Yes' if tag.enforce else 'No'}}</td>
     <td class="col col-3">{{tag.category.name if tag.category else '—'}}</td>
     <td class="col col-3"><code>{{tag.details_url if tag.details_url else  '—'}}</code></td>
     <!-- added {{tag.ctime.strftime('%F %T')}} by {{tag.user.username}} -->
     <td class="col col-sm-2">
-      <form action="{{url_for('vendors.route_tag_delete', vendor_id=v.vendor_id, tag_id=tag.vendor_tag_id)}}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-        <button class="btn-block btn btn-danger">Delete</button>
-      </form>
+      <a class="btn btn-block btn-info" href="{{url_for('vendors.route_tag_details', vendor_id=v.vendor_id, tag_id=tag.vendor_tag_id)}}">
+        Details
+      </a>
     </td>
   </tr>
 {% endfor %}
@@ -56,39 +55,12 @@
 <div class="card mt-3">
   <div class="card-body">
     <h2 class="card-title">Add a new tag</h2>
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" class="form-control" id="name" name="name" value="" placeholder="Software ID..." required>
+    <div class="form">
+      <div class="form-group">
+        <input type="text" class="form-control" id="name" name="name" value="" placeholder="Software ID..." required/>
+      </div>
+      <input type="submit" class="btn btn-primary" value="Add">
     </div>
-    <div class="form-group">
-      <label for="example">Example</label>
-      <input type="text" class="form-control" id="example" name="example" value="" placeholder="N1CET75W..." required>
-    </div>
-    <div class="form-group">
-      <label for="details_url">Details URL</label>
-      <input type="text" class="form-control" id="details_url" name="details_url" value="" placeholder="{{v.url}}">
-        <small class="form-text text-muted">
-          NOTE: You can use <code>$RELEASE_TAG$</code> and <code>$VERSION$</code>
-          to construct the URL as required.
-        </small>
-    </div>
-    <div class="form-group">
-      <label for="category_id">Category</label>
-      <select class="form-control" id="category_id" name="category_id">
-        <option value="">All</option>
-{% for cat in categories %}
-        <option value="{{cat.category_id}}">{{ cat.name if cat.name else cat.value}}</option>
-{% endfor %}
-      </select>
-    </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="checkbox" value="1" id="enforce" name="enforce">
-      <label class="form-check-label" for="enforce">
-        Tag is <strong>always</strong> required for component
-      </label>
-    </div>
-    <input type="submit" class="btn btn-primary btn-block mt-3" value="Add">
   </div>
 </div>
 </form>

@@ -78,14 +78,19 @@ class LocalTestCase(LvfsTestCase):
         assert b'com.dell' not in rv.data, rv.data
 
         # create a tag
-        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(name='SWID', example="ABCDEF", enforce="1"),
+        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(name='SWID'),
                            follow_redirects=True)
         assert b'Added tag' in rv.data, rv.data.decode()
 
         # create a tag without enough data
-        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(name='SWID2'),
+        rv = self.app.post('/lvfs/vendors/2/tag/create', data=dict(dave='SWID'),
                            follow_redirects=True)
         assert b'Failed to add tag' in rv.data, rv.data.decode()
+
+        # modify a tag
+        rv = self.app.post('/lvfs/vendors/2/tag/1/modify', data=dict(name='SWID', example="ABCDEF", enforce="1"),
+                           follow_redirects=True)
+        assert b'Modified tag' in rv.data, rv.data.decode()
 
         # show the tags page
         rv = self.app.get('/lvfs/vendors/2/tags')
