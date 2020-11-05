@@ -51,7 +51,7 @@ docs:
   only:
     - master
 
-tag for release:
+tag:
   image: docker:latest
   services:
     - docker:dind
@@ -71,7 +71,7 @@ deploy application:
   image: python:latest
   interruptible: true
   dependencies:
-    - tag for release
+    - tag
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_WEB_SERVICE" --force-new-deployment --region us-west-2
@@ -83,7 +83,7 @@ deploy metadata:
   image: python:latest
   interruptible: true
   dependencies:
-  - tag for release
+  - tag
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_METADATA_SERVICE" --force-new-deployment --region us-west-2
@@ -95,7 +95,7 @@ deploy beat:
   image: python:latest
   interruptible: true
   dependencies:
-    - tag for release
+    - tag
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_BEAT_SERVICE" --force-new-deployment --region us-west-2
