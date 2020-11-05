@@ -48,7 +48,6 @@ COPY docker/files/application/uwsgi.ini /app/conf/uwsgi.ini
 COPY docker/files/application/flaskapp.cfg /app/lvfs/flaskapp.cfg
 COPY docker/files/application/scan.conf /etc/clamd.d/scan.conf
 COPY docker/files/lvfs-entrypoint.sh /app/lvfs-entrypoint.sh
-COPY docker/files/envdump.py /app/envdump.py
 
 RUN chown -R 65534:65534 /app /data /backups
 
