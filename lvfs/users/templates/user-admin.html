@@ -78,86 +78,77 @@
       <label class="col col-form-label col-sm-2 pt-0">Attributes</label>
       <div class="col col-sm-10">
 {% if g.user.check_acl('@add-action-admin') %}
-        <span class="switch mt-3">
-          <input class="switch" type="checkbox" id="admin" name="admin" id="id-admin" value="1" {{'checked' if u.check_acl('@admin')}}>
-          <label for="id-admin">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="id-admin" name="admin" value="1" {{'checked' if u.check_acl('@admin')}}>
+          <label class="custom-control-label" for="id-admin">
             Full access to all vendors and users on the server
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-robot') %}
-        <span class="switch mt-3">
-          <input class="switch" type="checkbox" id="robot" name="robot" id="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
-          <label for="robot">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="robot" name="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
+          <label class="custom-control-label" for="robot">
             Account is a robot used for automated firmware uploading only
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-analyst') %}
-        <span class="switch">
-          <input class="switch" type="checkbox" id="analyst" name="analyst" id="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
-          <label for="analyst">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="analyst" name="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
+          <label class="custom-control-label" for="analyst">
             Read-only access to all firmware and associated reports in the <code>{{u.vendor.group_id}}</code> group
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-qa') %}
-        <span class="switch mt-3">
-          <input class="switch" type="checkbox" id="qa" name="qa" id="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
-          <label for="qa">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="qa" name="qa" id="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
+          <label class="custom-control-label" for="qa">
             Allowed to modify all the firmware uploaded to the <code>{{u.vendor.group_id}}</code> group
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-vendor-manager') %}
-        <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" id="vendor-manager" name="vendor-manager" id="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
-          <label for="vendor-manager">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="vendor-manager" name="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
+          <label class="custom-control-label" for="vendor-manager">
             Allowed to add, remove and modify users in the <code>{{u.vendor.group_id}}</code> group
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-researcher') %}
-        <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" id="researcher" name="researcher" id="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
-          <label for="researcher">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="researcher" name="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
+          <label class="custom-control-label" for="researcher">
             Allowed to create YARA rules that can be run on <strong>public</strong> firmware
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-partner') %}
-        <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" id="partner" name="partner" id="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
-          <label for="partner">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="partner" name="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
+          <label class="custom-control-label" for="partner">
             Allowed to import and export <strong>public</strong> lists of firmware, e.g. from Microsoft Update
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-approved-public') %}
-        <span class="switch mt-3">
-          <input class="switch" type="checkbox" id="approved-public" name="approved-public" id="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
-          <label for="approved-public">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="approved-public" name="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
+          <label class="custom-control-label" for="approved-public">
             Allowed to move firmware to the public <code>testing</code> and <code>stable</code> remotes
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% if g.user.check_acl('@add-action-vendor-manager') %}
 {% if u.auth_type != 'oauth' %}
-        <span class="switch mt-3 mb-3">
-          <input class="switch mt-3" type="checkbox" id="is_otp_enabled" name="is_otp_enabled" id="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
-          <label for="is_otp_enabled">
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="is_otp_enabled" name="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
+          <label class="custom-control-label" for="is_otp_enabled">
             Two factor authentication is required
           </label>
-        </span>
-        <br/>
+        </div>
 {% endif %}
 {% endif %}
       </div>
@@ -165,12 +156,12 @@
   </fieldset>
 {% endif %}
 {% if g.user.check_acl('@admin') %}
-    <div class="form-group">
-    <label for="send_email">
-      <input class="checkbox" type="checkbox" id="send_email" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
-      Notify the user about the account change
-    </label>
-  </div>
+    <div class="form-check form-inline mb-3">
+      <input type="checkbox" class="form-check-input" id="send_email" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
+      <label class="form-check-label" for="send_email">
+        Notify the user about the account change
+      </label>
+    </div>
 {% else %}
   <input type="hidden" name="send_email" value="1">
 {% endif %}
