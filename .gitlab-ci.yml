@@ -58,7 +58,7 @@ tag:
     - docker:dind
   stage: deploy
   interruptible: true
-  manual: true
+  when: manual
   dependencies:
     - test
   before_script:
