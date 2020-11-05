@@ -1,6 +1,6 @@
 stages:
     - build
-    - docs
+    - test
     - deploy
 
 build:
@@ -18,10 +18,11 @@ build:
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
 
 test:
-  when: manual
-  image: centos:centos8
-  stage: build
+  image: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  stage: test
   interruptible: true
+  dependencies:
+    - build
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
@@ -29,36 +30,17 @@ test:
       - .cache/pip
       - env/
   before_script:
-    - dnf -y install dnf-plugins-core
-    - dnf config-manager --set-enabled PowerTools
-    - dnf -y install epel-release
-    - dnf -y install
-        bsdtar
-        geolite2-country
-        libgcab1
-        cairo-gobject-devel
-        gobject-introspection-devel
-        gnutls-utils
-        python3-devel
-        python3-pip
-        python3-virtualenv
-        python3-psutil
-        redis
-        words
-    - virtualenv env
-    - source env/bin/activate
-    - pip install pip -U
-    - pip install -r requirements.txt --use-feature=2020-resolver
+    - dnf install -y redis
+    - source /app/venv/bin/activate
     - pip install mypy
     - redis-server &
   script:
     - pytest --cov=lvfs --cov=plugins --cov=pkgversion --cov=infparser --cov=cabarchive --cov-fail-under=60
-    - env/bin/python ./pylint_test.py
+    - /app/venv/bin/python ./pylint_test.py
 
 docs:
-  when: manual
   image: alpine:latest
-  stage: docs
+  stage: deploy
   interruptible: true
   allow_failure: true
   variables:
@@ -74,8 +56,9 @@ tag for release:
   services:
     - docker:dind
   stage: deploy
-  when: manual
   interruptible: true
+  dependencies:
+    - test
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
@@ -83,11 +66,12 @@ tag for release:
     - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
     - docker push "$CI_REGISTRY_IMAGE:latest"
     
-deploy web:
+deploy application:
   stage: deploy
-  when: manual
   image: python:latest
   interruptible: true
+  dependencies:
+    - tag for release
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_WEB_SERVICE" --force-new-deployment --region us-west-2
@@ -96,44 +80,24 @@ deploy web:
 
 deploy metadata:
   stage: deploy
-  when: manual
   image: python:latest
   interruptible: true
+  dependencies:
+  - tag for release
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_METADATA_SERVICE" --force-new-deployment --region us-west-2
   only:
     - master
 
-deploy yara:
-  stage: deploy
-  when: manual
-  image: python:latest
-  interruptible: true
-  script:
-    - pip install awscli
-    - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_YARA_SERVICE" --force-new-deployment --region us-west-2
-  only:
-    - master
-
 deploy beat:
   stage: deploy
-  when: manual
   image: python:latest
   interruptible: true
+  dependencies:
+    - tag for release
   script:
     - pip install awscli
     - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_BEAT_SERVICE" --force-new-deployment --region us-west-2
-  only:
-    - master
-
-deploy clam:
-  stage: deploy
-  when: manual
-  image: python:latest
-  interruptible: true
-  script:
-    - pip install awscli
-    - aws ecs update-service --cluster "$FARGATE_PROD_CLUSTER" --service "$FARGATE_PROD_CLAM_SERVICE" --force-new-deployment --region us-west-2
   only:
     - master
