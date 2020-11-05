@@ -56,7 +56,7 @@ tag:
   image: docker:latest
   services:
     - docker:dind
-  stage: deploy
+  stage: tag
   interruptible: true
   when: manual
   dependencies:
