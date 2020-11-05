@@ -1,6 +1,7 @@
 stages:
     - build
     - test
+    - tag
     - deploy
 
 build:
@@ -57,6 +58,7 @@ tag:
     - docker:dind
   stage: deploy
   interruptible: true
+  manual: true
   dependencies:
     - test
   before_script:
