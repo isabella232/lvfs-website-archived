@@ -118,6 +118,10 @@ def _generate_metadata_mds(mds: List[Component],
         child = ET.SubElement(component, 'url')
         child.set('type', 'homepage')
         child.text = md.url_homepage
+    if md.icon:
+        child = ET.SubElement(component, 'icon')
+        child.set('type', 'stock')
+        child.text = md.icon
     if md.metadata_license:
         ET.SubElement(component, 'metadata_license').text = md.metadata_license
     ET.SubElement(component, 'project_license').text = md.project_license
