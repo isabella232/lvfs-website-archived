@@ -105,7 +105,7 @@ class LocalTestCase(LvfsTestCase):
 
         # enforce, so add as problem if missing
         rv = self.app.get('/lvfs/firmware/1/problems')
-        assert b' The component requries a release SWID' in rv.data, rv.data.decode()
+        assert b' The component requries a SWID' in rv.data, rv.data.decode()
 
         # add tag to firmware
         rv = self.app.post('/lvfs/components/1/modify', data=dict(
@@ -115,7 +115,7 @@ class LocalTestCase(LvfsTestCase):
 
         # verify the new problems
         rv = self.app.get('/lvfs/firmware/1/problems')
-        assert b' The component requries a release SWID' not in rv.data, rv.data.decode()
+        assert b' The component requries a SWID' not in rv.data, rv.data.decode()
 
         # delete a tag
         rv = self.app.post('/lvfs/vendors/2/tag/1/delete', follow_redirects=True)

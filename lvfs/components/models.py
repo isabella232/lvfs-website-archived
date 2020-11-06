@@ -1136,7 +1136,7 @@ class Component(db.Model):
                         Claim(
                             kind="release-id-invalid",
                             icon="warning",
-                            summary="The component requries a release {}".format(
+                            summary="The component requries a {}".format(
                                 tag.name
                             ),
                             description="All components for vendor {} with category {} "
