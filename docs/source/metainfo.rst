@@ -24,9 +24,9 @@ An example ``metainfo.xml`` file looks like this:
       <name_variant_suffix>Black Friday Special Edition</name_variant_suffix>
       <summary>Firmware for the Hughski ColorHug Ambient Light Sensor</summary>
       <description>
-
-        Updating the firmware on your ColorHugALS device improves performance and
-        adds new features.
+        <p>
+          Updating the firmware on your ColorHugALS device improves performance and
+          adds new features.
         </p>
       </description>
       <provides>
@@ -40,7 +40,7 @@ An example ``metainfo.xml`` file looks like this:
         <release urgency="high" version="3.0.2" date="2017-02-09" install_duration="120">
           <checksum filename="my-custom-name.bin" target="content"/>
           <description>
-            This stable release fixes the following bugs:</p>
+            <p>This stable release fixes the following bugs:</p>
             <ul>
               <li>Fix the return code from GetHardwareVersion</li>
               <li>Scale the output of TakeReadingRaw by the datasheet values</li>
@@ -63,6 +63,10 @@ An example ``metainfo.xml`` file looks like this:
         <firmware compare="ge" version="0.1.2"/>
         <firmware compare="ge" version="0.3.4">bootloader</firmware>
       </requires>
+      <custom>
+        <value key="LVFS::VersionFormat">example</value>
+        <value key="LVFS::UpdateProtocol">org.acme.example</value>
+      </custom>
       <!-- these keywords are optional and are used for searching -->
       <keywords>
         <keyword>bios</keyword>
