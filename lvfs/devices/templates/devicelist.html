@@ -17,27 +17,6 @@
   </div>
 </div>
 
-<!-- news -->
-{% if devices|length > 0 %}
-<div class="card mt-3">
-  <div class="card-body">
-    <h2 class="card-title">Latest Devices Supported</h2>
-    <p class="card-text">
-      This list shows the 6 latest devices supported by the LVFS.
-    </p>
-    <ul class="list-group">
-{% for fw in devices %}
-      <li class="list-group-item">
-        <a href="{{url_for('devices.route_show', appstream_id=fw.md_prio.appstream_id)}}">{{fw.md_prio.name}}</a>
-        was released by {{fw.md_prio.developer_name_display}} {{format_humanize_naturaltime(fw.release_ts)}}.
-        <img class="float-right" src="/uploads/{{fw.vendor.icon}}" width="32"/>
-      </li>
-{% endfor %}
-    </ul>
-  </div>
-</div>
-{% endif %}
-
 {% if vendors|length > 0 %}
 <div class="card mt-3">
   <div class="card-body">
@@ -46,6 +25,7 @@
       This list shows all the updates that have been made available to the public.
       This list is automatically generated and will be updated when new firmware
       is added or existing firmware is made available.
+      Find the latest devices supported <a href="{{url_for('devices.route_new')}}">here</a>.
       For information about what vendors have been contacted about the LVFS,
       please see the <a href="{{url_for('main.route_vendorlist')}}">vendor engagement list</a>.
     </p>

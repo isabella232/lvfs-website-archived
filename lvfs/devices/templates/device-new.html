@@ -1,0 +1,39 @@
+{% extends "default.html" %}
+{% block title %}New Devices{% endblock %}
+
+{% block nav %}
+<nav class="row">
+  <div class="col col-sm-1 btn-group mb-3">
+    <a class="btn btn-falcon-default mr-sm-3"
+      href="{{url_for('devices.route_list')}}">
+      <span class="fas fa-arrow-left"></span>
+    </a>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+<!-- news -->
+{% if devices|length > 0 %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">Latest Devices Supported</h2>
+    <p class="card-text">
+      This list shows the 30 newest devices supported by the LVFS.
+    </p>
+    <ul class="list-group">
+{% for fw in devices %}
+      <li class="list-group-item">
+        <a href="{{url_for('devices.route_show', appstream_id=fw.md_prio.appstream_id)}}">{{fw.md_prio.name}}</a>
+        was released by {{fw.md_prio.developer_name_display}} {{format_humanize_naturaltime(fw.release_ts)}}.
+        <img class="float-right" src="/uploads/{{fw.vendor.icon}}" width="32"/>
+      </li>
+{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
