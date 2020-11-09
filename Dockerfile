@@ -3,6 +3,7 @@ EXPOSE 5000
 
 RUN dnf install -y epel-release dnf-plugins-core
 RUN dnf config-manager --set-enabled PowerTools epel
+RUN dnf copr enable rhughes/lvfs-website
 RUN dnf -y install \
 	bsdtar \
 	cairo-gobject-devel \
@@ -18,6 +19,7 @@ RUN dnf -y install \
 	python3-devel \
 	python3-pip \
 	python3-psutil \
+	UEFITool \
 	s3cmd
 
 # create all our dirs
