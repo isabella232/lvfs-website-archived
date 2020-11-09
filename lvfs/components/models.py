@@ -306,7 +306,7 @@ class ComponentIssue(db.Model):
             return "https://support.lenovo.com/us/en/product_security/{}".format(
                 self.value
             )
-        if self.kind == "intel":
+        if self.kind == "intel" and self.value.startswith("INTEL-SA-"):
             return "https://www.intel.com/content/www/us/en/security-center/advisory/{}".format(
                 self.value
             )
