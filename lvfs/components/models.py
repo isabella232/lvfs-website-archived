@@ -495,6 +495,7 @@ class Component(db.Model):
     name = Column(Text, default=None)
     name_variant_suffix = Column(Text, default=None)
     summary = Column(Text, default=None)
+    icon = Column(Text, default=None)
     description = Column(Text, default=None)  # markdown format
     release_description = Column(Text, default=None)  # markdown format
     details_url = Column(Text, default=None)

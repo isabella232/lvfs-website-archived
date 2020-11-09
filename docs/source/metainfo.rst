@@ -538,6 +538,68 @@ section in the component view:
     :width: 800px
     :alt: component source URL
 
+Device Icons
+============
+
+The icon show in GUI fwupd clients is normally set by the plugin automatically.
+In some cases the plugin may not know the appropriate icon until firmware has
+been uploaded to the LVFS.
+
+For this cosmetic purpose the firmware uploader can specify the stock icon in
+the ``metainfo.xml`` file which gets put in the the AppStream metadata and used
+by the graphical clients. In most cases specifying the icon is not required.
+
+To manually override the icon to one of the stock values, use this:
+
+.. code-block:: xml
+
+    <component>
+      …
+      <icon type="stock">battery</icon>
+      …
+    <component>
+
+Valid stock icons include:
+
+* ``ac-adapter``
+* ``audio-card``
+* ``audio-headphones``
+* ``audio-headset``
+* ``audio-input-microphone``
+* ``audio-speakers``
+* ``battery``
+* ``camera-photo``
+* ``camera-video``
+* ``camera-web``
+* ``computer``
+* ``drive-harddisk``
+* ``drive-multidisk``
+* ``drive-optical``
+* ``drive-removable-media``
+* ``input-dialpad``
+* ``input-gaming``
+* ``input-keyboard``
+* ``input-mouse``
+* ``input-tablet``
+* ``input-touchpad``
+* ``media-flash``
+* ``media-floppy``
+* ``media-optical``
+* ``media-removable``
+* ``media-tape``
+* ``modem``
+* ``multimedia-player``
+* ``network-vpn``
+* ``network-wired``
+* ``network-wireless``
+* ``pda``
+* ``phone``
+* ``printer``
+* ``printer-network``
+* ``scanner``
+* ``uninterruptible-power-supply``
+* ``video-display``
+
 Composite Hardware
 ==================
 

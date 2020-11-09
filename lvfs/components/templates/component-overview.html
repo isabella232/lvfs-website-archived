@@ -111,6 +111,12 @@
     <th class="col-3">Summary</th>
     <td class="col"><code>{{md.summary}}</code></td>
   </tr>
+{% if md.icon %}
+  <tr class="row">
+    <th class="col-3">Icon</th>
+    <td class="col"><code>{{md.icon}}</code></td>
+  </tr>
+{% endif %}
   <tr class="row">
     <th class="col-3">Version</th>
     <td class="col"><code>{{md.version_display}}</code></td>
