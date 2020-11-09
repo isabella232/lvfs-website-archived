@@ -110,7 +110,7 @@
   </div>
   <div class="form-group">
     <label for="comments">Comments:</label>
-    <textarea class="form-control" id="comments" name="comments" cols="64" rows="5">{{v.comments}}</textarea>
+    <textarea class="form-control" id="comments" name="comments" cols="64" rows="5">{{v.comments if v.comments}}</textarea>
   </div>
   <input type="submit" class="card-link btn btn-primary" value="Save">
   <button type="button" class="btn btn-warning card-link m-1" data-toggle="modal" data-target="#retokenModal">Regenerate token</button>
