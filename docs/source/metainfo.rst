@@ -565,44 +565,46 @@ To manually override the icon to one of the stock values, use this:
 
 Valid stock icons include:
 
-* ``ac-adapter``
-* ``audio-card``
-* ``audio-headphones``
-* ``audio-headset``
-* ``audio-input-microphone``
-* ``audio-speakers``
-* ``battery``
-* ``camera-photo``
-* ``camera-video``
-* ``camera-web``
-* ``computer``
-* ``drive-harddisk``
-* ``drive-multidisk``
-* ``drive-optical``
-* ``drive-removable-media``
-* ``input-dialpad``
-* ``input-gaming``
-* ``input-keyboard``
-* ``input-mouse``
-* ``input-tablet``
-* ``input-touchpad``
-* ``media-flash``
-* ``media-floppy``
-* ``media-optical``
-* ``media-removable``
-* ``media-tape``
-* ``modem``
-* ``multimedia-player``
-* ``network-vpn``
-* ``network-wired``
-* ``network-wireless``
-* ``pda``
-* ``phone``
-* ``printer``
-* ``printer-network``
-* ``scanner``
-* ``uninterruptible-power-supply``
-* ``video-display``
+================================ =
+``ac-adapter``                   .. image:: img/icons/ac-adapter.png
+``audio-card``                   .. image:: img/icons/audio-card.png
+``audio-headphones``             .. image:: img/icons/audio-headphones.png
+``audio-headset``                .. image:: img/icons/audio-headset.png
+``audio-input-microphone``       .. image:: img/icons/audio-input-microphone.png
+``audio-speakers``               .. image:: img/icons/audio-speakers.png
+``battery``                      .. image:: img/icons/battery.png
+``camera-photo``                 .. image:: img/icons/camera-photo.png
+``camera-video``                 .. image:: img/icons/camera-video.png
+``camera-web``                   .. image:: img/icons/camera-web.png
+``computer``                     .. image:: img/icons/computer.png
+``drive-harddisk``               .. image:: img/icons/drive-harddisk.png
+``drive-multidisk``              .. image:: img/icons/drive-multidisk.png
+``drive-optical``                .. image:: img/icons/drive-optical.png
+``drive-removable-media``        .. image:: img/icons/drive-removable-media.png
+``input-dialpad``                .. image:: img/icons/input-dialpad.png
+``input-gaming``                 .. image:: img/icons/input-gaming.png
+``input-keyboard``               .. image:: img/icons/input-keyboard.png
+``input-mouse``                  .. image:: img/icons/input-mouse.png
+``input-tablet``                 .. image:: img/icons/input-tablet.png
+``input-touchpad``               .. image:: img/icons/input-touchpad.png
+``media-flash``                  .. image:: img/icons/media-flash.png
+``media-floppy``                 .. image:: img/icons/media-floppy.png
+``media-optical``                .. image:: img/icons/media-optical.png
+``media-removable``              .. image:: img/icons/media-removable.png
+``media-tape``                   .. image:: img/icons/media-tape.png
+``modem``                        .. image:: img/icons/modem.png
+``multimedia-player``            .. image:: img/icons/multimedia-player.png
+``network-vpn``                  .. image:: img/icons/network-vpn.png
+``network-wired``                .. image:: img/icons/network-wired.png
+``network-wireless``             .. image:: img/icons/network-wireless.png
+``pda``                          .. image:: img/icons/pda.png
+``phone``                        .. image:: img/icons/phone.png
+``printer``                      .. image:: img/icons/printer.png
+``printer-network``              .. image:: img/icons/printer-network.png
+``scanner``                      .. image:: img/icons/scanner.png
+``uninterruptible-power-supply`` .. image:: img/icons/uninterruptible-power-supply.png
+``video-display``                .. image:: img/icons/video-display.png
+================================ =
 
 Composite Hardware
 ==================
