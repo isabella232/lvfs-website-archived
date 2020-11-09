@@ -24,6 +24,17 @@ class LocalTestCase(LvfsTestCase):
         rv = self.app.get("/lvfs/fsck/update_descriptions")
         assert b"Updating update descriptions" not in rv.data, rv.data.decode()
 
+    def test_lockdown(self):
+
+        # add a user and try to upload firmware without signing the agreement
+        self.login()
+        self.add_user("testuser@fwupd.org")
+        rv = self.app.post("/lvfs/fsck/lockdown", follow_redirects=True)
+        assert b"Disabled all users" in rv.data, rv.data.decode()
+        self.logout()
+        rv = self._login("testuser@fwupd.org")
+        assert b"User account is disabled" in rv.data, rv.data.decode()
+
 
 if __name__ == "__main__":
     unittest.main()
