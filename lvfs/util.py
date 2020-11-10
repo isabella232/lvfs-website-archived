@@ -22,6 +22,47 @@ from functools import wraps
 from lxml import etree as ET
 from flask import request, flash, render_template, g, Response, redirect, url_for
 
+DEVICE_ICONS = [
+    "ac-adapter",
+    "audio-card",
+    "audio-headphones",
+    "audio-headset",
+    "audio-input-microphone",
+    "audio-speakers",
+    "battery",
+    "camera-photo",
+    "camera-video",
+    "camera-web",
+    "computer",
+    "drive-harddisk",
+    "drive-multidisk",
+    "drive-optical",
+    "drive-removable-media",
+    "input-dialpad",
+    "input-gaming",
+    "input-keyboard",
+    "input-mouse",
+    "input-tablet",
+    "input-touchpad",
+    "media-flash",
+    "media-floppy",
+    "media-optical",
+    "media-removable",
+    "media-tape",
+    "modem",
+    "multimedia-player",
+    "network-vpn",
+    "network-wired",
+    "network-wireless",
+    "pda",
+    "phone",
+    "printer-network",
+    "printer",
+    "scanner",
+    "uninterruptible-power-supply",
+    "video-display",
+]
+
 def _fix_component_name(name: Optional[str],
                         developer_name: Optional[str] = None) -> Optional[str]:
     if not name:

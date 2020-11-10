@@ -598,6 +598,18 @@ class Component(db.Model):
         return self._vendor_tag_with_attr()
 
     @property
+    def icon_with_fallback(self) -> Optional[str]:
+        if self.icon:
+            return self.icon
+        if self.protocol and self.protocol.icon:
+            return self.protocol.icon
+        if self.category and self.category.icon:
+            return self.category.icon
+        if self.category and self.category.fallback and self.category.fallback.icon:
+            return self.category.fallback.icon
+        return None
+
+    @property
     def details_url_with_fallback(self) -> Optional[str]:
 
         # set explicitly

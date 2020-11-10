@@ -16,6 +16,17 @@
     <input type="text" class="form-control" id="name" name="name" value="{{cat.name if cat.name}}" required />
   </div>
   <div class="form-group">
+    <label for="fallback_id">Icon:</label>
+    <select class="form-control" name="icon">
+      <option value="" {{ 'selected' if not cat.icon }}>none</option>
+{% for icon in icons %}
+      <option value="{{icon}}" {{ 'selected' if cat.icon == icon }}>
+        {{ icon}}
+      </option>
+{% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
     <label for="fallback_id">Fallback:</label>
     <select class="form-control" name="fallback_id">
       <option value="" {{ 'selected' if not cat.fallback }}>None</option>

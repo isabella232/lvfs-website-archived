@@ -20,6 +20,7 @@ class Protocol(db.Model):
     protocol_id = Column(Integer, primary_key=True)
     value = Column(Text, nullable=False)
     name = Column(Text, default=None)
+    icon = Column(Text, default=None)
     is_signed = Column(Boolean, default=False)
     is_public = Column(Boolean, default=False)
     can_verify = Column(Boolean, default=False)
