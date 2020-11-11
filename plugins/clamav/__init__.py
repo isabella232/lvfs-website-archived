@@ -44,13 +44,13 @@ class Plugin(PluginBase):
         try:
             ps = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if ps.wait() != 0:
-                test.add_fail('Failed to scan', ps.stderr.read())
+                test.add_fail('Failed to scan', ps.stderr.read().decode())
                 return
             stdout, _ = ps.communicate()
         except OSError as e:
             test.add_fail('Failed to scan', str(e))
             return
-        test.add_pass('Version', stdout)
+        test.add_pass('Version', stdout.decode())
 
         # scan cabinet archive
         if self.get_setting_bool('clamav_use_daemon'):

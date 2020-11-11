@@ -62,12 +62,12 @@ class Test(db.Model):
 
     fw = relationship("Firmware", back_populates="tests")
 
-    def add_pass(self, title, message: Optional[str] = None) -> None:
+    def add_pass(self, title: str, message: Optional[str] = None) -> None:
         self.attributes.append(
             TestAttribute(title=title, message=message, success=True)
         )
 
-    def add_fail(self, title, message: Optional[str] = None) -> None:
+    def add_fail(self, title: str, message: Optional[str] = None) -> None:
         self.attributes.append(
             TestAttribute(title=title, message=message, success=False)
         )
