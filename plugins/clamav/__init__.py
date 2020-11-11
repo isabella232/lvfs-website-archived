@@ -48,7 +48,7 @@ class Plugin(PluginBase):
                 return
             stdout, _ = ps.communicate()
         except OSError as e:
-            test.add_fail('Failed to scan', str(e))
+            test.add_fail('Failed to scan', e)
             return
         test.add_pass('Version', stdout.decode())
 
