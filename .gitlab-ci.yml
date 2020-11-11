@@ -8,8 +8,6 @@ build:
   image: docker:latest
   stage: build
   interruptible: true
-  only:
-    - master
   services:
     - docker:dind
   before_script:
@@ -67,6 +65,8 @@ tag:
     - docker pull "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
     - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
     - docker push "$CI_REGISTRY_IMAGE:latest"
+  only:
+    - master
     
 deploy application:
   stage: deploy
