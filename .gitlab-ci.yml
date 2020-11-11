@@ -20,6 +20,8 @@ test:
   image: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   stage: test
   interruptible: true
+  services:
+    - docker:dind
   dependencies:
     - build
   variables:
