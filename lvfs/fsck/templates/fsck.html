@@ -23,4 +23,18 @@
 </div>
 </form>
 
+<form action="{{url_for('fsck.route_lockdown')}}" method="POST">
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">
+      Lockdown!
+    </h2>
+    <p class="card-text">
+      Lockdown all users on the LVFS. Be careful!
+    </p>
+    <input class="card-link btn btn-warning" type="submit" value="Go!"/>
+  </div>
+</div>
+</form>
+
 {% endblock %}
