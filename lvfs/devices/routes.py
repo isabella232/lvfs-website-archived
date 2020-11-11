@@ -361,6 +361,14 @@ def route_list():
     for vendor in mds_by_vendor:
         mds_by_vendor[vendor].sort(key=lambda obj: obj.name)
 
+    return render_template('devicelist.html',
+                           vendors=sorted(vendors),
+                           mds_by_vendor=mds_by_vendor)
+
+
+@bp_devices.route('/new')
+def route_new():
+
     # get most recent supported devices
     stmt = db.session.query(Component.appstream_id).\
                             group_by(Component.appstream_id).\
@@ -371,9 +379,7 @@ def route_list():
                                   join(Component).\
                                   join(stmt, Component.appstream_id == stmt.c.appstream_id).\
                                   order_by(Firmware.timestamp.desc()).\
-                                  limit(6).all()
+                                  limit(30).all()
 
-    return render_template('devicelist.html',
-                           vendors=sorted(vendors),
-                           devices=fws_recent,
-                           mds_by_vendor=mds_by_vendor)
+    return render_template('device-new.html',
+                           devices=fws_recent)
