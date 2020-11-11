@@ -7,7 +7,6 @@
 
 import os
 import datetime
-import shutil
 
 from typing import List
 
@@ -18,7 +17,7 @@ from sqlalchemy.orm import joinedload
 
 from celery.schedules import crontab
 
-from lvfs import app, db, ploader, tq
+from lvfs import db, ploader, tq
 
 from lvfs.analytics.models import AnalyticFirmware
 from lvfs.claims.models import Claim
@@ -129,12 +128,6 @@ def route_undelete(firmware_id):
     if not remote:
         return _error_internal('No private remote')
 
-    # move file back to the right place
-    path = os.path.join(app.config['RESTORE_DIR'], fw.filename)
-    if os.path.exists(path):
-        path_new = os.path.join(app.config['DOWNLOAD_DIR'], fw.filename)
-        shutil.move(path, path_new)
-
     # put back to the private state
     fw.remote_id = remote.remote_id
     fw.events.append(FirmwareEvent(remote_id=fw.remote_id, user_id=g.user.user_id))
@@ -188,9 +181,8 @@ def route_nuke(firmware_id):
         return redirect(url_for('firmware.route_show', firmware_id=firmware_id))
 
     # really delete firmware
-    path = os.path.join(app.config['RESTORE_DIR'], fw.filename)
-    if os.path.exists(path):
-        os.remove(path)
+    if os.path.exists(fw.absolute_path):
+        os.remove(fw.absolute_path)
 
     # delete shard cache if they exist
     for md in fw.mds:

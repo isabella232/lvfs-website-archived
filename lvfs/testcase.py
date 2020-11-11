@@ -44,7 +44,6 @@ class LvfsTestCase(unittest.TestCase):
                 "SQLALCHEMY_TRACK_MODIFICATIONS = False",
                 "DEBUG = True",
                 "CERTTOOL = 'certtool'",
-                "RESTORE_DIR = '/tmp'",
                 "DOWNLOAD_DIR = '/tmp'",
                 "SECRET_ADDR_SALT = 'addr%%%'",
                 "SECRET_VENDOR_SALT = 'vendor%%%'",

@@ -87,7 +87,7 @@ def route_tests(plugin_id, kind):
 def route_create():
 
     # sanity check
-    for dirname in ['DOWNLOAD_DIR', 'SHARD_DIR', 'UPLOAD_DIR', 'RESTORE_DIR']:
+    for dirname in ['DOWNLOAD_DIR', 'SHARD_DIR', 'UPLOAD_DIR']:
         if not os.path.isdir(app.config[dirname]):
             flash('Directory {} does not exist'.format(app.config[dirname]), 'warning')
 

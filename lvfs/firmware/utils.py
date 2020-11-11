@@ -8,7 +8,6 @@
 # pylint: disable=singleton-comparison
 
 import os
-import shutil
 import difflib
 import hashlib
 import datetime
@@ -21,7 +20,7 @@ from flask import render_template, g
 from jcat import JcatFile, JcatBlobSha1, JcatBlobSha256, JcatBlobKind
 from cabarchive import CabArchive, CabFile
 
-from lvfs import app, db, tq, ploader
+from lvfs import db, tq, ploader
 
 from lvfs.components.models import Component
 from lvfs.emails import send_email
@@ -39,12 +38,6 @@ def _firmware_delete(fw: Firmware) -> None:
     if not remote:
         _event_log('No deleted remote')
         return
-
-    # move file so it's no longer downloadable
-    path = os.path.join(app.config['DOWNLOAD_DIR'], fw.filename)
-    if os.path.exists(path):
-        path_new = os.path.join(app.config['RESTORE_DIR'], fw.filename)
-        shutil.move(path, path_new)
 
     # generate next cron run
     fw.mark_dirty()
@@ -124,9 +117,8 @@ def _purge_old_deleted_firmware():
                        .one()
         if fw.target_duration > datetime.timedelta(days=30):
             print('Deleting %s as age %s' % (fw.filename, fw.target_duration))
-            path = os.path.join(app.config['RESTORE_DIR'], fw.filename)
-            if os.path.exists(path):
-                os.remove(path)
+            if os.path.exists(fw.absolute_path):
+                os.remove(fw.absolute_path)
             for md in fw.mds:
                 for shard in md.shards:
                     path = shard.absolute_path

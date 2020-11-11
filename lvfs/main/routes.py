@@ -169,8 +169,6 @@ def serveStaticResource(resource):
     # firmware blobs
     if resource.startswith('downloads/'):
         return send_from_directory(app.config['DOWNLOAD_DIR'], os.path.basename(resource))
-    if resource.startswith('deleted/'):
-        return send_from_directory(app.config['RESTORE_DIR'], os.path.basename(resource))
     if resource.startswith('uploads/'):
         return send_from_directory(app.config['UPLOAD_DIR'], os.path.basename(resource))
 

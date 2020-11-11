@@ -411,8 +411,6 @@ class Firmware(db.Model):
 
     @property
     def absolute_path(self) -> str:
-        if self.is_deleted:
-            return os.path.join(app.config["RESTORE_DIR"], self.filename)
         return os.path.join(app.config["DOWNLOAD_DIR"], self.filename)
 
     def _ensure_blobs(self) -> None:
