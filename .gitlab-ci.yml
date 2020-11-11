@@ -20,8 +20,6 @@ test:
   image: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   stage: test
   interruptible: true
-  services:
-    - docker:dind
   dependencies:
     - build
   variables:
@@ -30,12 +28,11 @@ test:
     paths:
       - .cache/pip
       - env/
-  before_script:
+  script:
     - dnf install -y redis
     - source /app/venv/bin/activate
     - pip install mypy
     - redis-server &
-  script:
     - pytest --cov=lvfs --cov=plugins --cov=pkgversion --cov=infparser --cov=cabarchive --cov-fail-under=60
     - /app/venv/bin/python ./pylint_test.py
 
