@@ -25,6 +25,7 @@ RUN dnf -y install \
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
 RUN mkdir /data /backups
+RUN usermod -a -G virusgroup nobody
 WORKDIR /app
 
 # create and activate a venv
