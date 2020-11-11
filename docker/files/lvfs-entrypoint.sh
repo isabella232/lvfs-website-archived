@@ -15,11 +15,11 @@ then
     /usr/sbin/clamd -c /etc/clamd.d/scan.conf
     echo "clam started"
     echo "starting celery worker with queues [metadata,firmware,celery,yara]"
-    exec celery -A lvfs.tq worker --queues metadata,firmware,celery,yara --loglevel INFO
+    exec celery -A lvfs.tq worker --uid nobody --gid nobody --queues metadata,firmware,celery,yara --loglevel INFO
 fi
 
 if [ "$DEPLOY" = "beat" ]
 then
     echo "starting celery beat"
-    exec celery -A lvfs.tq beat --loglevel INFO
+    exec celery -A lvfs.tq beat --uid nobody --gid nobody --loglevel INFO
 fi
