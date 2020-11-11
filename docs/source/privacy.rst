@@ -111,7 +111,7 @@ GDPR Provisions
 -------------------------------------
 
 Where not specified previously in this policy, the following provisions will
-be in effect on or before 25 May 2018.
+be in effect on or before 11 November 2020.
 
 Transparency of data protection
 -------------------------------
@@ -127,9 +127,10 @@ Firmware Vendor Information
   uploaded firmware files.
 * **Why collected:** Secure authentication, to allow any possible future audit
   and to provide authorised users access to signed firmware files.
-* **Where stored:** MySQL database on fwupd.org.
-* **When copied:** Backed up to off-site secure LUKS partition weekly.
-* **Who has access:** The hardware vendor (filtered by the QA group) and the DPO.
+* **Where stored:** AWS hosted PostgreSQL database in Oregon, USA region.
+* **When copied:** Full backups weekly, with daily snapshots both to AWS backup.
+* **Who has access:** The hardware vendor (filtered by the QA group), Linux
+  Foundation Infrastructure Team and the DPO.
 * **Wiped:** When the vendor requests deletion of the user account.
 
 Service Event Log
@@ -138,9 +139,10 @@ Service Event Log
 * **What:** IP address (unhashed) and REST method requested, along with any error.
 * **Why collected:** Providing an event log for checking what the various
   hardware vendors are doing, or trying to do.
-* **Where stored:** MySQL database on fwupd.org.
-* **When copied:** Backed up to off-site secure LUKS partition weekly.
-* **Who has access:** The hardware vendor (filtered by the QA group) and the DPO.
+* **Where stored:** AWS hosted PostgreSQL database in Oregon, USA region.
+* **When copied:** Full backups weekly, with daily snapshots both to AWS backup.
+* **Who has access:** The hardware vendor (filtered by the QA group), Linux
+  Foundation Infrastructure Team and the DPO.
 * **Wiped:** When the QA group is deleted.
 
 Firmware Download Log
@@ -149,9 +151,10 @@ Firmware Download Log
 * **What:** IP address (hashed), timestamp, filename of firmware, user-agent of client.
 * **Why collected:** To know what client versions are being used for download,
   and to provide a download count over time for a specific firmware file.
-* **Where stored:** MySQL database on fwupd.org.
-* **When copied:** Backed up to off-site secure LUKS partition weekly.
-* **Who has access:** The hardware vendor (filtered by the QA group) and the DPO.
+* **Where stored:** AWS hosted PostgreSQL database in Oregon, USA region.
+* **When copied:** Full backups weekly, with daily snapshots both to AWS backup.
+* **Who has access:** The hardware vendor (filtered by the QA group), Linux
+  Foundation Infrastructure Team and the DPO.
 * **Wiped:** When the firmware is deleted.
 
 Firmware Reports
@@ -161,9 +164,10 @@ Firmware Reports
   OS distribution name and version.
 * **Why collected:** Allows the hardware vendor to assess if the firmware update
   is working on real hardware.
-* **Where stored:** MySQL database on fwupd.org.
-* **When copied:** Backed up to off-site secure LUKS partition weekly.
-* **Who has access:** The hardware vendor (filtered by the QA group) and the DPO.
+* **Where stored:** AWS hosted PostgreSQL database in Oregon, USA region.
+* **When copied:** Full backups weekly, with daily snapshots both to AWS backup.
+* **Who has access:** The hardware vendor (filtered by the QA group), Linux
+  Foundation Infrastructure Team and the DPO.
 * **Wiped:** When the firmware is deleted.
 
 We will ensure any use of personal data is justified using at least one of
