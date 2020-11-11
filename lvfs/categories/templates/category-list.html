@@ -19,6 +19,9 @@
 <div class="card mt-3">
   <div class="card-body">
     <h2 class="card-title">
+{% if cat.icon %}
+      <img class="img-thumbnail" src="{{url_for('static', filename='icons/{}.png'.format(cat.icon))}}"/>
+{% endif %}
       {{cat.name}}
       <code class="float-right">{{cat.value}}</code>
     </h2>

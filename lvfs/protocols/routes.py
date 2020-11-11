@@ -12,7 +12,7 @@ from lvfs import db
 
 from lvfs.protocols.models import Protocol
 from lvfs.util import admin_login_required
-from lvfs.util import _error_internal
+from lvfs.util import _error_internal, DEVICE_ICONS
 from lvfs.verfmts.models import Verfmt
 
 bp_protocols = Blueprint('protocols', __name__, template_folder='templates')
@@ -88,7 +88,7 @@ def route_modify(protocol_id):
     protocol.is_public = bool('is_public' in request.form)
     protocol.can_verify = bool('can_verify' in request.form)
     protocol.has_header = bool('has_header' in request.form)
-    for key in ['name']:
+    for key in ['name', 'icon']:
         if key in request.form:
             setattr(protocol, key, request.form[key] or None)
     if 'verfmt_id' in request.form:
@@ -117,4 +117,5 @@ def route_show(protocol_id):
     verfmts = db.session.query(Verfmt).order_by(Verfmt.verfmt_id.asc()).all()
     return render_template('protocol-details.html',
                            protocol=protocol,
+                           icons=DEVICE_ICONS,
                            verfmts=verfmts)

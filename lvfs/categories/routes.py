@@ -11,7 +11,7 @@ from flask_login import login_required
 from lvfs import db
 
 from lvfs.util import admin_login_required
-from lvfs.util import _error_internal
+from lvfs.util import _error_internal, DEVICE_ICONS
 
 from .models import Category
 
@@ -82,14 +82,15 @@ def route_modify(category_id):
 
     # modify category
     cat.expect_device_checksum = bool('expect_device_checksum' in request.form)
-    for key in ['name', 'fallback_id']:
+    for key in ['name', 'icon', 'fallback_id']:
         if key in request.form:
             setattr(cat, key, request.form[key] or None)
     db.session.commit()
 
     # success
     flash('Modified category', 'info')
-    return redirect(url_for('categories.route_show', category_id=category_id))
+    return redirect(url_for('categories.route_show',
+                            category_id=category_id))
 
 @bp_categories.route('/<int:category_id>')
 @login_required
@@ -107,5 +108,6 @@ def route_show(category_id):
     categories = db.session.query(Category).order_by(Category.name.asc()).all()
     return render_template('category-details.html',
                            categories=categories,
+                           icons=DEVICE_ICONS,
                            category='admin',
                            cat=cat)

@@ -39,11 +39,13 @@ class LocalTestCase(LvfsTestCase):
         # modify
         rv = self.app.post('/lvfs/protocols/4/modify', data=dict(
             name='ACME',
+            icon='battery',
             is_signed=True,
         ), follow_redirects=True)
         assert b'Modified protocol' in rv.data, rv.data.decode()
         rv = self.app.get('/lvfs/protocols/')
         assert 'ACME' in rv.data.decode('utf-8'), rv.data.decode()
+        assert 'battery' in rv.data.decode('utf-8'), rv.data.decode()
 
         # delete
         rv = self.app.post('/lvfs/protocols/4/delete', follow_redirects=True)

@@ -22,6 +22,7 @@ class Category(db.Model):
     category_id = Column(Integer, primary_key=True)
     value = Column(Text, nullable=False)  # 'X-System'
     name = Column(Text, default=None)  # 'System Update'
+    icon = Column(Text, default=None)  # 'battery'
     unused_fallbacks = Column('fallbacks', Text, default=None)
     expect_device_checksum = Column(Boolean, default=False)
     fallback_id = Column(Integer, ForeignKey("categories.category_id"), nullable=True)
