@@ -7,6 +7,7 @@
 #
 # pylint: disable=singleton-comparison,too-many-nested-blocks
 
+import socket
 import datetime
 from typing import List, Optional
 
@@ -47,7 +48,14 @@ def _test_run_all(tests: Optional[List[Test]] = None) -> None:
             test.ended_ts = datetime.datetime.utcnow()
             continue
         try:
-            print('Running test {} for firmware {}'.format(test.plugin_id, test.fw.firmware_id))
+            test.container_id = socket.gethostname()
+            print(
+                "Running test {} for firmware {} on {}".format(
+                    test.plugin_id,
+                    test.fw.firmware_id,
+                    test.container_id,
+                )
+            )
             try:
                 if not plugin.require_test_for_fw(test.fw):
                     continue

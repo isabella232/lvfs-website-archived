@@ -41,6 +41,11 @@
 {% endfor %}
     </ul>
 {% endif %}
+{% if test.container_id %}
+    <p class="card-text">
+      Run on container <code>{{test.container_id}}</code>.
+    </p>
+{% endif %}
     <div class="form-inline">
       <a class="card-link btn btn-info m-1"
          href="{{url_for('firmware.route_show', firmware_id=test.firmware_id)}}"

@@ -50,6 +50,11 @@
 {% endfor %}
     </ul>
 {% endif %}
+{% if test.container_id %}
+    <p class="card-text">
+      Run on container <code>{{test.container_id}}</code>.
+    </p>
+{% endif %}
 {% if test.started_ts and test.check_acl('@retry') %}
       <form action="{{url_for('tests.route_retry', test_id=test.test_id)}}" method="POST">
         <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>

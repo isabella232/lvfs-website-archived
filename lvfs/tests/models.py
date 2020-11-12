@@ -44,6 +44,7 @@ class Test(db.Model):
         Integer, ForeignKey("firmware.firmware_id"), nullable=False, index=True
     )
     plugin_id = Column(Text, default=None)
+    container_id = Column(Text, default=None)
     waivable = Column(Boolean, default=False)
     scheduled_ts = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     started_ts = Column(DateTime, default=None)

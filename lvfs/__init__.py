@@ -8,6 +8,7 @@
 # pylint: disable=wrong-import-position,wrong-import-order
 
 import os
+import socket
 import sqlalchemy
 import logging
 
@@ -116,6 +117,10 @@ app.register_blueprint(bp_users, url_prefix='/lvfs/users')
 app.register_blueprint(bp_vendors, url_prefix='/lvfs/vendors')
 app.register_blueprint(bp_verfmts, url_prefix='/lvfs/verfmts')
 app.register_blueprint(bp_hsireports, url_prefix='/lvfs/hsireports')
+
+@app.before_request
+def before_request_func():
+    g.container_id = socket.gethostname()
 
 @app.cli.command('initdb')
 def initdb_command():

@@ -20,6 +20,9 @@
 {% if e.address != '127.0.0.1' %}
       from <code>{{e.address}}</code>
 {% endif %}
+{% if e.container_id %}
+      on <code>{{e.container_id}}</code>
+{% endif %}
       </p>
   </div>
 {% endfor %}

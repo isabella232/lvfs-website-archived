@@ -7,6 +7,7 @@
 #
 # pylint: disable=wrong-import-position
 
+import socket
 import json
 import calendar
 import datetime
@@ -226,6 +227,7 @@ def _event_log(msg: str, is_important: bool = False) -> None:
                   vendor_id=vendor_id,
                   address=_get_client_address(),
                   request=request_path,
+                  container_id=socket.gethostname(),
                   is_important=is_important)
     db.session.add(event)
     db.session.commit()

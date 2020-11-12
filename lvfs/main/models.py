@@ -29,6 +29,7 @@ class Event(db.Model):
     message = Column(Text, default=None)
     is_important = Column(Boolean, default=False)
     request = Column(Text, default=None)
+    container_id = Column(Text, default=None)
 
     vendor = relationship("Vendor", foreign_keys=[vendor_id])
     user = relationship("User", foreign_keys=[user_id])
