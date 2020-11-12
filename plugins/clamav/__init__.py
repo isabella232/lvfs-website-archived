@@ -74,7 +74,7 @@ class Plugin(PluginBase):
             ps = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             rc = ps.wait()
             if rc == 2:
-                test.add_fail('Failed to scan', ps.stderr.read())
+                test.add_fail('Failed to scan', ps.stderr.read().decode())
                 return
             stdout, _ = ps.communicate()
         except OSError as e:
