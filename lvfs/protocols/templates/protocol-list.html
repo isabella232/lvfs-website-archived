@@ -29,7 +29,7 @@
   <div class="card-body">
     <h2 class="card-title">
 {% if pr.icon %}
-      <img class="img-thumbnail" src="{{url_for('static', filename='icons/{}.png'.format(pr.icon))}}"/>
+      <img class="img-thumbnail" src="{{url_for('cdn', filename='icons/{}.png'.format(pr.icon))}}"/>
 {% endif %}
       {{pr.name}}
       <code class="float-right">{{pr.value}}</code>
