@@ -38,4 +38,19 @@
 </div>
 </form>
 
+<form action="{{url_for('fsck.route_generate_stats')}}" method="POST">
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">
+      Generate daily stats
+    </h2>
+    <p class="card-text">
+      Generate stats for yesterday.
+    </p>
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+    <input class="card-link btn btn-warning" type="submit" value="Go!"/>
+  </div>
+</div>
+</form>
+
 {% endblock %}

@@ -12,6 +12,7 @@ from lvfs import db
 
 from lvfs.util import admin_login_required, _error_internal
 from lvfs.users.models import User
+from lvfs.analytics.utils import _async_generate_stats
 
 from .utils import _async_fsck_update_descriptions
 
@@ -40,6 +41,17 @@ def route_update_descriptions():
         args=(request.form["search"], request.form["replace"],), queue="metadata"
     )
 
+    return redirect(url_for("fsck.route_view"))
+
+
+@bp_fsck.route("/generate_stats", methods=["POST"])
+@login_required
+@admin_login_required
+def route_generate_stats():
+
+    # asynchronously rebuilt
+    flash("Generating stats for yesterday", "info")
+    _async_generate_stats.apply_async()
     return redirect(url_for("fsck.route_view"))
 
 
