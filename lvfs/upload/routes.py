@@ -8,9 +8,8 @@
 # pylint: disable=too-many-locals
 
 import os
-import datetime
 import hashlib
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
@@ -33,15 +32,6 @@ from lvfs.vendors.models import Vendor, VendorAffiliation
 from lvfs.verfmts.models import Verfmt
 
 bp_upload = Blueprint('upload', __name__, template_folder='templates')
-
-def _get_plugin_metadata_for_uploaded_file(ufile: UploadedFile) -> Dict[str, str]:
-    settings = _get_settings()
-    metadata: Dict[str, str] = {}
-    metadata['$DATE$'] = datetime.datetime.now().replace(microsecond=0).isoformat()
-    metadata['$FWUPD_MIN_VERSION$'] = ufile.fwupd_min_version
-    metadata['$CAB_FILENAME$'] = ufile.fw.filename
-    metadata['$FIRMWARE_BASEURI$'] = settings['firmware_baseuri']
-    return metadata
 
 def _user_can_upload(user: User) -> bool:
 
@@ -190,10 +180,6 @@ def _upload_firmware():
     # allow plugins to copy any extra files from the source archive
     for cffile in ufile.cabarchive_upload.values():
         ploader.archive_copy(ufile.cabarchive_repacked, cffile)
-
-    # allow plugins to add files
-    ploader.archive_finalize(ufile.cabarchive_repacked,
-                             _get_plugin_metadata_for_uploaded_file(ufile))
 
     # dump to a file
     download_dir = app.config['DOWNLOAD_DIR']

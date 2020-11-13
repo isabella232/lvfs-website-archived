@@ -165,7 +165,6 @@ class UploadedFile:
         self.fw = Firmware()
         self.is_strict = is_strict
         self.enable_inf_parsing = True
-        self.fwupd_min_version = '0.8.0'    # a guess, but everyone should have this
         self.version_formats: Dict[str, Verfmt] = {}
         self.category_map: Dict[str, Category] = {}
         self.protocol_map: Dict[str, Protocol] = {}
@@ -505,8 +504,6 @@ class UploadedFile:
                                  compare=req.get('compare'),
                                  version=req.get('version'))
                 md.requirements.append(rq)
-                if text == 'org.freedesktop.fwupd':
-                    self.fwupd_min_version = req.get('version')
             elif req.tag == 'hardware':
                 text = _node_validate_text(req, minlen=3, maxlen=1000)
                 for req_value in text.split('|'):
