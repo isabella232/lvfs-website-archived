@@ -26,6 +26,7 @@ RUN dnf -y install \
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
 RUN mkdir /data /backups
 RUN usermod -a -G virusgroup nobody
+RUN chmod g+rx /var/run/clamd.scan
 WORKDIR /app
 
 # create and activate a venv
