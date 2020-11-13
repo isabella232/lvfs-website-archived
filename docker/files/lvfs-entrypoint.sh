@@ -3,7 +3,7 @@ set -e
 
 if [ "$DEPLOY" = "application" ]
 then
-    cat $ECS_CONTAINER_METADATA_FILE
+    echo "$ECS_CONTAINER_METADATA_FILE"
     FLASK_APP=lvfs/__init__.py flask db upgrade
     exec uwsgi --ini /app/conf/uwsgi.ini
 fi
