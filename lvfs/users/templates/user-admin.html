@@ -13,13 +13,19 @@
 </div>
 {% endif %}
 
-<form method="post" action="{{url_for('users.route_modify_by_admin', user_id=u.user_id)}}">
+<form id="reset" action="{{url_for('users.route_reset_by_admin', user_id=u.user_id)}}" method="POST">
   <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+</form>
+
+<form id="modify" action="{{url_for('users.route_modify_by_admin', user_id=u.user_id)}}" method="POST">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+</form>
+
 {% if u.auth_type != 'oauth' %}
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="display_name">Display Name</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" id="display_name" name="display_name" value="{{u.display_name}}" required>
+      <input form="modify" type="text" class="form-control" id="display_name" name="display_name" value="{{u.display_name}}" required>
     </div>
   </div>
 {% endif %}
@@ -27,7 +33,7 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="username">Username</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" id="username" name="username" value="{{u.username}}">
+      <input form="modify" type="text" class="form-control" id="username" name="username" value="{{u.username}}">
     </div>
   </div>
 {% endif %}
@@ -35,7 +41,7 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="password">Password</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" id="password" name="password" value="" placeholder="{{'Exists' if u.password else 'Does not exist'}}">
+      <input form="modify" type="text" class="form-control" id="password" name="password" value="" placeholder="{{'Exists' if u.password else 'Does not exist'}}">
     </div>
   </div>
 {% endif %}
@@ -43,13 +49,13 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="auth_warning">Account Warning</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" id="auth_warning" name="auth_warning" value="{{u.auth_warning if u.auth_warning else ''}}">
+      <input form="modify" type="text" class="form-control" id="auth_warning" name="auth_warning" value="{{u.auth_warning if u.auth_warning else ''}}">
     </div>
   </div>
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="human_user">Contact Email</label>
     <div class="col col-sm-10">
-      <input type="text" class="form-control" id="human_user" name="human_user" value="{{u.human_user.username if u.human_user else ''}}" placeholder="As username...">
+      <input form="modify" type="text" class="form-control" id="human_user" name="human_user" value="{{u.human_user.username if u.human_user else ''}}" placeholder="As username...">
     </div>
   </div>
 {% endif %}
@@ -57,7 +63,7 @@
   <div class="form-group row">
     <label class="col col-sm-2 col-form-label" for="auth_type">Account Type</label>
     <div class="col col-sm-10">
-    <select class="form-control" id="auth_type" name="auth_type">
+    <select form="modify" class="form-control" id="auth_type" name="auth_type">
       <option value="disabled" {{ 'selected' if u.auth_type == 'disabled' }}>
         Disabled
       </option>
@@ -79,7 +85,7 @@
       <div class="col col-sm-10">
 {% if g.user.check_acl('@add-action-admin') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="id-admin" name="admin" value="1" {{'checked' if u.check_acl('@admin')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="id-admin" name="admin" value="1" {{'checked' if u.check_acl('@admin')}}>
           <label class="custom-control-label" for="id-admin">
             Full access to all vendors and users on the server
           </label>
@@ -87,7 +93,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-robot') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="robot" name="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="robot" name="robot" value="1" {{'checked' if u.check_acl('@robot')}}>
           <label class="custom-control-label" for="robot">
             Account is a robot used for automated firmware uploading only
           </label>
@@ -95,7 +101,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-analyst') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="analyst" name="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="analyst" name="analyst" value="1" {{'checked' if u.check_acl('@analyst')}}>
           <label class="custom-control-label" for="analyst">
             Read-only access to all firmware and associated reports in the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -103,7 +109,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-qa') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="qa" name="qa" id="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="qa" name="qa" value="1" {{'checked' if u.check_acl('@qa')}}>
           <label class="custom-control-label" for="qa">
             Allowed to modify all the firmware uploaded to the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -111,7 +117,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-vendor-manager') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="vendor-manager" name="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="vendor-manager" name="vendor-manager" value="1" {{'checked' if u.check_acl('@vendor-manager')}}>
           <label class="custom-control-label" for="vendor-manager">
             Allowed to add, remove and modify users in the <code>{{u.vendor.group_id}}</code> group
           </label>
@@ -119,7 +125,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-researcher') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="researcher" name="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="researcher" name="researcher" value="1" {{'checked' if u.check_acl('@researcher')}}>
           <label class="custom-control-label" for="researcher">
             Allowed to create YARA rules that can be run on <strong>public</strong> firmware
           </label>
@@ -127,7 +133,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-partner') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="partner" name="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="partner" name="partner" value="1" {{'checked' if u.check_acl('@partner')}}>
           <label class="custom-control-label" for="partner">
             Allowed to import and export <strong>public</strong> lists of firmware, e.g. from Microsoft Update
           </label>
@@ -135,7 +141,7 @@
 {% endif %}
 {% if g.user.check_acl('@add-action-approved-public') %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="approved-public" name="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="approved-public" name="approved-public" value="1" {{'checked' if u.check_acl('@approved-public')}}>
           <label class="custom-control-label" for="approved-public">
             Allowed to move firmware to the public <code>testing</code> and <code>stable</code> remotes
           </label>
@@ -144,7 +150,7 @@
 {% if g.user.check_acl('@add-action-vendor-manager') %}
 {% if u.auth_type != 'oauth' %}
         <div class="custom-control custom-switch">
-          <input type="checkbox" class="custom-control-input" id="is_otp_enabled" name="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
+          <input form="modify" type="checkbox" class="custom-control-input" id="is_otp_enabled" name="is_otp_enabled" value="1" {{'checked' if u.is_otp_enabled}}>
           <label class="custom-control-label" for="is_otp_enabled">
             Two factor authentication is required
           </label>
@@ -157,25 +163,21 @@
 {% endif %}
 {% if g.user.check_acl('@admin') %}
     <div class="form-check form-inline mb-3">
-      <input type="checkbox" class="form-check-input" id="send_email" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
+      <input form="modify" type="checkbox" class="form-check-input" id="send_email" name="send_email" value="{{'1' if not u.check_acl('@robot')}}" checked />
       <label class="form-check-label" for="send_email">
         Notify the user about the account change
       </label>
     </div>
 {% else %}
-  <input type="hidden" name="send_email" value="1">
+  <input form="modify" type="hidden" name="send_email" value="1" />
 {% endif %}
-  <input type="submit" class="card-link btn btn-primary" value="Save">
+  <input form="modify" type="submit" class="card-link btn btn-primary" value="Save" />
   <div class="float-right">
-    <form action="{{url_for('users.route_reset_by_admin', user_id=u.user_id)}}" method="POST">
-      <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-      <button class="card-link btn btn-warning">Reset Password</button>
-    </form>
+    <button form="reset" class="card-link btn btn-warning">Reset Password</button>
 {% if g.user.check_acl('@admin') and u.group_id != 'admin' %}
     <button type="button" class="card-link btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
 {% endif %}
   </div>
-</form>
   </div>
 </div>
 
