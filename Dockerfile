@@ -20,7 +20,8 @@ RUN dnf -y install \
 	python3-pip \
 	python3-psutil \
 	UEFITool \
-	s3cmd
+	s3cmd \
+	sudo
 
 # create all our dirs
 RUN bash -c 'mkdir -p /app/{scripts,conf,logs/uwsgi}'
