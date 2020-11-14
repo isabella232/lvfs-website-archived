@@ -135,6 +135,11 @@
     <th class="col-3">Installed Size</th>
     <td class="col">{{format_size(md.release_installed_size)}}</td>
   </tr>
+  <tr class="row">
+    <th class="col-3">License</th>
+    <td class="col-2">Metadata: <code>{{md.metadata_license.value if md.metadata_license else 'Unknown'}}</code></td>
+    <td class="col">Firmware: <code>{{md.project_license.value if md.project_license else 'Unknown'}}</code></td>
+  </tr>
 {% if md.priority %}
   <tr class="row">
     <th class="col-3">Priority</th>

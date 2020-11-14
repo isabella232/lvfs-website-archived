@@ -19,6 +19,7 @@ from lvfs import app, db, ploader, csrf
 
 from lvfs.agreements.models import Agreement
 from lvfs.categories.models import Category
+from lvfs.licenses.models import License
 from lvfs.emails import send_email
 from lvfs.firmware.models import Firmware, FirmwareEvent
 from lvfs.firmware.utils import _firmware_delete, _async_sign_fw
@@ -125,6 +126,8 @@ def _upload_firmware():
             ufile.protocol_map[pro.value] = pro.protocol_id
         for verfmt in db.session.query(Verfmt):
             ufile.version_formats[verfmt.value] = verfmt
+        for lic in db.session.query(License):
+            ufile.license_map[lic.value] = lic
         ufile.parse(os.path.basename(fileitem.filename), fileitem.read())
     except (FileTooLarge, FileTooSmall, FileNotSupported, MetadataInvalid) as e:
         flash('Failed to upload file: ' + str(e), 'danger')

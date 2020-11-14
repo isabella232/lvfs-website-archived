@@ -191,6 +191,7 @@ def init_db(db) -> None:
     from .verfmts.models import Verfmt
     from .protocols.models import Protocol
     from .categories.models import Category
+    from .licenses.models import License
     from .users.models import User, UserAction
     from .metadata.models import Remote
     from .hash import _otp_hash
@@ -212,6 +213,11 @@ def init_db(db) -> None:
     if not db.session.query(Category).filter(Category.value == 'triplet').first():
         db.session.add(Category(value='X-Device'))
         db.session.add(Category(value='X-ManagementEngine'))
+        db.session.commit()
+    if not db.session.query(License).filter(License.value == 'CC0-1.0').first():
+        db.session.add(License(value='CC0-1.0', is_content=True))
+        db.session.add(License(value='GPL-2.0+', requires_source=True))
+        db.session.add(License(value='LicenseRef-proprietary'))
         db.session.commit()
     if not db.session.query(User).filter(User.username == 'sign-test@fwupd.org').first():
         remote = Remote(name='embargo-admin')

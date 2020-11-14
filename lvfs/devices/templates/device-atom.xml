@@ -69,7 +69,7 @@
           </tr>
           <tr>
             <th>License</th>
-            <td>{{fw.md_prio.project_license}}</td>
+            <td>{{fw.md_prio.project_license.value}}</td>
           </tr>
 {% if fw.md_prio.requires_source_url %}
           <tr>

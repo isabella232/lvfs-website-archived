@@ -1,0 +1,48 @@
+{% extends "default.html" %}
+{% block title %}Update Licenses{% endblock %}
+
+{% block content %}
+
+{% if licenses|length == 0 %}
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">Licenses</h2>
+    <p class="card-text">
+      No licenses have been created.
+    </p>
+  </div>
+</div>
+
+{% else %}
+
+{% for lic in licenses %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">
+      {{lic.name}}
+      <code class="float-right">{{lic.value}}</code>
+    </h2>
+    <a class="card-link btn btn-info"
+      href="{{url_for('licenses.route_show', license_id=lic.license_id)}}"
+      role="button">Details &raquo;</a>
+  </div>
+</div>
+{% endfor %}
+
+{% endif %}
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">Create a new license</h2>
+    <form method="post" action="{{url_for('licenses.route_create')}}" class="form">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+      <div class="form-group card-text">
+        <label for="value">Value name, e.g. <code>CC0-1.0</code></label>
+        <input class="form-control" type="text" id="value" name="value" placeholder="Value" required />
+      </div>
+      <input class="card-link btn btn-primary" type="submit" value="Add"/>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
