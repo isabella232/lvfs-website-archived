@@ -4,6 +4,8 @@
 # Copyright (C) 2017-2018 Richard Hughes <richard@hughsie.com>
 #
 # SPDX-License-Identifier: GPL-2.0+
+#
+# pylint: disable=singleton-comparison
 
 from typing import List
 
@@ -15,6 +17,7 @@ from sqlalchemy import func
 from lvfs import db, ploader
 
 from lvfs.categories.models import Category
+from lvfs.licenses.models import License
 from lvfs.firmware.models import Firmware
 from lvfs.firmware.utils import _async_sign_fw
 from lvfs.hash import _is_sha1, _is_sha256
@@ -151,6 +154,12 @@ def route_modify(component_id):
     if 'verfmt_id' in request.form:
         if md.verfmt_id != request.form['verfmt_id']:
             md.verfmt_id = request.form['verfmt_id'] or None
+    if 'metadata_license_id' in request.form:
+        if md.metadata_license_id != request.form['metadata_license_id']:
+            md.metadata_license_id = request.form['metadata_license_id'] or None
+    if 'project_license_id' in request.form:
+        if md.project_license_id != request.form['project_license_id']:
+            md.project_license_id = request.form['project_license_id'] or None
     if 'category_id' in request.form:
         category_id = request.form['category_id']
         if not category_id:
@@ -286,11 +295,19 @@ def route_show(component_id, page='overview'):
             protocols.insert(0, protocol)
             break
     categories = db.session.query(Category).order_by(Category.name.asc()).all()
+    metadata_licenses = db.session.query(License)\
+                                  .filter(License.is_content)\
+                                  .order_by(License.name.asc()).all()
+    project_licenses = db.session.query(License)\
+                                 .filter(License.is_content == False)\
+                                 .order_by(License.name.asc()).all()
     return render_template('component-' + page + '.html',
                            category='firmware',
                            protocols=protocols,
                            verfmts=verfmts,
                            categories=categories,
+                           metadata_licenses=metadata_licenses,
+                           project_licenses=project_licenses,
                            md=md,
                            page=page)
 

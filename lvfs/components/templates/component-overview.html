@@ -135,11 +135,56 @@
     <th class="col-3">Installed Size</th>
     <td class="col">{{format_size(md.release_installed_size)}}</td>
   </tr>
+  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <tr class="row">
-    <th class="col-3">License</th>
-    <td class="col-2">Metadata: <code>{{md.metadata_license.value if md.metadata_license else 'Unknown'}}</code></td>
-    <td class="col">Firmware: <code>{{md.project_license.value if md.project_license else 'Unknown'}}</code></td>
+    <th class="col-3">Metadata License</th>
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+    <td class="col-7">
+      <select class="form-control" name="metadata_license_id">
+        <option value="" {{ 'selected' if not md.project_license }}>Unknown</option>
+{% for lic in metadata_licenses %}
+        <option value="{{lic.license_id}}" {{ 'selected' if md.metadata_license and md.metadata_license.license_id == lic.license_id }}>
+          {{lic.name}} [{{lic.value}}]
+        </option>
+{% endfor %}
+      </select>
+    </td>
+    <td class="col-2">
+      <input type="submit" class="btn btn-primary btn-block" value="Set"/>
+    </td>
+{% else %}
+    <td class="col">
+      <code>{{md.metadata_license.value if md.metadata_license else 'Unknown'}}</code>
+    </td>
+{% endif %}
   </tr>
+  </form>
+  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+  <tr class="row">
+    <th class="col-3">Firmware License</th>
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+    <td class="col-7">
+      <select class="form-control" name="project_license_id">
+        <option value="" {{ 'selected' if not md.project_license }}>Unknown</option>
+{% for lic in project_licenses %}
+        <option value="{{lic.license_id}}" {{ 'selected' if md.project_license and md.project_license.license_id == lic.license_id }}>
+          {{lic.name}} [{{lic.value}}]
+        </option>
+{% endfor %}
+      </select>
+    </td>
+    <td class="col-2">
+      <input type="submit" class="btn btn-primary btn-block" value="Set"/>
+    </td>
+{% else %}
+    <td class="col">
+      <code>{{md.project_license.value if md.project_license else 'Unknown'}}</code>
+    </td>
+{% endif %}
+  </tr>
+  </form>
 {% if md.priority %}
   <tr class="row">
     <th class="col-3">Priority</th>

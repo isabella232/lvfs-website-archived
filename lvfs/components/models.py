@@ -1187,6 +1187,60 @@ class Component(db.Model):
                         )
                     )
 
+        # invalid metadata license
+        if self.metadata_license:
+            if not self.metadata_license.is_content:
+                problems.append(
+                    Claim(
+                        kind="metadata-license-invalid",
+                        icon="warning",
+                        summary="Invalid metadata license",
+                        description="The component requires a valid license, e.g. CC0-1.0",
+                        url=url_for(
+                            "components.route_show", component_id=self.component_id
+                        )
+                    )
+                )
+        else:
+            problems.append(
+                Claim(
+                    kind="metadata-license-invalid",
+                    icon="warning",
+                    summary="Missing metadata license",
+                    description="The component requires a metadata license, e.g. CC0-1.0",
+                    url=url_for(
+                        "components.route_show", component_id=self.component_id
+                    )
+                )
+            )
+
+        # invalid project license
+        if self.project_license:
+            if self.project_license.is_content:
+                problems.append(
+                    Claim(
+                        kind="project-license-invalid",
+                        icon="warning",
+                        summary="Invalid project license",
+                        description="The component requires a valid license, e.g. GPL-2.0+",
+                        url=url_for(
+                            "components.route_show", component_id=self.component_id
+                        )
+                    )
+                )
+        else:
+            problems.append(
+                Claim(
+                    kind="project-license-invalid",
+                    icon="warning",
+                    summary="Missing project license",
+                    description="The component requires a project license, e.g. GPL-2.0+",
+                    url=url_for(
+                        "components.route_show", component_id=self.component_id
+                    )
+                )
+            )
+
         # add all CVE problems
         for issue in self.issues:
             if issue.problem:
