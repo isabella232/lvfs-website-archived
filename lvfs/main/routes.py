@@ -11,6 +11,7 @@ import os
 import html
 import datetime
 import fnmatch
+import hashlib
 import json
 from typing import Dict, List
 
@@ -18,7 +19,7 @@ import humanize
 import iso3166
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template
-from flask import send_from_directory, abort, Response, g
+from flask import send_from_directory, abort, Response, g, make_response
 from flask_login import login_required, login_user, logout_user
 from sqlalchemy.orm import joinedload
 
@@ -81,6 +82,48 @@ def _user_agent_safe_for_requirement(user_agent: str) -> bool:
 @bp_main.route('/downloads/')
 def route_downloads():
     return redirect(url_for('devices.route_list'))
+
+
+@bp_main.route("/downloads/PULP_MANIFEST")
+def route_pulp_manifest():
+
+    lines: List[str] = []
+
+    # add metadata
+    if request.args.get("metadata", default=1, type=int):
+        r = db.session.query(Remote).filter(Remote.name == "stable").one()
+        download_dir = app.config["DOWNLOAD_DIR"]
+        for basename in [
+            r.filename,
+            r.filename_newest,
+            "firmware.xml.gz.asc",
+            "firmware.xml.gz.jcat",
+        ]:
+            fn = os.path.join(download_dir, basename)
+            if os.path.exists(fn):
+                with open(fn, "rb") as f:
+                    checksum_signed_sha256 = hashlib.sha256(f.read()).hexdigest()
+                lines.append(
+                    "{},{},{}".format(basename, checksum_signed_sha256, os.path.getsize(fn))
+                )
+
+    # add firmware in stable
+    for fw in (
+        db.session.query(Firmware)
+        .join(Remote)
+        .filter(Remote.is_public)
+        .order_by(Firmware.filename.asc())
+    ):
+        lines.append(
+            "{},{},{}".format(
+                fw.filename, fw.checksum_signed_sha256, fw.mds[0].release_download_size
+            )
+        )
+
+    rsp = make_response("\n".join(lines))
+    rsp.headers["Content-Disposition"] = "attachment; filename=PULP_MANIFEST"
+    rsp.mimetype = "text/plain"
+    return rsp
 
 @bp_main.route('/<path:resource>')
 def serveStaticResource(resource):
@@ -273,6 +316,7 @@ def route_index():
     return render_template('index.html',
                            vendors_logo=vendors_logo,
                            vendors_quote=vendors_quote)
+
 
 @bp_main.route('/lvfs/dashboard')
 @login_required
