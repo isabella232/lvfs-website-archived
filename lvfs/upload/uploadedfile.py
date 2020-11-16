@@ -23,6 +23,7 @@ from cabarchive import CabArchive, CabFile
 from infparser import InfParser
 
 from lvfs.categories.models import Category
+from lvfs.licenses.models import License
 from lvfs.components.models import Component, ComponentIssue, ComponentGuid, ComponentRequirement, ComponentChecksum
 from lvfs.firmware.models import Firmware
 from lvfs.protocols.models import Protocol
@@ -165,10 +166,10 @@ class UploadedFile:
         self.fw = Firmware()
         self.is_strict = is_strict
         self.enable_inf_parsing = True
-        self.fwupd_min_version = '0.8.0'    # a guess, but everyone should have this
         self.version_formats: Dict[str, Verfmt] = {}
         self.category_map: Dict[str, Category] = {}
         self.protocol_map: Dict[str, Protocol] = {}
+        self.license_map: Dict[str, License] = {}
 
         # strip out any unlisted files
         self.cabarchive_repacked = CabArchive()
@@ -429,11 +430,15 @@ class UploadedFile:
         # get <metadata_license>
         if self.is_strict:
             try:
-                md.metadata_license = _node_validate_text(component.xpath('metadata_license')[0])
-                if md.metadata_license not in ['CC0-1.0', 'FSFAP',
-                                               'CC-BY-3.0', 'CC-BY-SA-3.0', 'CC-BY-4.0', 'CC-BY-SA-4.0',
-                                               'GFDL-1.1', 'GFDL-1.2', 'GFDL-1.3']:
-                    raise MetadataInvalid('Invalid <metadata_license> tag of {}'.format(md.metadata_license))
+                text = _node_validate_text(component.xpath('metadata_license')[0])
+                if not self.license_map:
+                    md.metadata_license = License(value=text)
+                elif text not in self.license_map:
+                    raise MetadataInvalid('Unknown <metadata_license> tag of {}'.format(text))
+                else:
+                    md.metadata_license = self.license_map[text]
+                    if not md.metadata_license.is_content:
+                        raise MetadataInvalid('Invalid <metadata_license> tag of {}'.format(text))
             except AttributeError as e:
                 raise MetadataInvalid('<metadata_license> tag') from e
             except IndexError as e:
@@ -446,8 +451,16 @@ class UploadedFile:
 
         # get <project_license>
         try:
-            md.project_license = _node_validate_text(component.xpath('project_license')[0],
-                                                     minlen=3, maxlen=50, nourl=True)
+            text = _node_validate_text(component.xpath('project_license')[0],
+                                                       minlen=3, maxlen=50, nourl=True)
+            if text in ["proprietary", "Proprietary"]:
+                text = "LicenseRef-proprietary"
+            if not self.license_map:
+                md.project_license = License(value=text)
+            elif text not in self.license_map:
+                raise MetadataInvalid('Unknown <project_license> tag of {}'.format(text))
+            else:
+                md.project_license = self.license_map[text]
         except IndexError as e:
             raise MetadataInvalid('<project_license> tag missing') from e
         if not md.project_license:
@@ -505,8 +518,6 @@ class UploadedFile:
                                  compare=req.get('compare'),
                                  version=req.get('version'))
                 md.requirements.append(rq)
-                if text == 'org.freedesktop.fwupd':
-                    self.fwupd_min_version = req.get('version')
             elif req.tag == 'hardware':
                 text = _node_validate_text(req, minlen=3, maxlen=1000)
                 for req_value in text.split('|'):

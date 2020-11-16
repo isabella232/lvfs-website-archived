@@ -501,8 +501,10 @@ class Component(db.Model):
     details_url = Column(Text, default=None)
     source_url = Column(Text, default=None)
     url_homepage = Column(Text, default=None)
-    metadata_license = Column(Text, default=None)
-    project_license = Column(Text, default=None)
+    unused_metadata_license = Column('metadata_license', Text, default=None)
+    metadata_license_id = Column(Integer, ForeignKey("licenses.license_id"))
+    unused_project_license = Column('project_license', Text, default=None)
+    project_license_id = Column(Integer, ForeignKey("licenses.license_id"))
     developer_name = Column(Text, default=None)
     filename_contents = Column(Text, nullable=False)
     filename_xml = Column(Text, nullable=False)
@@ -557,6 +559,8 @@ class Component(db.Model):
     )
     protocol = relationship("Protocol", foreign_keys=[protocol_id])
     category = relationship("Category", foreign_keys=[category_id])
+    project_license = relationship("License", foreign_keys=[project_license_id])
+    metadata_license = relationship("License", foreign_keys=[metadata_license_id])
     verfmt = relationship("Verfmt", foreign_keys=[verfmt_id])
     yara_query_results = relationship(
         "YaraQueryResult", lazy="joined", cascade="all,delete,delete-orphan"
@@ -792,8 +796,8 @@ class Component(db.Model):
 
     @property
     def requires_source_url(self) -> bool:
-        if self.project_license.find("GPL") != -1:
-            return True
+        if self.project_license:
+            return self.project_license.requires_source
         return False
 
     @property
@@ -1182,6 +1186,60 @@ class Component(db.Model):
                             ),
                         )
                     )
+
+        # invalid metadata license
+        if self.metadata_license:
+            if not self.metadata_license.is_content:
+                problems.append(
+                    Claim(
+                        kind="metadata-license-invalid",
+                        icon="warning",
+                        summary="Invalid metadata license",
+                        description="The component requires a valid license, e.g. CC0-1.0",
+                        url=url_for(
+                            "components.route_show", component_id=self.component_id
+                        )
+                    )
+                )
+        else:
+            problems.append(
+                Claim(
+                    kind="metadata-license-invalid",
+                    icon="warning",
+                    summary="Missing metadata license",
+                    description="The component requires a metadata license, e.g. CC0-1.0",
+                    url=url_for(
+                        "components.route_show", component_id=self.component_id
+                    )
+                )
+            )
+
+        # invalid project license
+        if self.project_license:
+            if self.project_license.is_content:
+                problems.append(
+                    Claim(
+                        kind="project-license-invalid",
+                        icon="warning",
+                        summary="Invalid project license",
+                        description="The component requires a valid license, e.g. GPL-2.0+",
+                        url=url_for(
+                            "components.route_show", component_id=self.component_id
+                        )
+                    )
+                )
+        else:
+            problems.append(
+                Claim(
+                    kind="project-license-invalid",
+                    icon="warning",
+                    summary="Missing project license",
+                    description="The component requires a project license, e.g. GPL-2.0+",
+                    url=url_for(
+                        "components.route_show", component_id=self.component_id
+                    )
+                )
+            )
 
         # add all CVE problems
         for issue in self.issues:

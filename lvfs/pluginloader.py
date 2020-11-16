@@ -74,9 +74,7 @@ class PluginBase:
         raise NotImplementedError
     def archive_copy(self, cabarchive: CabArchive, cabfile: CabFile) -> None:
         raise NotImplementedError
-    def archive_finalize(self,
-                         cabarchive: CabArchive,
-                         metadata: Dict[str, str]) -> None:
+    def archive_finalize(self, cabarchive: CabArchive, fw: Firmware) -> None:
         raise NotImplementedError
     def ensure_test_for_fw(self, fw: Firmware) -> None:
         raise NotImplementedError
@@ -266,18 +264,14 @@ class Pluginloader:
                 pass
 
     # an archive is being built
-    def archive_finalize(self,
-                         cabarchive: CabArchive,
-                         metadata: Optional[Dict[str, str]] = None) -> None:
+    def archive_finalize(self, cabarchive: CabArchive, fw: Firmware) -> None:
         if not self.loaded:
             self.load_plugins()
-        if not metadata:
-            metadata = {}
         for plugin in self._plugins:
             if not plugin.enabled:
                 continue
             try:
-                plugin.archive_finalize(cabarchive, metadata)
+                plugin.archive_finalize(cabarchive, fw)
             except PluginError as e:
                 from .util import _event_log
                 _event_log('Plugin %s failed for ArchiveFinalize(): %s' % (plugin.id, str(e)))

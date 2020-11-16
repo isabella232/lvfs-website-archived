@@ -1,0 +1,70 @@
+{% extends "default.html" %}
+{% block title %}License Details{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">License Details</h2>
+<form method="post" action="{{url_for('licenses.route_modify', license_id=lic.license_id)}}">
+  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+  <div class="form-group">
+    <label for="value">Value:</label>
+    <input type="text" class="form-control" id="value" name="value" value="{{lic.value}}" required />
+  </div>
+  <div class="form-group">
+    <label for="name">Name:</label>
+    <input type="text" class="form-control" id="name" name="name" value="{{lic.name if lic.name}}" required />
+  </div>
+  <div class="form-group">
+    <label for="text">Text:</label>
+    <textarea class="form-control" name="text" id="text" cols="90" rows="15">{{lic.text if lic.text}}</textarea>
+  </div>
+  <div class="form-group">
+    <label for="is_content">
+      <input class="checkbox" type="checkbox" id="is_content" name="is_content" value="1" {{'checked' if lic.is_content}} //>
+      Is valid for metadata, e.g. a content license
+    </label>
+  </div>
+  <div class="form-group">
+    <label for="is_approved">
+      <input class="checkbox" type="checkbox" id="is_approved" name="is_approved" value="1" {{'checked' if lic.is_approved}} //>
+      Is approved by an entity like the FSF
+    </label>
+  </div>
+  <div class="form-group">
+    <label for="requires_source">
+      <input class="checkbox" type="checkbox" id="requires_source" name="requires_source" value="1" {{'checked' if lic.requires_source}} //>
+      Requires Source URL for binary firmware
+    </label>
+  </div>
+  <input type="submit" class="card-link btn btn-primary" value="Save">
+  <button type="button" class="card-link btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
+</form>
+  </div>
+</div>
+
+<!-- modal dialog -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Really Delete License?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Once deleted, licenses can not be recovered.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form action="{{url_for('licenses.route_delete', license_id=lic.license_id)}}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+          <button class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

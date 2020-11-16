@@ -65,6 +65,7 @@ tq.init_app(app)
 from lvfs.agreements.routes import bp_agreements
 from lvfs.analytics.routes import bp_analytics
 from lvfs.categories.routes import bp_categories
+from lvfs.licenses.routes import bp_licenses
 from lvfs.claims.routes import bp_claims
 from lvfs.components.routes import bp_components
 from lvfs.devices.routes import bp_devices
@@ -93,6 +94,7 @@ from lvfs.verfmts.routes import bp_verfmts
 app.register_blueprint(bp_agreements, url_prefix='/lvfs/agreements')
 app.register_blueprint(bp_analytics, url_prefix='/lvfs/analytics')
 app.register_blueprint(bp_categories, url_prefix='/lvfs/categories')
+app.register_blueprint(bp_licenses, url_prefix='/lvfs/licenses')
 app.register_blueprint(bp_claims, url_prefix='/lvfs/claims')
 app.register_blueprint(bp_components, url_prefix='/lvfs/components')
 app.register_blueprint(bp_devices, url_prefix='/lvfs/devices')

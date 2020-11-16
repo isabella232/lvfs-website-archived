@@ -203,7 +203,6 @@ class TestStringMethods(unittest.TestCase):
             ufile = UploadedFile()
             _add_version_formats(ufile)
             ufile.parse('foo.cab', '')
-        self.assertEqual(ufile.fwupd_min_version, '0.8.0')
 
     # no metainfo.xml
     def test_metainfo_missing(self):

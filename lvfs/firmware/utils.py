@@ -223,6 +223,9 @@ def _sign_fw(fw):
     if jcatfile.items:
         cabarchive['firmware.jcat'] = CabFile(jcatfile.save())
 
+    # update archive with extra files
+    ploader.archive_finalize(cabarchive, fw)
+
     # overwrite old file
     cab_data = cabarchive.save()
     with open(fn, 'wb') as f:

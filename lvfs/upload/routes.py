@@ -8,9 +8,8 @@
 # pylint: disable=too-many-locals
 
 import os
-import datetime
 import hashlib
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 from flask import Blueprint, request, flash, url_for, redirect, render_template, g
 from flask_login import login_required
@@ -20,6 +19,7 @@ from lvfs import app, db, ploader, csrf
 
 from lvfs.agreements.models import Agreement
 from lvfs.categories.models import Category
+from lvfs.licenses.models import License
 from lvfs.emails import send_email
 from lvfs.firmware.models import Firmware, FirmwareEvent
 from lvfs.firmware.utils import _firmware_delete, _async_sign_fw
@@ -33,15 +33,6 @@ from lvfs.vendors.models import Vendor, VendorAffiliation
 from lvfs.verfmts.models import Verfmt
 
 bp_upload = Blueprint('upload', __name__, template_folder='templates')
-
-def _get_plugin_metadata_for_uploaded_file(ufile: UploadedFile) -> Dict[str, str]:
-    settings = _get_settings()
-    metadata: Dict[str, str] = {}
-    metadata['$DATE$'] = datetime.datetime.now().replace(microsecond=0).isoformat()
-    metadata['$FWUPD_MIN_VERSION$'] = ufile.fwupd_min_version
-    metadata['$CAB_FILENAME$'] = ufile.fw.filename
-    metadata['$FIRMWARE_BASEURI$'] = settings['firmware_baseuri']
-    return metadata
 
 def _user_can_upload(user: User) -> bool:
 
@@ -135,6 +126,8 @@ def _upload_firmware():
             ufile.protocol_map[pro.value] = pro.protocol_id
         for verfmt in db.session.query(Verfmt):
             ufile.version_formats[verfmt.value] = verfmt
+        for lic in db.session.query(License):
+            ufile.license_map[lic.value] = lic
         ufile.parse(os.path.basename(fileitem.filename), fileitem.read())
     except (FileTooLarge, FileTooSmall, FileNotSupported, MetadataInvalid) as e:
         flash('Failed to upload file: ' + str(e), 'danger')
@@ -190,10 +183,6 @@ def _upload_firmware():
     # allow plugins to copy any extra files from the source archive
     for cffile in ufile.cabarchive_upload.values():
         ploader.archive_copy(ufile.cabarchive_repacked, cffile)
-
-    # allow plugins to add files
-    ploader.archive_finalize(ufile.cabarchive_repacked,
-                             _get_plugin_metadata_for_uploaded_file(ufile))
 
     # dump to a file
     download_dir = app.config['DOWNLOAD_DIR']

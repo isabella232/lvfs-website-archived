@@ -122,8 +122,9 @@ def _generate_metadata_mds(mds: List[Component],
         child.set('type', 'stock')
         child.text = md.icon
     if md.metadata_license:
-        ET.SubElement(component, 'metadata_license').text = md.metadata_license
-    ET.SubElement(component, 'project_license').text = md.project_license
+        ET.SubElement(component, 'metadata_license').text = md.metadata_license.value
+    if md.project_license:
+        ET.SubElement(component, 'project_license').text = md.project_license.value
     ET.SubElement(component, 'developer_name').text = md.developer_name
 
     # screenshot shared by all releases

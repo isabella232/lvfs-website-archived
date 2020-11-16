@@ -53,4 +53,20 @@
 </div>
 </form>
 
+<form action="{{url_for('fsck.route_project_license')}}" method="POST">
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="card-title">
+      Project License
+    </h2>
+    <p class="card-text">
+      Convert <code>metadata_license</code> and <code>project_license</code>
+      values into standard types.
+    </p>
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+    <input class="card-link btn btn-warning" type="submit" value="Go!"/>
+  </div>
+</div>
+</form>
+
 {% endblock %}

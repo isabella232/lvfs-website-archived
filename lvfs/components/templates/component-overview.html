@@ -12,75 +12,54 @@
   </div>
 {% endif %}
 
+<form id="modify" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
+  <input form="modify" type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
+</form>
+
 <fieldset {{ 'disabled="disabled"' if not g.user.check_acl('@admin') and md.fw.remote.is_public }} >
 <div class="card">
-  <div class="bg-holder bg-card" style="background-image:url({{url_for('cdn', filename='img/corner-1.png')}});"></div>
   <div class="card-body">
 <table class="table">
   <tr class="row table-borderless">
     <th class="col-3">ID</th>
-{% if md.check_acl('@modify-appstream-id') %}
-    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-    <td class="col-7">
-      <textarea class="form-control fixed-width" name="appstream_id" cols="100" rows="1">{{md.appstream_id if md.appstream_id}}</textarea>
-    </td>
     <td class="col">
-      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
-    </td>
-    </form>
+{% if md.check_acl('@modify-appstream-id') %}
+      <textarea form="modify" class="form-control fixed-width" name="appstream_id" cols="100" rows="1">{{md.appstream_id if md.appstream_id}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.appstream_id}}</code></td>
+      <code>{{md.appstream_id}}</code>
 {% endif %}
+    </td>
   </tr>
   <tr class="row">
     <th class="col-3">Name</th>
+      <td class="col">
 {% if md.check_acl('@modify-keywords') %}
-    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-    <td class="col-7">
-      <textarea class="form-control fixed-width" name="name" cols="100" rows="1">{{md.name if md.name}}</textarea>
-    </td>
-    <td class="col">
-      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
-    </td>
-    </form>
+      <textarea form="modify" class="form-control fixed-width" name="name" cols="100" rows="1">{{md.name if md.name}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.name_with_category}}</code></td>
+      <code>{{md.name_with_category}}</code>
 {% endif %}
+    </td>
   </tr>
   <tr class="row">
     <th class="col-3">Name Variant Suffix (optional)</th>
+      <td class="col">
 {% if md.check_acl('@modify-keywords') %}
-    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-    <td class="col-7">
-      <textarea class="form-control fixed-width" name="name_variant_suffix" cols="100" rows="1">{{md.name_variant_suffix if md.name_variant_suffix}}</textarea>
-    </td>
-    <td class="col">
-      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
-    </td>
-    </form>
+      <textarea form="modify" class="form-control fixed-width" name="name_variant_suffix" cols="100" rows="1">{{md.name_variant_suffix if md.name_variant_suffix}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.name_variant_suffix}}</code></td>
+      <code>{{md.name_variant_suffix}}</code>
 {% endif %}
+    </td>
   </tr>
 {% if md.branch or md.fw.vendor.branches %}
   <tr class="row">
     <th class="col-3">Branch</th>
+      <td class="col">
 {% if md.check_acl('@modify-keywords') %}
-    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-    <td class="col-7">
-      <textarea class="form-control fixed-width" name="branch" cols="100" rows="1">{{md.branch if md.branch}}</textarea>
-    </td>
-    <td class="col">
-      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
-    </td>
-    </form>
+      <textarea form="modify" class="form-control fixed-width" name="branch" cols="100" rows="1">{{md.branch if md.branch}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.branch}}</code></td>
+      <code>{{md.branch}}</code>
 {% endif %}
+    </td>
   </tr>
 {% endif %}
   <tr class="row">
@@ -93,19 +72,13 @@
       Release tag, e.g. <code>N1CET75W</code> (optional)
 {% endif %}
     </th>
-{% if md.check_acl('@modify-keywords') %}
-    <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
-    <td class="col-7">
-      <textarea class="form-control fixed-width" name="release_tag" cols="100" rows="1">{{md.release_tag if md.release_tag}}</textarea>
-    </td>
     <td class="col">
-      <input type="submit" class="btn btn-warning btn-block" value="Set"/>
-    </td>
-    </form>
+{% if md.check_acl('@modify-keywords') %}
+      <textarea form="modify" class="form-control fixed-width" name="release_tag" cols="100" rows="1">{{md.release_tag if md.release_tag}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.release_tag}}</code></td>
+      <code>{{md.release_tag}}</code>
 {% endif %}
+    </td>
   </tr>
   <tr class="row">
     <th class="col-3">Summary</th>
@@ -135,40 +108,67 @@
     <th class="col-3">Installed Size</th>
     <td class="col">{{format_size(md.release_installed_size)}}</td>
   </tr>
+  <tr class="row">
+    <th class="col-3">Metadata License</th>
+    <td class="col">
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+      <select form="modify" class="form-control" name="metadata_license_id">
+        <option value="" {{ 'selected' if not md.project_license }}>Unknown</option>
+{% for lic in metadata_licenses %}
+        <option value="{{lic.license_id}}" {{ 'selected' if md.metadata_license and md.metadata_license.license_id == lic.license_id }}>
+          {{lic.name}} [{{lic.value}}]
+        </option>
+{% endfor %}
+      </select>
+{% else %}
+      <code>{{md.metadata_license.value if md.metadata_license else 'Unknown'}}</code>
+{% endif %}
+    </td>
+  </tr>
+  <tr class="row">
+    <th class="col-3">Firmware License</th>
+    <td class="col">
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+      <select form="modify" class="form-control" name="project_license_id">
+        <option value="" {{ 'selected' if not md.project_license }}>Unknown</option>
+{% for lic in project_licenses %}
+        <option value="{{lic.license_id}}" {{ 'selected' if md.project_license and md.project_license.license_id == lic.license_id }}>
+          {{lic.name}} [{{lic.value}}]
+        </option>
+{% endfor %}
+      </select>
+{% else %}
+      <code>{{md.project_license.value if md.project_license else 'Unknown'}}</code>
+{% endif %}
+    </td>
+  </tr>
 {% if md.priority %}
   <tr class="row">
     <th class="col-3">Priority</th>
     <td class="col">{{md.priority}}</td>
   </tr>
 {% endif %}
-  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <tr class="row">
     <th class="col-3">Protocol</th>
+    <td class="col">
 {% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
-    <td class="col-7">
-      <select class="form-control" name="protocol_id">
+      <select form="modify" class="form-control" name="protocol_id">
 {% for pr in protocols %}
 {% if pr.is_public %}
         <option value="{{pr.protocol_id}}" {{ 'selected' if md.protocol and md.protocol.value == pr.value }}>{{ pr.name if pr.name else pr.value}}</option>
 {% endif %}
 {% endfor %}
       </select>
-    </td>
-    <td class="col-2">
-      <input type="submit" class="btn btn-primary btn-block" value="Set"/>
-    </td>
 {% else %}
-    <td class="col-7"><code>{{md.protocol.value}}</code></td>
+    <code>{{md.protocol.value}}</code>
 {% endif %}
+    </td>
   </tr>
-  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <tr class="row">
     <th class="col-3">Version Format</th>
+    <td class="col">
 {% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
-    <td class="col-7">
-      <select class="form-control" name="verfmt_id">
+      <select form="modify" class="form-control" name="verfmt_id">
         <option value="" {{ 'selected' if not md.verfmt }}>Unknown</option>
 {% for verfmt in verfmts %}
         <option value="{{verfmt.verfmt_id}}" {{ 'selected' if md.verfmt and md.verfmt.value == verfmt.value }}>
@@ -179,70 +179,52 @@
         </option>
 {% endfor %}
       </select>
-    </td>
-    <td class="col-2">
-      <input type="submit" class="btn btn-primary btn-block" value="Set"/>
-    </td>
 {% else %}
-    <td class="col-7"><code>{{md.verfmt.value}}</code></td>
+      <code>{{md.verfmt.value}}</code>
 {% endif %}
+    </td>
   </tr>
   <tr class="row">
     <th class="col-3">Category</th>
+    <td class="col">
 {% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
-    <td class="col-7">
-      <select class="form-control" name="category_id">
+      <select form="modify" class="form-control" name="category_id">
         <option value="" {{ 'selected' if not md.category }}>Unknown</option>
 {% for cat in categories %}
         <option value="{{cat.category_id}}" {{ 'selected' if md.category and md.category.value == cat.value }}>{{ cat.name if cat.name else cat.value}}</option>
 {% endfor %}
       </select>
-    </td>
-    <td class="col">
-      <input type="submit" class="btn btn-primary btn-block" value="Set"/>
-    </td>
 {% else %}
-    <td class="col-7"><code>{{md.category.value}}</code></td>
+      <code>{{md.category.value}}</code>
 {% endif %}
+    </td>
   </tr>
-  </form>
 {% if md.screenshot_url %}
-  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <tr class="row">
     <th class="col-3">Screenshot URL</th>
-{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
-    <td class="col-7">
-      <input type="text" class="form-control" name="screenshot_url" value="{{md.screenshot_url if md.screenshot_url}}"/>
-    </td>
     <td class="col">
-      <input type="submit" class="btn btn-secondary btn-block" value="Set"/>
-    </td>
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+      <input form="modify" type="text" class="form-control" name="screenshot_url" value="{{md.screenshot_url if md.screenshot_url}}"/>
 {% else %}
-    <td class="col"><code>{{md.screenshot_url}}</code></td>
+      <code>{{md.screenshot_url}}</code>
 {% endif %}
+    </td>
   </tr>
-  </form>
 {% endif %}
 {% if md.screenshot_caption %}
-  <form class="form-inline" action="{{url_for('components.route_modify', component_id=md.component_id)}}" method="POST">
-  <input type="hidden" name="csrf_token" value="{{csrf_token()}}"/>
   <tr class="row">
     <th class="col-3">Screenshot Caption</th>
-{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
-    <td class="col-7">
-      <textarea class="form-control" name="screenshot_caption" cols="100" rows="3">{{md.screenshot_caption if md.screenshot_caption}}</textarea>
-    </td>
     <td class="col">
-      <input type="submit" class="btn btn-secondary btn-block" value="Set"/>
-    </td>
+{% if md.fw.remote.name != 'stable' or g.user.check_acl('@admin') %}
+      <textarea form="modify" class="form-control" name="screenshot_caption" cols="100" rows="3">{{md.screenshot_caption if md.screenshot_caption}}</textarea>
 {% else %}
-    <td class="col"><code>{{md.screenshot_caption}}</code>
+      <code>{{md.screenshot_caption}}</code>
 {% endif %}
+    </td>
   </tr>
-  </form>
 {% endif %}
 </table>
+    <input form="modify" type="submit" class="card-link btn btn-primary" value="Modify"/>
   </div>
 </div>
 
