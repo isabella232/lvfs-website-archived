@@ -9,7 +9,6 @@
 
 import os
 import gzip
-import hashlib
 import glob
 import datetime
 
@@ -449,31 +448,6 @@ def _generate_metadata_kind(fws: List[Firmware],
                                      xml_declaration=True,
                                      pretty_print=True))
 
-def _metadata_update_pulp(download_dir: str):
-
-    """ updates metadata for Pulp """
-    with open(os.path.join(download_dir, 'PULP_MANIFEST'), 'w') as manifest:
-
-        # add metadata
-        r = db.session.query(Remote).filter(Remote.name == 'stable').one()
-        for basename in [r.filename,
-                         r.filename_newest,
-                         'firmware.xml.gz.asc',
-                         'firmware.xml.gz.jcat']:
-            fn = os.path.join(download_dir, basename)
-            if os.path.exists(fn):
-                with open(fn, 'rb') as f:
-                    checksum_signed_sha256 = hashlib.sha256(f.read()).hexdigest()
-                manifest.write('%s,%s,%i\n' % (basename, checksum_signed_sha256, os.path.getsize(fn)))
-
-        # add firmware in stable
-        for fw in db.session.query(Firmware)\
-                            .join(Remote)\
-                            .filter(Remote.is_public)\
-                            .order_by(Firmware.filename.asc()):
-            manifest.write('{},{},{}\n'.format(fw.filename,
-                                               fw.checksum_signed_sha256,
-                                               fw.mds[0].release_download_size))
 
 def _regenerate_and_sign_metadata_remote(r: Remote):
 
@@ -574,10 +548,6 @@ def _regenerate_and_sign_metadata_remote(r: Remote):
     with open(fn_xmlgz_jcat, 'wb') as f:
         f.write(jcatfile.save())
     invalid_fns.append(fn_xmlgz_jcat)
-
-    # update PULP
-    if r.name == 'stable':
-        _metadata_update_pulp(download_dir)
 
     # do this all at once right at the end of all the I/O
     for fn in invalid_fns:
